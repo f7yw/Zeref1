@@ -1,4 +1,4 @@
-import { generateWAMessageFromContent } from "@adiwajshing/baileys"
+import { generateWAMessageFromContent } from "@whiskeysockets/baileys"
 import { smsg } from './lib/simple.js'
 import { format } from 'util'
 import { fileURLToPath } from 'url'
@@ -8,9 +8,9 @@ import fs from 'fs'
 import chalk from 'chalk'
 
 /**
- * @type {import('@adiwajshing/baileys')}
+ * @type {import('@whiskeysockets/baileys')}
  */
-const { proto } = (await import('@adiwajshing/baileys')).default
+const { proto } = (await import('@whiskeysockets/baileys')).default
 const isNumber = x => typeof x === 'number' && !isNaN(x)
 const delay = ms => isNumber(ms) && new Promise(resolve => setTimeout(function () {
     clearTimeout(this)
@@ -19,20 +19,19 @@ const delay = ms => isNumber(ms) && new Promise(resolve => setTimeout(function (
 
 /**
  * Handle messages upsert
- * @param {import('@adiwajshing/baileys').BaileysEventMap<unknown>['messages.upsert']} groupsUpdate 
+ * @param {import('@whiskeysockets/baileys').BaileysEventMap<unknown>['messages.upsert']} chatUpdate 
  */
 export async function handler(chatUpdate) {
     this.msgqueque = this.msgqueque || []
-if (!chatUpdate) return
+    if (!chatUpdate) return
 
-this.pushMessage(chatUpdate.messages).catch(console.error)
+    this.pushMessage(chatUpdate.messages).catch(console.error)
 
-let m = chatUpdate.messages[chatUpdate.messages.length - 1]
-if (!m || !m.message) return
-	
+    let m = chatUpdate.messages[chatUpdate.messages.length - 1]
+    if (!m || !m.message) return
 
-if (m.key.remoteJid === 'status@broadcast') return 
-if (m.isGroup) return
+    if (m.key.remoteJid === 'status@broadcast') return 
+    if (m.isGroup) return
 // باقي كود الرد هنا 👇
 
 	
@@ -1528,4 +1527,5 @@ watchFile(file, async () => {
     console.log(chalk.redBright("Update 'handler.js'"))
     if (global.reloadHandler) console.log(await global.reloadHandler())
 })
+
 

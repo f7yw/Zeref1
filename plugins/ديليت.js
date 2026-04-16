@@ -1,4 +1,4 @@
-import MessageType from '@adiwajshing/baileys'
+import MessageType from '@whiskeysockets/baileys'
 let handler = async (m, { conn, usedPrefix, command }) => {
 let room = Object.values(conn.game).find(room => room.id.startsWith('tictactoe') && [room.game.playerX, room.game.playerO].includes(m.sender))
 if (room == undefined) return conn.sendButton(m.chat, '*[❗] انت لست في لعبه جيم اكس او (اكس او)*', wm, null, [['ابدأ روم جديدة', `${usedPrefix}ttt مباراه جديدة`]], m)

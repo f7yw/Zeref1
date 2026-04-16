@@ -5,12 +5,11 @@ import path, { join } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 import { platform } from 'process';
 import * as ws from 'ws';
-import { readdirSync, statSync, unlinkSync, existsSync, readFileSync, watch } from 'fs';
+import { readdirSync } from 'fs';
 import yargs from 'yargs';
 import { spawn } from 'child_process';
 import lodash from 'lodash';
 import chalk from 'chalk';
-import syntaxerror from 'syntax-error';
 import { tmpdir } from 'os';
 import { format } from 'util';
 
@@ -30,7 +29,7 @@ const {
 const { chain } = lodash;
 const PORT = process.env.PORT || process.env.SERVER_PORT || 3000;
 
-// ✅ نسخة ثابتة بدل fetchLatestBaileysVersion
+// نسخة ثابتة بدل fetchLatestBaileysVersion
 const version = [2, 2413, 1];
 
 protoType();
@@ -90,7 +89,6 @@ const { state, saveCreds } = await useMultiFileAuthState(global.authFile);
 
 // ====== CONNECTION OPTIONS ======
 const connectionOptions = {
-  printQRInTerminal: true,
   connectTimeoutMs: 60000,
   keepAliveIntervalMs: 10000,
 
@@ -115,8 +113,12 @@ conn.logger.info(`Ƈᴀʀɢᴀɴᴅᴏ．．．\n`);
 
 // ====== CONNECTION HANDLER ======
 async function connectionUpdate(update) {
-  const { connection, lastDisconnect } = update;
+  const { connection, lastDisconnect, qr } = update;
   stopped = connection;
+
+  if (qr) {
+    console.log('📲 امسح هذا الكود بالواتساب:', qr);
+  }
 
   let reason = new Boom(lastDisconnect?.error)?.output?.statusCode;
 

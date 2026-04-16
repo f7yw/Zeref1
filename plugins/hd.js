@@ -1,5 +1,5 @@
 import FormData from "form-data";
-import Jimp from "jimp";
+import * as Jimp from "jimp";
 
 let handler = async (m, { conn, usedPrefix, command }) => {
   conn.hdr = conn.hdr ? conn.hdr : {}
