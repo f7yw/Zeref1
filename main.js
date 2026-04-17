@@ -23,14 +23,16 @@ const { proto } = (await import('@whiskeysockets/baileys')).default;
 const {
   DisconnectReason,
   useMultiFileAuthState,
-  makeCacheableSignalKeyStore
+  makeCacheableSignalKeyStore,
+  fetchLatestBaileysVersion
 } = await import('@whiskeysockets/baileys');
 
 const { chain } = lodash;
 const PORT = process.env.PORT || process.env.SERVER_PORT || 3000;
 
-// نسخة ثابتة بدل fetchLatestBaileysVersion
-const version = [2, 3000, 1015901307];
+// جلب أحدث نسخة من Baileys
+const { version, isLatest } = await fetchLatestBaileysVersion();
+console.log(chalk.cyan(`[BAILEYS] Using version v${version.join('.')} (Latest: ${isLatest})`));
 
 protoType();
 serialize();
@@ -99,7 +101,7 @@ const connectionOptions = {
     keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'silent' }))
   },
 
-  browser: ['Mac OS', 'Safari', '10.15.7'],
+  browser: ['Ubuntu', 'Chrome', '121.0.6167.160'],
   version
 };
 
@@ -108,21 +110,12 @@ global.conn = makeWASocket(connectionOptions);
 conn.isInit = false;
 
 // Pairing Code Logic
-if (!conn.authState.creds.registered) {
-    let phoneNumber = process.env.PHONE_NUMBER;
+if (!conn.authState.creds.registered && !process.argv.includes('--test')) {
+    let phoneNumber = process.env.PHONE_NUMBER || global.owner?.[0]?.[0];
     
-    if (!phoneNumber) {
-        const rl = (await import('readline')).createInterface({ input: process.stdin, output: process.stdout });
-        const question = (text) => new Promise((resolve) => rl.question(text, resolve));
-        
-        console.log(chalk.cyan('\n[PAIRING] No phone number provided in environment variables.'));
-        phoneNumber = await question(chalk.yellow('Please enter the phone number for pairing (with country code, e.g., 967...): '));
-        rl.close();
-    }
-
     if (phoneNumber) {
         phoneNumber = phoneNumber.replace(/[^0-9]/g, '');
-        console.log(chalk.cyan(`[PAIRING] Generating pairing code for: ${phoneNumber}`));
+        console.log(chalk.cyan(`[PAIRING] Using phone number from config/env: ${phoneNumber}`));
         setTimeout(async () => {
             try {
                 let code = await conn.requestPairingCode(phoneNumber);
@@ -133,7 +126,7 @@ if (!conn.authState.creds.registered) {
             }
         }, 3000);
     } else {
-        console.log(chalk.red('[PAIRING] No phone number provided. Please scan QR instead.'));
+        console.log(chalk.red('[PAIRING] No phone number found. Please scan QR instead.'));
     }
 }
 
