@@ -2,11 +2,10 @@ import { menuSections, sections } from './menu.js'
 
 let handler = async (m, { conn }) => {
 
-  if (!global.menuSessions) return
-  const session = global.menuSessions[m.sender]
-  if (!session) return
+  const session = global.menuSessions?.[m.sender] || { prefix: '.' }
 
-  const choice = m.text.trim()
+  const map = { '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4', '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9', '۰': '0', '۱': '1', '۲': '2', '۳': '3', '۴': '4', '۵': '5', '۶': '6', '۷': '7', '۸': '8', '۹': '9' }
+  const choice = m.text.trim().replace(/[٠-٩۰-۹]/g, d => map[d] || d)
 
   let section = menuSections[choice]
   if (!section) {
@@ -24,10 +23,10 @@ let handler = async (m, { conn }) => {
   )
 
   // حذف الجلسة بعد الاستخدام
-  delete global.menuSessions[m.sender]
+  if (global.menuSessions?.[m.sender]) delete global.menuSessions[m.sender]
 }
 
-handler.customPrefix = /^(10|[1-9]|📖 القرآن الكريم|🤖 الذكاء الاصطناعي|🎮 الألعاب|😄 ترفيه|🛠️ الأدوات|💰 الاقتصاد|📊 المعلومات|👥 إدارة القروب|👑 أوامر المالك|📜 كل الأوامر)$/
+handler.customPrefix = /^(10|[1-9]|١٠|[١-٩]|📖 القرآن الكريم|🤖 الذكاء الاصطناعي|🎮 الألعاب|😄 ترفيه|🛠️ الأدوات|💰 الاقتصاد|📊 المعلومات|👥 إدارة القروب|👑 أوامر المالك|📜 كل الأوامر)$/
 handler.command = new RegExp
 
 export default handler

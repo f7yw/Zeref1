@@ -8,6 +8,11 @@ function clockString(ms) {
   return [h, m, s].map(v => v.toString().padStart(2, 0)).join(':')
 }
 
+function normalizeChoice(text = '') {
+  const map = { '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4', '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9', '۰': '0', '۱': '1', '۲': '2', '۳': '3', '۴': '4', '۵': '5', '۶': '6', '۷': '7', '۸': '8', '۹': '9' }
+  return text.trim().replace(/[٠-٩۰-۹]/g, d => map[d] || d)
+}
+
 export const sections = {
   quran: {
     title: '📖 القرآن الكريم',
@@ -242,9 +247,9 @@ handler.exp = 0
 handler.fail = null
 
 handler.before = async (m, { conn }) => {
-  const choice = (m.text || '').trim()
-  if (global.menuSessions?.[m.sender] && menuSections[choice]) {
-    const session = global.menuSessions[m.sender]
+  const choice = normalizeChoice(m.text || '')
+  if (menuSections[choice]) {
+    const session = global.menuSessions?.[m.sender] || {}
     const prefix = session?.prefix || '.'
     const user = global.db.data.users[m.sender] || {}
     initEconomy(user)
@@ -254,6 +259,7 @@ handler.before = async (m, { conn }) => {
     const uptime = clockString(process.uptime() * 1000)
     const stats = buildStats(m, user, level, role, max, uptime)
     await sendSection(conn, m, menuSections[choice].key, prefix, stats)
+    if (global.menuSessions?.[m.sender]) delete global.menuSessions[m.sender]
     return true
   }
 

@@ -12,6 +12,7 @@ import chalk from 'chalk'
  */
 const { proto } = (await import('@whiskeysockets/baileys')).default
 const isNumber = x => typeof x === 'number' && !isNaN(x)
+const jidOf = x => typeof x === 'string' ? x : (x?.id || x?.jid || x?.lid || x?.participant || '')
 const delay = ms => isNumber(ms) && new Promise(resolve => setTimeout(function () {
     clearTimeout(this)
     resolve()
@@ -1049,11 +1050,23 @@ try {
 
         const groupMetadata = (m.isGroup ? ((conn.chats[m.chat] || {}).metadata || await this.groupMetadata(m.chat).catch(_ => null)) : {}) || {}
         const participants = (m.isGroup ? groupMetadata.participants : []) || []
-        const user = (m.isGroup ? participants.find(u => conn.decodeJid(u.id) === m.sender) : {}) || {} // User Data
-        const bot = (m.isGroup ? participants.find(u => conn.decodeJid(u.id) == this.user.jid) : {}) || {} // Your Data
+        const botJids = [
+            this.user?.jid,
+            this.user?.id,
+            this.user?.lid,
+            conn.decodeJid(this.user?.jid || ''),
+            conn.decodeJid(this.user?.id || '')
+        ].filter(Boolean)
+        const sameJid = (a, b) => {
+            const x = conn.decodeJid(jidOf(a))
+            const y = conn.decodeJid(jidOf(b))
+            return x === y || jidOf(a) === jidOf(b) || x.split('@')[0] === y.split('@')[0]
+        }
+        const user = (m.isGroup ? participants.find(u => sameJid(u, m.sender)) : {}) || {} // User Data
+        const bot = (m.isGroup ? participants.find(u => botJids.some(j => sameJid(u, j))) : {}) || {} // Your Data
         const isRAdmin = user?.admin == 'superadmin' || false
         const isAdmin = isRAdmin || user?.admin == 'admin' || false // Is User Admin?
-        const isBotAdmin = bot?.admin || false // Are you Admin?
+        const isBotAdmin = bot?.admin == 'admin' || bot?.admin == 'superadmin' || false // Are you Admin?
 
         const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), './plugins')
         for (let name in global.plugins) {
@@ -1391,6 +1404,7 @@ export async function participantsUpdate({ id, participants, action }) {
     if (opts['self']) return
     if (this.isInit) return
     if (global.db.data == null) await loadDatabase()
+    participants = (participants || []).map(jidOf).filter(Boolean)
     let chat = global.db.data.chats[id] || {}
     let botTt = global.db.data.settings[conn.user.jid] || {}
     let text = ''
@@ -1408,8 +1422,9 @@ export async function participantsUpdate({ id, participants, action }) {
                     let apii = await this.getFile(pp)
                     const antiArab = JSON.parse(fs.readFileSync('./src/antiArab.json'))
                     const userPrefix = antiArab.some(prefix => user.startsWith(prefix))                        
-                    const botTt2 = groupMetadata.participants.find(u => this.decodeJid(u.id) == this.user.jid) || {} 
-                    const isBotAdminNn = botTt2?.admin === "admin" || false
+                    const botIds = [this.user?.jid, this.user?.id, this.user?.lid, this.decodeJid(this.user?.jid || ''), this.decodeJid(this.user?.id || '')].filter(Boolean)
+                    const botTt2 = groupMetadata.participants.find(u => botIds.some(j => this.decodeJid(jidOf(u)) === this.decodeJid(j) || jidOf(u).split('@')[0] === j.split('@')[0])) || {} 
+                    const isBotAdminNn = botTt2?.admin === "admin" || botTt2?.admin === "superadmin" || false
                         text = (action === 'add' ? (chat.sWelcome || this.welcome || conn.welcome || 'Welcome, @user!').replace('@subject', await this.getName(id)).replace('@desc', groupMetadata.desc?.toString() || '*𝚂𝙸𝙽 𝙳𝙴𝚂𝙲𝚁𝙸𝙿𝙲𝙸𝙾𝙽*') :
                               (chat.sBye || this.bye || conn.bye || 'Bye, @user!')).replace('@user', '@' + user.split('@')[0])
                             
@@ -1435,7 +1450,9 @@ this.sendFile(id, apii.data, 'pp.jpg', text, null, false, { mentions: [user] })
         case 'quitaradmin':
             if (!text)
                 text = (chat.sDemote || this.sdemote || conn.sdemote || '@user ```is no longer Admin```')
-            text = text.replace('@user', '@' + participants[0].split('@')[0])
+            const target = jidOf(participants[0])
+            if (!target) break
+            text = text.replace('@user', '@' + target.split('@')[0])
             if (chat.detect)
                 this.sendMessage(id, { text, mentions: this.parseMention(text) })
             break

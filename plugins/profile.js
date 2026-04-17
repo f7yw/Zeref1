@@ -8,7 +8,10 @@ let handler = async (m, { conn }) => {
   syncEnergy(user)
   const level = user.level || 0
   const { max } = xpRange(level, global.multiplier)
-  const name = await conn.getName(who).catch(() => who.split('@')[0])
+  let name = who.split('@')[0]
+  try {
+    name = await Promise.resolve(conn.getName(who))
+  } catch (_) {}
   const registered = user.registered ? 'نعم' : 'لا'
   const premium = user.premium || user.premiumTime > 0 ? 'نعم' : 'لا'
   const banned = user.banned ? 'نعم' : 'لا'
