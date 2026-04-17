@@ -22,6 +22,7 @@ await m.reply('*الترجمه:* ' + result2)
 } catch { 
 await m.reply('*[❗𝐈𝐍𝐅𝐎❗] ERROR, VUELVA A INTENTARLO*')    
 }}}
-handler.command = /^(ترجم|ترجمة)$/i
+handler.command = /^$/
+handler.disabled = true
 export default handler
 

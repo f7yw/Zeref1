@@ -1028,6 +1028,7 @@ try {
         const isOwner = isROwner || m.fromMe
         const isMods = isOwner || global.mods.map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender)
         const isPrems = isROwner || isOwner || isMods || global.db.data.users[m.sender].premiumTime > 0 //|| global.db.data.users[m.sender].premium = 'true'
+        if (global.db.data.chats[m.chat]?.botOff && m.text && global.prefix.test(m.text) && !(isROwner || isOwner)) return
 
         if (opts['queque'] && m.text && !(isMods || isPrems)) {
             let queque = this.msgqueque, time = 1000 * 5

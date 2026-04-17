@@ -1,6 +1,6 @@
 
 let handler = async (m, {conn, usedPrefix}) => {
-	
+        
     let who = m.quoted ? m.quoted.sender : m.mentionedJid && m.mentionedJid[0] ? m.mentionedJid[0] : m.fromMe ? conn.user.jid : m.sender
     let user = global.db.data.users[who]
     if (!(who in global.db.data.users))throw`✳️ 
@@ -21,8 +21,8 @@ conn.reply(m.chat, `
 ❏ *❖${usedPrefix}buy <cantidad>*
 ❏ *❖${usedPrefix}buyall*`, m, { mentions: [who] })
 }
-handler.help = ['balance']
+handler.help = ['رانك', 'diamond']
 handler.tags = ['econ']
-handler.command = ['البنك', 'رانك', 'diamond', 'بنك'] 
+handler.command = ['رانك', 'diamond'] 
 
 export default handler

@@ -84,10 +84,17 @@ async function answerMath(conn, m, entry, answerText) {
   )
 }
 
-let handler = async (m, { conn, text, usedPrefix }) => {
+let handler = async (m, { conn, text, usedPrefix, command }) => {
   const quiz = conn.quiz?.[m.chat]
   const math = conn.math?.[m.chat]
   if (!quiz && !math) return m.reply(`لا يوجد سؤال أو تحدي نشط الآن.\nابدأ بسؤال: ${usedPrefix}سوال\nأو تحدي: ${usedPrefix}تحدي`)
+
+  if (/^(الجواب|اظهر_الجواب|اظهر-الجواب)$/i.test(command)) {
+    const active = quiz || math
+    const questionText = quiz ? active.question.question : active.question.expr
+    const answerText = quiz ? active.question.response : active.question.answer
+    return m.reply(`╭────『 ✅ جواب السؤال 』────\n│\n│ ❓ السؤال: *${questionText}*\n│ ✅ الجواب: *${answerText}*\n│\n╰──────────────────`)
+  }
 
   const parts = (text || '').trim().split(/\s+/).filter(Boolean)
   let id = ''
@@ -106,7 +113,7 @@ let handler = async (m, { conn, text, usedPrefix }) => {
   return answerMath(conn, m, math, answer)
 }
 
-handler.help = ['جواب <رمز> <الإجابة>']
+handler.help = ['جواب <رمز> <الإجابة>', 'الجواب']
 handler.tags = ['game']
-handler.command = /^(جواب|اجابة|إجابة|حل|answer)$/i
+handler.command = /^(جواب|اجابة|إجابة|حل|answer|الجواب|اظهر_الجواب|اظهر-الجواب)$/i
 export default handler

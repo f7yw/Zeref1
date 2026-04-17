@@ -36,7 +36,8 @@ let handler = async (m, { args, usedPrefix, command }) => {
   }
 }
 
-handler.help    = ['ترجم <لغة> <نص>']
+handler.help    = []
 handler.tags    = ['tools']
-handler.command = [/^(ترجم|ترجمه|مترجم)$/i]
+handler.command = /^$/
+handler.disabled = true
 export default handler

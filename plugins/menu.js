@@ -75,7 +75,9 @@ ${p}انمي       ⟵ بحث عن أنيمي`.trim()
     text: (p) => `
 *🛠️ ─── الأدوات ───*
 
-${p}ترجم        ⟵ ترجمة أي نص لأي لغة
+${p}مترجم تشغيل ar  ⟵ تشغيل الترجمة العامة
+${p}مترجم ايقاف     ⟵ إيقاف الترجمة العامة
+${p}لغة ar          ⟵ تغيير لغة الترجمة العامة
 ${p}ذكرني       ⟵ ضبط تذكير بمهمة
 ${p}منبه        ⟵ ضبط منبّه بوقت محدد
 ${p}رمزي        ⟵ عرض رمز QR الخاص بك
@@ -103,12 +105,31 @@ ${p}لفل          ⟵ ارفع مستواك`.trim()
 *📊 ─── المعلومات ───*
 
 ${p}الضعوم     ⟵ حالة البوت ووقت التشغيل
+${p}بروفايل    ⟵ ملفك ومعلوماتك
 ${p}التوقيت    ⟵ التوقيت الحالي
 ${p}رابطي      ⟵ رابط واتساب الخاص بك
 ${p}حكمه       ⟵ حكمة عشوائية
 ${p}حديث       ⟵ حديث نبوي شريف
 ${p}بلاغ       ⟵ إرسال بلاغ للمالك
 ${p}المالك     ⟵ معلومات مالك البوت`.trim()
+  },
+  group: {
+    title: '👥 إدارة القروب',
+    text: (p) => `
+*👥 ─── إدارة القروب ───*
+
+${p}اسم_القروب الاسم      ⟵ تغيير اسم القروب
+${p}وصف_القروب النص      ⟵ تغيير وصف القروب
+${p}طرد @شخص            ⟵ طرد عضو
+${p}اضف 967xxxxxxxx     ⟵ إضافة عضو
+${p}رفع @شخص            ⟵ رفع مشرف
+${p}خفض @شخص            ⟵ خفض مشرف
+${p}قفل_القروب          ⟵ المشرفون فقط
+${p}فتح_القروب          ⟵ السماح للجميع
+${p}منشن_ظاهر النص      ⟵ منشن واضح للجميع
+${p}منشن_مخفي النص      ⟵ منشن مخفي للجميع
+${p}الحماية تشغيل       ⟵ تفعيل حماية الروابط
+${p}الحماية ايقاف       ⟵ إيقاف حماية الروابط`.trim()
   },
   owner: {
     title: '👑 أوامر المالك',
@@ -120,8 +141,13 @@ ${p}المميزين     ⟵ قائمة المميزين
 ${p}بان          ⟵ حظر مستخدم
 ${p}فك-الحظر     ⟵ رفع الحظر عن مستخدم
 ${p}البلوكات     ⟵ قائمة المحظورين
-${p}تشغيل        ⟵ تشغيل البوت
-${p}ايقاف        ⟵ إيقاف البوت
+${p}حالة_البوت   ⟵ حالة وإعدادات البوت
+${p}تشغيل        ⟵ تشغيل البوت في المحادثة
+${p}ايقاف        ⟵ إيقاف البوت في المحادثة
+${p}عام          ⟵ استقبال أوامر الجميع
+${p}خاص          ⟵ أوامر المالك فقط
+${p}قراءة تشغيل  ⟵ تفعيل قراءة الرسائل
+${p}قراءة ايقاف  ⟵ إيقاف قراءة الرسائل
 ${p}إعادة        ⟵ إعادة تشغيل البوت`.trim()
   },
   all: {
@@ -143,12 +169,6 @@ export const menuSections = Object.fromEntries(
 export const menuPollSections = Object.fromEntries(
   Object.entries(sections).map(([, section]) => [section.title, section.text])
 )
-
-const pageOrder = [
-  ['quran', 'ai', 'games'],
-  ['fun', 'tools', 'economy'],
-  ['info', 'owner']
-]
 
 function buildStats(m, user, level, role, max, uptime) {
   const name = m.pushName || 'مستخدم'
@@ -175,7 +195,7 @@ function buildStats(m, user, level, role, max, uptime) {
 ║
 ║  ⏱️ وقت التشغيل: *${uptime}*
 ║
-╚══〘 👇 اختر من الأزرار 〙══╝`.trim()
+╚══〘 👇 اختر رقم القسم 〙══╝`.trim()
 }
 
 function buildPageText(prefix) {
@@ -185,25 +205,8 @@ function buildPageText(prefix) {
 }
 
 async function sendPage(conn, m, prefix, stats) {
-  const optionNames = Object.values(sections).map(section => section.title)
-  const text = `${stats}\n\n${buildPageText(prefix)}\n\nاختر من التصويت بالضغط على القسم، أو أرسل رقم القسم مثل: *1*\nلجميع الأوامر اختر: *📜 كل الأوامر*`
+  const text = `${stats}\n\n${buildPageText(prefix)}\n\nأرسل رقم القسم فقط مثل: *1*\nلجميع الأوامر اختر رقم قسم *📜 كل الأوامر*.`
   await conn.sendMessage(m.chat, { text }, { quoted: m })
-  const poll = await conn.sendMessage(m.chat, {
-    poll: {
-      name: '📋 قائمة SHADOW - اختر القسم',
-      values: optionNames,
-      selectableCount: 1
-    }
-  }, { quoted: m })
-  global.menuPolls = global.menuPolls || new Map()
-  if (poll?.key?.id) {
-    global.menuPolls.set(poll.key.id, {
-      chat: m.chat,
-      sender: m.sender,
-      prefix,
-      expires: Date.now() + 10 * 60 * 1000
-    })
-  }
 }
 
 async function sendSection(conn, m, sectionKey, prefix, stats) {
@@ -251,58 +254,6 @@ handler.before = async (m, { conn }) => {
     const uptime = clockString(process.uptime() * 1000)
     const stats = buildStats(m, user, level, role, max, uptime)
     await sendSection(conn, m, menuSections[choice].key, prefix, stats)
-    return true
-  }
-
-  const btn = m.message?.buttonsResponseMessage?.selectedButtonId
-  if (!btn) return false
-
-  if (!global.menuSessions) global.menuSessions = {}
-  const session = global.menuSessions[m.sender]
-  const prefix = session?.prefix || '.'
-
-  const user = global.db.data.users[m.sender] || {}
-  initEconomy(user)
-  syncEnergy(user)
-
-  const { level = 1, role = 'مستخدم' } = user
-  const { max } = xpRange(level, global.multiplier)
-  const uptime = clockString(process.uptime() * 1000)
-  const stats = buildStats(m, user, level, role, max, uptime)
-
-  if (btn === 'menu_home') {
-    global.menuSessions[m.sender] = { prefix, page: 0, ts: Date.now() }
-    await sendPage(conn, m, prefix, stats)
-    return true
-  }
-
-  if (btn === 'menu_back') {
-    const page = session?.page || 0
-    const prev = Math.max(0, page - 1)
-    global.menuSessions[m.sender] = { prefix, page: prev, ts: Date.now() }
-    await sendPage(conn, m, prefix, stats)
-    return true
-  }
-
-  if (btn.startsWith('menu_next_')) {
-    const current = Number(btn.split('_').pop() || 0)
-    const next = Math.min(pageOrder.length - 1, current + 1)
-    global.menuSessions[m.sender] = { prefix, page: next, ts: Date.now() }
-    await sendPage(conn, m, prefix, stats)
-    return true
-  }
-
-  if (btn.startsWith('menu_prev_')) {
-    const current = Number(btn.split('_').pop() || 0)
-    const prev = Math.max(0, current - 1)
-    global.menuSessions[m.sender] = { prefix, page: prev, ts: Date.now() }
-    await sendPage(conn, m, prefix, stats)
-    return true
-  }
-
-  const sectionKey = btn.replace(/^menu_/, '')
-  if (sections[sectionKey]) {
-    await sendSection(conn, m, sectionKey, prefix, stats)
     return true
   }
 

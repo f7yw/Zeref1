@@ -278,11 +278,15 @@ let handler = await import('./handler.js');
 conn.handler = handler.handler.bind(conn);
 conn.connectionUpdate = connectionUpdate.bind(conn);
 conn.credsUpdate = saveCreds.bind(conn);
+conn.participantsUpdate = handler.participantsUpdate.bind(conn);
+conn.groupsUpdate = handler.groupsUpdate.bind(conn);
 
 // ====== EVENTS ======
 conn.ev.on('messages.upsert', conn.handler);
 conn.ev.on('connection.update', conn.connectionUpdate);
 conn.ev.on('creds.update', conn.credsUpdate);
+conn.ev.on('group-participants.update', conn.participantsUpdate);
+conn.ev.on('groups.update', conn.groupsUpdate);
 
 // ====== POLL VOTE HANDLER (menu navigation) ======
 global.menuPolls = global.menuPolls || new Map();
@@ -358,6 +362,23 @@ async function filesInit() {
 }
 
 await filesInit();
+
+setInterval(async () => {
+  if (global.db?.data) await global.db.write().catch(console.error);
+  if (global.chatgpt?.data) await global.chatgpt.write().catch(console.error);
+}, 30000);
+
+process.on('SIGTERM', async () => {
+  if (global.db?.data) await global.db.write().catch(console.error);
+  if (global.chatgpt?.data) await global.chatgpt.write().catch(console.error);
+  process.exit(0);
+});
+
+process.on('SIGINT', async () => {
+  if (global.db?.data) await global.db.write().catch(console.error);
+  if (global.chatgpt?.data) await global.chatgpt.write().catch(console.error);
+  process.exit(0);
+});
 
 // ====== AUTO CLEAN TMP ======
 setInterval(() => {

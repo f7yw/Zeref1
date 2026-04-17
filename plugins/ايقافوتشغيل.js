@@ -15,7 +15,8 @@ let handler = async (m, { conn, command }) => {
 
 handler.help = ['تشغيل', 'ايقاف'];
 handler.tags = ['owner'];
-handler.command = /^تشغيل|ايقاف$/i;
+handler.command = /^$/i;
 handler.prems = true; // فقط المالك يستطيع الإيقاف
+handler.disabled = true
 
 export default handler;
