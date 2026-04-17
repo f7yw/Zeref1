@@ -30,7 +30,7 @@ const { chain } = lodash;
 const PORT = process.env.PORT || process.env.SERVER_PORT || 3000;
 
 // نسخة ثابتة بدل fetchLatestBaileysVersion
-const version = [2, 2413, 1];
+const version = [2, 3000, 1015901307];
 
 protoType();
 serialize();
@@ -99,7 +99,7 @@ const connectionOptions = {
     keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'silent' }))
   },
 
-  browser: ['Ubuntu', 'Chrome', '20.0.04'],
+  browser: ['Mac OS', 'Safari', '10.15.7'],
   version
 };
 
@@ -109,16 +109,31 @@ conn.isInit = false;
 
 // Pairing Code Logic
 if (!conn.authState.creds.registered) {
-    const phoneNumber = process.env.PHONE_NUMBER || global.owner?.[0]?.[0];
+    let phoneNumber = process.env.PHONE_NUMBER;
+    
+    if (!phoneNumber) {
+        const rl = (await import('readline')).createInterface({ input: process.stdin, output: process.stdout });
+        const question = (text) => new Promise((resolve) => rl.question(text, resolve));
+        
+        console.log(chalk.cyan('\n[PAIRING] No phone number provided in environment variables.'));
+        phoneNumber = await question(chalk.yellow('Please enter the phone number for pairing (with country code, e.g., 967...): '));
+        rl.close();
+    }
+
     if (phoneNumber) {
+        phoneNumber = phoneNumber.replace(/[^0-9]/g, '');
         console.log(chalk.cyan(`[PAIRING] Generating pairing code for: ${phoneNumber}`));
         setTimeout(async () => {
-            let code = await conn.requestPairingCode(phoneNumber);
-            code = code?.match(/.{1,4}/g)?.join("-") || code;
-            console.log(chalk.yellow.bold(`\n\nYOUR PAIRING CODE: ${code}\n\n`));
+            try {
+                let code = await conn.requestPairingCode(phoneNumber);
+                code = code?.match(/.{1,4}/g)?.join("-") || code;
+                console.log(chalk.yellow.bold(`\n\nYOUR PAIRING CODE: ${code}\n\n`));
+            } catch (e) {
+                console.error(chalk.red('[PAIRING ERROR]'), e);
+            }
         }, 3000);
     } else {
-        console.log(chalk.red('[PAIRING] No phone number found in config or env. Please scan QR instead.'));
+        console.log(chalk.red('[PAIRING] No phone number provided. Please scan QR instead.'));
     }
 }
 
