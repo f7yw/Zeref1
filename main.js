@@ -85,6 +85,18 @@ global.loadDatabase = async function () {
 };
 await loadDatabase();
 
+// ====== CHATGPT DATABASE ======
+global.chatgpt = new Low(new JSONFile(`chatgpt.json`));
+
+global.loadChatgptDB = async function () {
+  await global.chatgpt.read().catch(console.error);
+  global.chatgpt.data = {
+    users: {},
+    ...(global.chatgpt.data || {})
+  };
+};
+await global.loadChatgptDB();
+
 // ====== AUTH ======
 global.authFile = `Zeref`;
 const { state, saveCreds } = await useMultiFileAuthState(global.authFile);
