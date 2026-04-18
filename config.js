@@ -22,7 +22,7 @@ global.packname = '𝐒𝐇𝐀𝐃𝐎𝐖-Bot'
 global.author = '967778088098+'
 global.wm = '𝐒𝐇𝐀𝐃𝐎𝐖 - Bot'
 global.igfg = '𝐒𝐇𝐀𝐃𝐎𝐖 - Bot'
-global.wait = '> *يرجى الأنتظار لحظه*'
+global.wait = '> *يرجى الأنتظار لحظه*\n> 🔗 *https://github.com/Farisatif*'
 
 // صور البوت - تأكد من وجود هذه الملفات فعليًا
 global.imagen1 = fs.readFileSync('./Menu2.jpg')
