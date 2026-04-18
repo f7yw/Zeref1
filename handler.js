@@ -1094,6 +1094,21 @@ try {
         const isPrems = isROwner || isOwner || isMods || global.db.data.users[m.sender].premiumTime > 0 //|| global.db.data.users[m.sender].premium = 'true'
         if (global.db.data.chats[m.chat]?.botOff && m.text && global.prefix.test(m.text) && !(isROwner || isOwner)) return
 
+        // ── Temp ban check (offensive words) ──
+        if (!isOwner && !isROwner) {
+            const _tempBannedUser = global.db.data.users[m.sender]
+            if (_tempBannedUser?.tempBannedUntil && _tempBannedUser.tempBannedUntil > Date.now() && global.prefix.test(m.text || '')) {
+                const _remaining = Math.ceil((_tempBannedUser.tempBannedUntil - Date.now()) / 60000)
+                this.sendMessage(m.chat, { text: `⏳ أنت محظور مؤقتاً من استخدام البوت لمدة *${_remaining}* دقيقة أخرى بسبب استخدام كلمات مسيئة.`, mentions: [m.sender] }, { quoted: m }).catch(() => {})
+                return
+            }
+        }
+
+        // ── Realistic response delay ──
+        if (!m.fromMe && m.text && global.prefix.test(m.text || '')) {
+            await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * 600) + 400))
+        }
+
         if (opts['queque'] && m.text && !(isMods || isPrems)) {
             let queque = this.msgqueque, time = 1000 * 5
             const previousID = queque[queque.length - 1]
@@ -1393,7 +1408,7 @@ if (botSpam.antispam && m.text && user && user.lastCommandTime && (Date.now() - 
                 const _oldLvl = findLevel(user.exp || 0, global.multiplier)
                 user.exp += m.exp
                 user.limit -= m.limit * 1
-                // ── Level-up notification ─────────────────────────────────
+                // ── Level-up (silent — shown in profile only) ─────────────
                 const _newLvl = findLevel(user.exp || 0, global.multiplier)
                 if (_newLvl > _oldLvl && user.autolevelup !== false) {
                     user.level = _newLvl
@@ -1402,24 +1417,9 @@ if (botSpam.antispam && m.text && user && user.lastCommandTime && (Date.now() - 
                     user.money  = (user.money  || 0) + _bonusMoney
                     user.energy = Math.min(MAX_ENERGY, (user.energy || 0) + 30)
                     if (_bonusDia) user.diamond = (user.diamond || 0) + 1
+                    user.role = getRole(_newLvl)
                     logTransaction(user, 'earn', _bonusMoney, `🆙 مكافأة المستوى ${_newLvl}`)
-                    const _role   = getRole(_newLvl)
-                    const _lvlMsg =
-`╭──────『 🆙 ارتفعت مستوى! 』──────
-│
-│ 🎊 مبروك @${m.sender.split('@')[0]}!
-│
-│ 🏆 *المستوى الجديد:* ${_newLvl}
-│ ${_role}
-│
-│ ─── 🎁 مكافآت الارتقاء ───
-│ 💰 +${_bonusMoney} 🪙
-│ ⚡ +30 طاقة${_bonusDia ? `\n│ 💎 +1 ماسة نادرة! ✨` : ''}
-│
-│ استمر للمستوى التالي 🔥
-│
-╰──────────────────────`
-                    this.sendMessage(m.chat, { text: _lvlMsg, mentions: [m.sender] }, { quoted: m }).catch(() => {})
+                    // Level-up notifications disabled — level is displayed in profile (.بروفايل)
                 }
             }
 

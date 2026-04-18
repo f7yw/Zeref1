@@ -18,7 +18,9 @@ let handler = async (m, { conn, usedPrefix }) => {
     return false
   }
 
-  const questions = JSON.parse(fs.readFileSync('./src/game/acertijo.json'))
+  const baseQ = JSON.parse(fs.readFileSync('./src/game/acertijo.json'))
+  const itQ   = JSON.parse(fs.readFileSync('./src/game/it_questions.json'))
+  const questions = [...baseQ, ...itQ]
   const q = questions[Math.floor(Math.random() * questions.length)]
   const id = makeId()
   const reward = Math.floor(Math.random() * (COIN_MAX - COIN_MIN + 1)) + COIN_MIN

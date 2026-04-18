@@ -203,6 +203,52 @@ async function connectionUpdate(update) {
   if (connection === 'open') {
     console.log(chalk.green.bold('\n✅ Connected to WhatsApp successfully!'));
     console.log(chalk.green(`  ➤ Bot is active and listening for messages.`));
+
+    // ── Send startup log to developer ──
+    setTimeout(async () => {
+      try {
+        const { readdirSync: _rdr } = await import('fs')
+        const pluginFiles = _rdr('./plugins').filter(f => f.endsWith('.js'))
+        const totalUsers = Object.keys(global.db?.data?.users || {}).length
+        const totalChats = Object.keys(global.db?.data?.chats || {}).length
+        const premUsers = Object.values(global.db?.data?.users || {}).filter(u => u?.premium === true || (u?.premiumTime || 0) > Date.now()).length
+        const memMB = Math.round(process.memoryUsage().rss / 1024 / 1024)
+        const uptime = Math.round(process.uptime())
+        const pluginList = pluginFiles.map((f, i) => `${i + 1}. ${f}`).join('\n')
+
+        const startupMsg = `╭──────『 🚀 تشغيل البوت 』──────
+│
+│ ✅ *البوت يعمل بنجاح!*
+│ 🕐 وقت البدء: ${new Date().toLocaleString('ar')}
+│ ⏱️ وقت التشغيل: ${uptime}ث
+│
+│ ─── قاعدة البيانات ───
+│ 👥 مستخدمون: ${totalUsers}
+│ 💬 محادثات: ${totalChats}
+│ 👑 مميزون: ${premUsers}
+│
+│ ─── الأداء ───
+│ 🧠 الذاكرة: ${memMB} MB
+│ 📦 Node: ${process.version}
+│
+│ ─── الإضافات (${pluginFiles.length}) ───
+${pluginList}
+╰──────────────────────`
+
+        const ownerNumbers = (global.owner || []).filter(([, , isDev]) => isDev).map(([n]) => n)
+        for (const num of ownerNumbers) {
+          const jid = `${String(num).replace(/\D/g, '')}@s.whatsapp.net`
+          try {
+            const data = (await conn.onWhatsApp(jid).catch(() => []))[0]
+            if (data?.exists) {
+              await conn.sendMessage(jid, { text: startupMsg })
+            }
+          } catch (_) {}
+        }
+      } catch (e) {
+        console.error('[STARTUP LOG ERROR]', e.message)
+      }
+    }, 5000)
   }
 
   if (connection === 'close') {

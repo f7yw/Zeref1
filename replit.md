@@ -43,9 +43,26 @@ Arabic WhatsApp bot built with Node.js and Baileys. The bot is focused on useful
 - `plugins/شات.js` — 154 auto-response patterns, 500+ response strings, full Arabic coverage
 
 ## Handler Features
-- Level-up notification: automatic message + reward (200×level coins, +30 energy, +1 diamond every 5 levels) on every message
+- Level-up notification: **SILENT** — level stored in DB, shown in `.بروفايل` only; bonuses still granted (200×level coins, +30 energy, +1 diamond every 5 levels)
 - Registration gate: `handler.register = true` on يومي + عمل blocks unregistered users with proper Arabic prompt
-- `global.dfail.unreg` updated to professional Arabic registration prompt
+- Temp ban check: users with `user.tempBannedUntil > Date.now()` are blocked from all commands with time remaining message
+- Response delay: 400–1000ms random realistic delay before responding to commands
+- Startup log: sent to all developer-flagged owners (5s after connect) with plugin list, DB stats, and memory usage
+
+## Security & Safety Features
+- `plugins/offensive-words.js` — auto-block offensive Arabic/English words with 3-warning system and 30-minute temp ban
+- `plugins/db-clear.js` — `.مسح_المستخدمين`, `.مسح_المحادثات`, `.مسح_الكل` commands that preserve blocked/premium users
+- `plugins/صورة-القروب.js` — get and set group profile picture
+- `plugins/مغادرة.js` — users can delete their own registration data
+
+## Questions System
+- `src/game/acertijo.json` — original trivia questions (anime, general knowledge)
+- `src/game/it_questions.json` — 350+ IT/Computer Science questions (Arabic) covering: programming, networking, security, cloud, DevOps, AI/ML, databases, algorithms, OS, web dev
+- `plugins/سوال.js` — loads BOTH question banks and picks randomly
+
+## Join Request System
+- `plugins/group-request.js` — request/accept/reject workflow for joining groups
+- `plugins/owner-join.js` — instant join for developer/owner/premium; approval flow for regular users
 
 ## Current Focus
 The bot is a professional Arabic WhatsApp assistant with economy, games, auto-responses, admin tools, and media features.
