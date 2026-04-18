@@ -67,7 +67,7 @@ let handler = async (m, { conn, text, command, usedPrefix, participants }) => {
     const who = m.mentionedJid?.[0] || m.quoted?.sender || m.sender
     const target = ensureUser(who)
     const groupMessages = m.isGroup ? (target.messages?.groups?.[m.chat] || 0) : 0
-    const name = await conn.getName(who).catch(() => who.split('@')[0])
+    const name = await Promise.resolve(conn.getName(who)).catch(() => who.split('@')[0])
     return conn.reply(m.chat, `💬 *متتبع الرسائل*\nالعضو: @${who.split('@')[0]}\nالاسم: ${name || '-'}\nإجمالي الرسائل: ${target.messages?.total || 0}\nرسائل هذا القروب: ${m.isGroup ? groupMessages : 'خاص'}\nآخر نشاط: ${target.messages?.last ? new Date(target.messages.last).toLocaleString('ar') : 'غير محفوظ'}`, m, { mentions: [who] })
   }
 
