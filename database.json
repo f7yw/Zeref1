@@ -394,7 +394,7 @@
       "upgrader": 0,
       "vodka": 0,
       "wallet": 0,
-      "warn": 0,
+      "warn": 1,
       "weapon": 0,
       "weapondurability": 0,
       "wolf": 0,
@@ -1822,7 +1822,7 @@
       "emas": 0,
       "emerald": 0,
       "esteh": 0,
-      "exp": 4772,
+      "exp": 5284,
       "expg": 0,
       "exphero": 0,
       "expired": 0,
@@ -2143,8 +2143,8 @@
         "step": null,
         "soal": null
       },
-      "energy": 90,
-      "lastEnergyRegen": 1776483489387,
+      "energy": 61,
+      "lastEnergyRegen": 1776484569387,
       "lastDaily": 0,
       "lastWork": 1776481197104,
       "totalEarned": 119,
@@ -2172,17 +2172,17 @@
       "psepick": 0,
       "robo": 0,
       "roboxp": 0,
-      "lastCommandTime": 1776483784860,
+      "lastCommandTime": 1776484743215,
       "commandCount": 1,
       "tasks": [],
       "notes": [],
       "messages": {
-        "total": 193,
+        "total": 220,
         "groups": {
-          "120363427285079878@g.us": 135,
-          "120363422912330057@g.us": 1
+          "120363427285079878@g.us": 151,
+          "120363422912330057@g.us": 4
         },
-        "last": 1776483797241
+        "last": 1776484743214
       }
     },
     "204990769553546@lid": {
@@ -3053,12 +3053,12 @@
         "soal": null
       },
       "messages": {
-        "total": 81,
+        "total": 100,
         "groups": {
-          "120363427285079878@g.us": 62,
-          "120363422912330057@g.us": 1
+          "120363427285079878@g.us": 71,
+          "120363422912330057@g.us": 4
         },
-        "last": 1776483702062
+        "last": 1776484737918
       },
       "energy": 100,
       "lastEnergyRegen": 1776474223945,
@@ -3089,7 +3089,7 @@
       "psepick": 0,
       "robo": 0,
       "roboxp": 0,
-      "lastCommandTime": 1776483702063,
+      "lastCommandTime": 1776484020973,
       "commandCount": 1
     },
     "137465276969165@lid": {
@@ -3280,8 +3280,8 @@
         "to": "en"
       },
       "messageStats": {
-        "28648019066900@lid": 135,
-        "967782114485@s.whatsapp.net": 73,
+        "28648019066900@lid": 151,
+        "967782114485@s.whatsapp.net": 82,
         "204990769553546@lid": 89
       }
     },
@@ -3335,8 +3335,8 @@
       "simi": false,
       "expired": 0,
       "messageStats": {
-        "28648019066900@lid": 1,
-        "967782114485@s.whatsapp.net": 1
+        "28648019066900@lid": 4,
+        "967782114485@s.whatsapp.net": 4
       }
     }
   },
@@ -3612,10 +3612,10 @@
       "lastSuccess": 1749101924697
     },
     "hd.js": {
-      "total": 8,
-      "success": 8,
-      "last": 1776483653691,
-      "lastSuccess": 1776483653691
+      "total": 11,
+      "success": 11,
+      "last": 1776484331992,
+      "lastSuccess": 1776484331992
     },
     "كلب.js": {
       "total": 2,
@@ -3816,16 +3816,16 @@
       "lastSuccess": 1776479448922
     },
     "owner-block-unblock.js": {
-      "total": 7,
-      "success": 7,
-      "last": 1749110230194,
-      "lastSuccess": 1749110230194
+      "total": 8,
+      "success": 8,
+      "last": 1776483891119,
+      "lastSuccess": 1776483891119
     },
     "owner-banuser.js": {
-      "total": 2,
-      "success": 2,
-      "last": 1749110278023,
-      "lastSuccess": 1749110278023
+      "total": 3,
+      "success": 3,
+      "last": 1776483860319,
+      "lastSuccess": 1776483860319
     },
     "owner-banlist.js": {
       "total": 2,
@@ -3834,9 +3834,9 @@
       "lastSuccess": 1749110316706
     },
     "owner-addprem.js": {
-      "total": 16,
+      "total": 18,
       "success": 8,
-      "last": 1776480670421,
+      "last": 1776484714794,
       "lastSuccess": 1776480484751
     },
     "n9.js": {
@@ -3894,16 +3894,16 @@
       "lastSuccess": 1749115617736
     },
     "menu.js": {
-      "total": 31,
-      "success": 31,
-      "last": 1776482826341,
-      "lastSuccess": 1776482826341
+      "total": 33,
+      "success": 33,
+      "last": 1776484183037,
+      "lastSuccess": 1776484183037
     },
     "menu-response.js": {
-      "total": 34,
-      "success": 34,
-      "last": 1776477945195,
-      "lastSuccess": 1776477945195
+      "total": 38,
+      "success": 38,
+      "last": 1776484392431,
+      "lastSuccess": 1776484392431
     },
     "security.js": {
       "total": 3,
@@ -3912,9 +3912,9 @@
       "lastSuccess": 1776475160916
     },
     "ai.js": {
-      "total": 2,
+      "total": 5,
       "success": 0,
-      "last": 1776463912553,
+      "last": 1776484419650,
       "lastSuccess": 0
     },
     "group-admin.js": {
@@ -3936,10 +3936,10 @@
       "lastSuccess": 1776465766503
     },
     "profile.js": {
-      "total": 7,
-      "success": 4,
-      "last": 1776476353807,
-      "lastSuccess": 1776476353807
+      "total": 9,
+      "success": 6,
+      "last": 1776484744565,
+      "lastSuccess": 1776484744565
     },
     "جواب.js": {
       "total": 3,
@@ -3984,10 +3984,10 @@
       "lastSuccess": 1776480476117
     },
     "تحذير.js": {
-      "total": 11,
-      "success": 11,
-      "last": 1776475419907,
-      "lastSuccess": 1776475419907
+      "total": 12,
+      "success": 12,
+      "last": 1776484737815,
+      "lastSuccess": 1776484737815
     },
     "afk.js": {
       "total": 13,
@@ -4002,22 +4002,28 @@
       "lastSuccess": 1776477737630
     },
     "group-request.js": {
-      "total": 17,
-      "success": 7,
-      "last": 1776483785353,
-      "lastSuccess": 1776483785353
+      "total": 18,
+      "success": 8,
+      "last": 1776483845389,
+      "lastSuccess": 1776483845389
     },
     "شغل.js": {
-      "total": 6,
+      "total": 9,
       "success": 0,
-      "last": 1776482671376,
+      "last": 1776484170317,
       "lastSuccess": 0
     },
     "شطرنج.js": {
-      "total": 8,
-      "success": 8,
-      "last": 1776483703552,
-      "lastSuccess": 1776483703552
+      "total": 11,
+      "success": 11,
+      "last": 1776484021919,
+      "lastSuccess": 1776484021919
+    },
+    "بنترست.js": {
+      "total": 3,
+      "success": 3,
+      "last": 1776484298524,
+      "lastSuccess": 1776484298524
     }
   },
   "msgs": {},
@@ -4060,11 +4066,11 @@
       "link": "https://chat.whatsapp.com/ECnhXVUTQvg8tQBNXdmOmN",
       "code": "ECnhXVUTQvg8tQBNXdmOmN",
       "reason": "?mode=gi_t",
-      "status": "pending",
+      "status": "approved",
       "createdAt": 1776479151576,
       "expiresAt": 1776565551576,
-      "decidedBy": null,
-      "decidedAt": null
+      "decidedBy": "28648019066900@lid",
+      "decidedAt": 1776483844398
     }
   },
   "groupRequestCooldown": {

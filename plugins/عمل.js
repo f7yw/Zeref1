@@ -1,4 +1,4 @@
-import { deductEnergy, syncEnergy, fmt, initEconomy, msToHuman, MAX_ENERGY } from '../lib/economy.js'
+import { deductEnergy, syncEnergy, fmt, initEconomy, msToHuman, MAX_ENERGY, isVip } from '../lib/economy.js'
 
 const WORK_COOLDOWN = 30 * 60 * 1000  // 30 minutes
 const ENERGY_COST   = 10
@@ -32,17 +32,18 @@ const handler = async (m, { usedPrefix }) => {
   initEconomy(user)
   syncEnergy(user)
 
+  const vip  = isVip(m.sender)
   const now  = Date.now()
   const last = user.lastWork || user.lastwork || 0
   const rem  = WORK_COOLDOWN - (now - last)
 
-  if (rem > 0) {
+  if (rem > 0 && !vip) {
     return m.reply(
       `╭────『 ⏳ يحتاج راحة! 』────\n│\n│ ⚔️ جسمك يحتاج استراحة أيها المغامر!\n│ ⏰ العودة بعد: *${msToHuman(rem)}*\n│ ⚡ طاقتك: ${user.energy}/${MAX_ENERGY}\n│\n╰──────────────────`.trim()
     )
   }
 
-  if (user.energy < ENERGY_COST) {
+  if (!vip && user.energy < ENERGY_COST) {
     return m.reply(
       `╭────『 ⚡ طاقة ناضبة 』────\n│\n│ ❌ تحتاج *${ENERGY_COST} ⚡* للعمل\n│ طاقتك الحالية: *${user.energy}/${MAX_ENERGY}*\n│\n│ 💡 احصل على طاقة بـ *${usedPrefix}يومي*\n│ أو انتظر التعبئة التلقائية (+1 كل 3 دق)\n│\n╰──────────────────`.trim()
     )
@@ -52,7 +53,7 @@ const handler = async (m, { usedPrefix }) => {
   const coins = Math.floor(Math.random() * (COIN_MAX - COIN_MIN + 1)) + COIN_MIN
   const xp    = Math.floor(Math.random() * 80) + 20
 
-  deductEnergy(user, ENERGY_COST)
+  deductEnergy(user, ENERGY_COST, m.sender)
   user.money    += coins
   user.exp      += xp
   user.lastWork  = now

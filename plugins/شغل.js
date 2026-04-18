@@ -1,73 +1,66 @@
-import playdl from 'play-dl';
-import yts from 'yt-search';
-import fs from 'fs';
-import { pipeline } from 'stream';
-import { promisify } from 'util';
-import os from 'os';
-
-const streamPipeline = promisify(pipeline);
+import yts from 'yt-search'
+import fs from 'fs'
+import { downloadAudio, searchYouTube } from '../lib/ytdlp.js'
+import { recordingDelay } from '../lib/presence.js'
 
 var handler = async (m, { conn, command, text, usedPrefix }) => {
-  if (!text) throw `*مثال: ${usedPrefix}${command} اية الكرسي*`;
+  if (!text) throw `*مثال: ${usedPrefix}${command} اية الكرسي*`
 
-  await m.reply(global.wait);
+  await m.reply(global.wait)
+  await recordingDelay(conn, m.chat, 1500)
 
-  let search = await yts(text);
-  if (!search || !search.videos.length) throw '*لم يتم العثور على نتائج، جرب عنوانًا آخر*';
+  let url, videoInfo
 
-  let vid = search.videos[0];
-  let { title, thumbnail, timestamp, views, ago, url } = vid;
-  let wm = '〘<<>>〙';
+  // Check if it's a URL or a search query
+  if (/^https?:\/\//i.test(text.trim())) {
+    url = text.trim()
+  } else {
+    const results = await searchYouTube(text, 1)
+    if (!results.length) throw '*❌ لم يتم العثور على نتائج*'
+    videoInfo = results[0]
+    url = videoInfo.url || `https://www.youtube.com/watch?v=${videoInfo.id}`
+  }
 
-  let captvid = `*❖───┊ ♪ يــوتـــيــوب ♪ ┊───❖*
-  ❏ الـعـنوان: ${title}
+  // Fallback: use yts for thumbnail/display info
+  if (!videoInfo) {
+    try {
+      const s = await yts({ videoId: url.match(/[?&]v=([^&]+)/)?.[1] || url.split('/').pop() })
+      if (s) videoInfo = s
+    } catch (_) {}
+  }
 
-  ❐ الـمده: ${timestamp}
+  const { filePath, title, thumbnail, webpage_url, views } = await downloadAudio(url, { maxDuration: 600 })
 
-  ❑ الــمـشهـدات: ${views}
+  const caption = `*❖───┊ ♪ يوتيوب ♪ ┊───❖*
 
-  ❒ مـنذ: ${ago}
+  ❏ *العنوان:* ${title}
+  ❒ *الرابط:* ${webpage_url || url}`
 
-  ❒ الـرابــط: ${url}`;
-
-  conn.sendMessage(m.chat, { image: { url: thumbnail }, caption: captvid }, { quoted: m });
-
-  const stream = await playdl.stream(url, { quality: 2 });
-
-  const tmpDir = os.tmpdir();
-  const safeTitle = title.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_').slice(0, 50);
-  const filePath = `${tmpDir}/${safeTitle}_${Date.now()}.mp3`;
-
-  await streamPipeline(stream.stream, fs.createWriteStream(filePath));
-
-  let doc = {
-    audio: { url: filePath },
-    mimetype: 'audio/mp4',
-    fileName: `${title}.mp3`,
-    contextInfo: {
-      externalAdReply: {
-        showAdAttribution: true,
-        mediaType: 2,
-        mediaUrl: url,
-        title: title,
-        body: wm,
-        sourceUrl: url,
-        thumbnail: await (await conn.getFile(thumbnail)).data
-      }
+  // Send thumbnail first if available
+  if (thumbnail) {
+    try {
+      await conn.sendMessage(m.chat, { image: { url: thumbnail }, caption }, { quoted: m })
+    } catch (_) {
+      await m.reply(caption)
     }
-  };
+  } else {
+    await m.reply(caption)
+  }
 
-  await conn.sendMessage(m.chat, doc, { quoted: m });
+  // Send audio
+  await conn.sendMessage(m.chat, {
+    audio: { url: filePath },
+    mimetype: 'audio/mpeg',
+    fileName: `${title.slice(0, 80)}.mp3`,
+    ptt: false
+  }, { quoted: m })
 
-  fs.unlink(filePath, (err) => {
-    if (err) console.error(`Failed to delete audio file: ${err}`);
-  });
-};
+  fs.unlink(filePath, () => {})
+}
 
-handler.help = ['شغل <اسم الأغنية>'];
-handler.tags = ['downloader'];
-handler.command = /^شغل$/i;
-handler.exp = 0;
-handler.diamond = false;
+handler.help = ['شغل <اسم الأغنية أو رابط>']
+handler.tags = ['downloader']
+handler.command = /^شغل$/i
+handler.exp = 0
 
-export default handler;
+export default handler

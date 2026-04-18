@@ -1,9 +1,12 @@
 import sharp from 'sharp'
-import { deductEnergy, syncEnergy, initEconomy, FEES, MAX_ENERGY } from '../lib/economy.js'
+import { deductEnergy, syncEnergy, initEconomy, isVip, FEES, MAX_ENERGY } from '../lib/economy.js'
+import { typingDelay } from '../lib/presence.js'
 
 let handler = async (m, { conn, usedPrefix }) => {
   const user = global.db.data.users[m.sender]
-  if (user) {
+  const vip = isVip(m.sender)
+
+  if (user && !vip) {
     initEconomy(user)
     syncEnergy(user)
     if (user.energy < FEES.hd) {
@@ -27,8 +30,9 @@ let handler = async (m, { conn, usedPrefix }) => {
   if (!/image\/(jpe?g|png|webp)/i.test(mime)) throw '❌ الصيغة المدعومة: JPG أو PNG فقط.'
 
   conn.hdr[m.sender] = true
-  if (user) deductEnergy(user, FEES.hd)
-  await m.reply(`⚙️ جاري رفع جودة الصورة... ⚡ -${FEES.hd} طاقة\n🔗 ${global.md}`)
+  if (user && !vip) deductEnergy(user, FEES.hd, m.sender)
+  await typingDelay(conn, m.chat, 1000)
+  await m.reply(`⚙️ جاري رفع جودة الصورة...${!vip ? ` ⚡ -${FEES.hd} طاقة` : ''}`)
 
   try {
     const img = await downloadMedia(q)
@@ -44,7 +48,10 @@ let handler = async (m, { conn, usedPrefix }) => {
       .jpeg({ quality: 95, chromaSubsampling: '4:4:4' })
       .toBuffer()
 
-    await conn.sendMessage(m.chat, { image: out, caption: `✅ تم رفع الجودة!\n📐 ${meta.width}×${meta.height} ➜ ${newW}×${newH}\n🔗 ${global.md}` }, { quoted: m })
+    await conn.sendMessage(m.chat, {
+      image: out,
+      caption: `✅ تم رفع الجودة!\n📐 ${meta.width}×${meta.height} ➜ ${newW}×${newH}`
+    }, { quoted: m })
   } catch (er) {
     console.error('[HD ERROR]', er)
     m.reply('❌ فشل تحسين الجودة، تأكد أن الصورة واضحة وحاول مجدداً.')

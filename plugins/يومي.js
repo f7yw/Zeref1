@@ -1,4 +1,4 @@
-import { syncEnergy, MAX_ENERGY, fmt, initEconomy, msToHuman } from '../lib/economy.js'
+import { syncEnergy, MAX_ENERGY, fmt, initEconomy, msToHuman, isVip } from '../lib/economy.js'
 
 const DAILY_COOLDOWN = 24 * 60 * 60 * 1000
 const ENERGY_BONUS   = 50
@@ -12,11 +12,12 @@ let handler = async (m) => {
   if (!user) return m.reply('❌ سجّل أولاً باستخدام أي أمر.')
   initEconomy(user)
 
-  const now = Date.now()
+  const vip  = isVip(m.sender)
+  const now  = Date.now()
   const last = user.lastDaily || 0
   const rem  = DAILY_COOLDOWN - (now - last)
 
-  if (rem > 0) {
+  if (rem > 0 && !vip) {
     return m.reply(
       `╭────『 ⏳ المكافأة اليومية 』────\n│\n│ ⏰ يمكنك المطالبة بعد:\n│ *${msToHuman(rem)}*\n│\n╰──────────────────`.trim()
     )
