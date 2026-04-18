@@ -1822,7 +1822,7 @@
       "emas": 0,
       "emerald": 0,
       "esteh": 0,
-      "exp": 5605,
+      "exp": 5794,
       "expg": 0,
       "exphero": 0,
       "expired": 0,
@@ -2016,7 +2016,7 @@
       "mythic": 0,
       "naga": 0,
       "nagalastclaim": 0,
-      "name": "ℤ𝕖𝕣𝕖𝕗",
+      "name": "ℤ",
       "net": 0,
       "nila": 0,
       "nilabakar": 0,
@@ -2042,8 +2042,8 @@
       "pisang": 0,
       "pointxp": 0,
       "potion": 10,
-      "premium": false,
-      "premiumTime": 0,
+      "premium": true,
+      "premiumTime": 2091845532186,
       "ramuan": 0,
       "ramuancentaurlast": 0,
       "ramuangriffinlast": 0,
@@ -2055,9 +2055,9 @@
       "ramuanphonixlast": 0,
       "ramuanrubahlast": 0,
       "ramuanserigalalast": 0,
-      "registered": false,
+      "registered": true,
       "reglast": 0,
-      "regTime": -1,
+      "regTime": 1776485532185,
       "rendang": 0,
       "rhinoceros": 0,
       "rhinocerosexp": 0,
@@ -2143,8 +2143,8 @@
         "step": null,
         "soal": null
       },
-      "energy": 64,
-      "lastEnergyRegen": 1776485109387,
+      "energy": 66,
+      "lastEnergyRegen": 1776485469387,
       "lastDaily": 0,
       "lastWork": 1776481197104,
       "totalEarned": 119,
@@ -2172,18 +2172,19 @@
       "psepick": 0,
       "robo": 0,
       "roboxp": 0,
-      "lastCommandTime": 1776485335135,
+      "lastCommandTime": 1776485614467,
       "commandCount": 1,
       "tasks": [],
       "notes": [],
       "messages": {
-        "total": 239,
+        "total": 249,
         "groups": {
-          "120363427285079878@g.us": 170,
+          "120363427285079878@g.us": 180,
           "120363422912330057@g.us": 4
         },
-        "last": 1776485335135
-      }
+        "last": 1776485614461
+      },
+      "bannedReason": ""
     },
     "204990769553546@lid": {
       "afk": -1,
@@ -2277,7 +2278,7 @@
       "emas": 0,
       "emerald": 0,
       "esteh": 0,
-      "exp": 1997,
+      "exp": 2004,
       "expg": 0,
       "exphero": 0,
       "expired": 0,
@@ -2630,11 +2631,11 @@
       "lastCommandTime": 1776477132053,
       "commandCount": 1,
       "messages": {
-        "total": 89,
+        "total": 90,
         "groups": {
-          "120363427285079878@g.us": 89
+          "120363427285079878@g.us": 90
         },
-        "last": 1776481275345
+        "last": 1776487143864
       },
       "tasks": [],
       "notes": []
@@ -3280,9 +3281,9 @@
         "to": "en"
       },
       "messageStats": {
-        "28648019066900@lid": 170,
+        "28648019066900@lid": 180,
         "967782114485@s.whatsapp.net": 87,
-        "204990769553546@lid": 89
+        "204990769553546@lid": 90
       }
     },
     "28648019066900@lid": {
@@ -3612,10 +3613,10 @@
       "lastSuccess": 1749101924697
     },
     "hd.js": {
-      "total": 11,
-      "success": 11,
-      "last": 1776484331992,
-      "lastSuccess": 1776484331992
+      "total": 14,
+      "success": 13,
+      "last": 1776485619576,
+      "lastSuccess": 1776485619576
     },
     "كلب.js": {
       "total": 2,
@@ -3798,10 +3799,10 @@
       "lastSuccess": 1749109627022
     },
     "owner-listprem.js": {
-      "total": 5,
-      "success": 5,
-      "last": 1776479485357,
-      "lastSuccess": 1776479485357
+      "total": 6,
+      "success": 6,
+      "last": 1776485558200,
+      "lastSuccess": 1776485558200
     },
     "owner-join.js": {
       "total": 3,
@@ -3894,10 +3895,10 @@
       "lastSuccess": 1749115617736
     },
     "menu.js": {
-      "total": 34,
-      "success": 34,
-      "last": 1776485084572,
-      "lastSuccess": 1776485084572
+      "total": 35,
+      "success": 35,
+      "last": 1776485415559,
+      "lastSuccess": 1776485415559
     },
     "menu-response.js": {
       "total": 41,
@@ -3924,10 +3925,10 @@
       "lastSuccess": 1776477132792
     },
     "البنك.js": {
-      "total": 11,
-      "success": 11,
-      "last": 1776481332536,
-      "lastSuccess": 1776481332536
+      "total": 12,
+      "success": 12,
+      "last": 1776485547668,
+      "lastSuccess": 1776485547668
     },
     "global-translator.js": {
       "total": 5,
@@ -3936,10 +3937,10 @@
       "lastSuccess": 1776465766503
     },
     "profile.js": {
-      "total": 10,
-      "success": 7,
-      "last": 1776485064902,
-      "lastSuccess": 1776485064902
+      "total": 11,
+      "success": 8,
+      "last": 1776485573927,
+      "lastSuccess": 1776485573927
     },
     "جواب.js": {
       "total": 3,
@@ -4014,10 +4015,10 @@
       "lastSuccess": 1776485154244
     },
     "شطرنج.js": {
-      "total": 11,
-      "success": 11,
-      "last": 1776484021919,
-      "lastSuccess": 1776484021919
+      "total": 12,
+      "success": 12,
+      "last": 1776485430343,
+      "lastSuccess": 1776485430343
     },
     "بنترست.js": {
       "total": 3,
@@ -4030,6 +4031,12 @@
       "success": 9,
       "last": 1776485335444,
       "lastSuccess": 1776485335444
+    },
+    "تسجيل.js": {
+      "total": 2,
+      "success": 2,
+      "last": 1776485533480,
+      "lastSuccess": 1776485533480
     }
   },
   "msgs": {},

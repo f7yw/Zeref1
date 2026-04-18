@@ -71,76 +71,87 @@ function legalMove(game, fr, to) {
 }
 
 // ─── Piece SVG (90×90 coordinate space) ───────────────────────────────────
+// ── NEO piece style ─────────────────────────────────────────────────────────
+// Bold, geometric, flat — chess.com "Neo" theme
 function pieceSVG(piece) {
   const w  = isWhite(piece);
   const F  = w ? W_FILL   : B_FILL;
   const S  = w ? W_STROKE : B_STROKE;
-  const SW = w ? W_SW     : B_SW;
+  const SW = (w ? W_SW : B_SW) + 0.8;   // Neo = thicker outlines
   const p  = piece.toLowerCase();
-  const dot = w ? '#795548' : '#C8B89A';
+  const inner = w ? '#C8A060' : '#E8D5A3';  // inner accent for Neo
 
   switch (p) {
-    // ── PAWN ──────────────────────────────────────────────────────────────
+    // ── NEO PAWN ─────────────────────────────────────────────────────────
     case 'p': return `
-      <circle cx="45" cy="24" r="13" fill="${F}" stroke="${S}" stroke-width="${SW}"/>
-      <polygon points="36,37 54,37 59,68 31,68"
-               fill="${F}" stroke="${S}" stroke-width="${SW}" stroke-linejoin="round"/>
-      <rect x="27" y="68" width="36" height="9" rx="4"
-               fill="${F}" stroke="${S}" stroke-width="${SW}"/>`;
+      <circle cx="45" cy="22" r="15" fill="${F}" stroke="${S}" stroke-width="${SW}"/>
+      <rect x="38" y="35" width="14" height="8" rx="1"
+            fill="${F}" stroke="${S}" stroke-width="${SW}"/>
+      <rect x="31" y="43" width="28" height="22" rx="3"
+            fill="${F}" stroke="${S}" stroke-width="${SW}"/>
+      <rect x="24" y="65" width="42" height="10" rx="5"
+            fill="${F}" stroke="${S}" stroke-width="${SW}"/>`;
 
-    // ── ROOK ──────────────────────────────────────────────────────────────
+    // ── NEO ROOK ─────────────────────────────────────────────────────────
     case 'r': return `
-      <rect x="26" y="9"  width="9"  height="14" rx="2" fill="${F}" stroke="${S}" stroke-width="${SW}"/>
-      <rect x="40" y="9"  width="9"  height="14" rx="2" fill="${F}" stroke="${S}" stroke-width="${SW}"/>
-      <rect x="54" y="9"  width="9"  height="14" rx="2" fill="${F}" stroke="${S}" stroke-width="${SW}"/>
-      <rect x="24" y="20" width="41" height="48" rx="2" fill="${F}" stroke="${S}" stroke-width="${SW}"/>
-      <rect x="21" y="68" width="47" height="9"  rx="4" fill="${F}" stroke="${S}" stroke-width="${SW}"/>
-      <line x1="24" y1="34" x2="65" y2="34" stroke="${S}" stroke-width="1.2" opacity="0.4"/>`;
+      <rect x="24" y="8"  width="11" height="16" rx="2" fill="${F}" stroke="${S}" stroke-width="${SW}"/>
+      <rect x="39" y="8"  width="12" height="16" rx="2" fill="${F}" stroke="${S}" stroke-width="${SW}"/>
+      <rect x="55" y="8"  width="11" height="16" rx="2" fill="${F}" stroke="${S}" stroke-width="${SW}"/>
+      <rect x="20" y="21" width="50" height="7"  rx="1" fill="${F}" stroke="${S}" stroke-width="${SW}"/>
+      <rect x="24" y="28" width="42" height="37" rx="2" fill="${F}" stroke="${S}" stroke-width="${SW}"/>
+      <rect x="19" y="65" width="52" height="10" rx="5" fill="${F}" stroke="${S}" stroke-width="${SW}"/>`;
 
-    // ── KNIGHT ────────────────────────────────────────────────────────────
+    // ── NEO KNIGHT ───────────────────────────────────────────────────────
     case 'n': return `
-      <path d="M36,77 L30,58 C26,50 24,40 28,32 C32,22 40,14 48,10
-               C52,8 56,8 60,10 C64,14 64,20 60,26 C58,28 54,30 52,34
-               L60,46 C64,52 64,62 60,70 L64,77 Z"
+      <path d="M32,75 L28,55 C24,46 26,36 32,28 C36,22 44,12 54,9
+               C60,7 66,9 68,16 C70,24 64,30 60,34
+               L66,45 C70,54 68,65 64,72 L68,75 Z"
             fill="${F}" stroke="${S}" stroke-width="${SW}" stroke-linejoin="round"/>
-      <circle cx="47" cy="18" r="3.5" fill="${dot}"/>
-      <rect x="24" y="68" width="41" height="9" rx="4"
+      <ellipse cx="50" cy="17" rx="5" ry="4"
+               fill="${inner}" stroke="none"/>
+      <line x1="34" y1="42" x2="58" y2="42"
+            stroke="${S}" stroke-width="1.8" opacity="0.5"/>
+      <rect x="22" y="66" width="46" height="10" rx="5"
             fill="${F}" stroke="${S}" stroke-width="${SW}"/>`;
 
-    // ── BISHOP ────────────────────────────────────────────────────────────
+    // ── NEO BISHOP ───────────────────────────────────────────────────────
     case 'b': return `
-      <circle cx="45" cy="10" r="5.5" fill="${F}" stroke="${S}" stroke-width="${SW}"/>
-      <line x1="45" y1="15" x2="45" y2="22" stroke="${S}" stroke-width="${SW}"/>
-      <ellipse cx="45" cy="36" rx="13" ry="17"
+      <circle cx="45" cy="9" r="7" fill="${F}" stroke="${S}" stroke-width="${SW}"/>
+      <rect x="42" y="15" width="6" height="8" rx="1"
+            fill="${F}" stroke="${S}" stroke-width="${SW}"/>
+      <ellipse cx="45" cy="34" rx="14" ry="16"
                fill="${F}" stroke="${S}" stroke-width="${SW}"/>
-      <polygon points="35,51 55,51 60,68 30,68"
+      <rect x="33" y="48" width="24" height="7" rx="3"
+            fill="${F}" stroke="${S}" stroke-width="${SW}"/>
+      <polygon points="30,55 60,55 65,65 25,65"
                fill="${F}" stroke="${S}" stroke-width="${SW}" stroke-linejoin="round"/>
-      <rect x="27" y="68" width="36" height="9" rx="4"
+      <rect x="22" y="65" width="46" height="10" rx="5"
             fill="${F}" stroke="${S}" stroke-width="${SW}"/>`;
 
-    // ── QUEEN ─────────────────────────────────────────────────────────────
+    // ── NEO QUEEN ────────────────────────────────────────────────────────
     case 'q': return `
-      <circle cx="45" cy="11" r="7"  fill="${F}" stroke="${S}" stroke-width="${SW}"/>
-      <circle cx="18" cy="26" r="5.5" fill="${F}" stroke="${S}" stroke-width="${SW}"/>
-      <circle cx="72" cy="26" r="5.5" fill="${F}" stroke="${S}" stroke-width="${SW}"/>
-      <polygon points="12,52 18,26 31,42 45,10 59,42 72,26 78,52"
+      <circle cx="45" cy="9"  r="8"   fill="${F}" stroke="${S}" stroke-width="${SW}"/>
+      <circle cx="16" cy="24" r="6.5" fill="${F}" stroke="${S}" stroke-width="${SW}"/>
+      <circle cx="74" cy="24" r="6.5" fill="${F}" stroke="${S}" stroke-width="${SW}"/>
+      <circle cx="45" cy="24" r="5"   fill="${F}" stroke="${S}" stroke-width="${SW - 0.5}"/>
+      <polygon points="10,52 16,24 30,40 45,8 60,40 74,24 80,52"
                fill="${F}" stroke="${S}" stroke-width="${SW}" stroke-linejoin="round"/>
-      <ellipse cx="45" cy="64" rx="30" ry="14"
-               fill="${F}" stroke="${S}" stroke-width="${SW}"/>
-      <rect x="19" y="72" width="52" height="7" rx="3"
+      <rect x="16" y="52" width="58" height="14" rx="4"
+            fill="${F}" stroke="${S}" stroke-width="${SW}"/>
+      <rect x="18" y="66" width="54" height="9"  rx="4"
             fill="${F}" stroke="${S}" stroke-width="${SW}"/>`;
 
-    // ── KING ──────────────────────────────────────────────────────────────
+    // ── NEO KING ─────────────────────────────────────────────────────────
     case 'k': return `
-      <rect x="41" y="5"  width="8" height="23" rx="3"
+      <rect x="41" y="4"  width="8"  height="26" rx="4"
             fill="${F}" stroke="${S}" stroke-width="${SW}"/>
-      <rect x="33" y="11" width="24" height="8" rx="3"
+      <rect x="30" y="11" width="30" height="10" rx="4"
             fill="${F}" stroke="${S}" stroke-width="${SW}"/>
-      <polygon points="14,52 22,28 36,44 45,14 54,44 68,28 76,52"
+      <polygon points="12,52 22,26 36,42 45,10 54,42 68,26 78,52"
                fill="${F}" stroke="${S}" stroke-width="${SW}" stroke-linejoin="round"/>
-      <ellipse cx="45" cy="64" rx="30" ry="14"
-               fill="${F}" stroke="${S}" stroke-width="${SW}"/>
-      <rect x="19" y="72" width="52" height="7" rx="3"
+      <rect x="16" y="52" width="58" height="14" rx="4"
+            fill="${F}" stroke="${S}" stroke-width="${SW}"/>
+      <rect x="18" y="66" width="54" height="9"  rx="4"
             fill="${F}" stroke="${S}" stroke-width="${SW}"/>`;
   }
   return '';

@@ -1,5 +1,5 @@
 import { xpRange } from '../lib/levelling.js'
-import { syncEnergy, fmtEnergy, fmt, getRole, initEconomy, msToHuman, MAX_ENERGY, isVip } from '../lib/economy.js'
+import { syncEnergy, fmtEnergy, fmt, getRole, initEconomy, msToHuman, MAX_ENERGY, isVip, logTransaction } from '../lib/economy.js'
 import { initUser } from '../lib/userInit.js'
 
 // ─── DAILY WORK COOLDOWN DISPLAY ────────────────────────────────────────────
@@ -29,6 +29,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (user.money < amount) return m.reply(`❌ ليس لديك ما يكفي!\n💰 محفظتك: ${fmt(user.money)}`)
     user.money -= amount
     user.bank += amount
+    logTransaction(user, 'spend', amount, `🏦 إيداع في البنك`)
     return m.reply(`╭────『 🏦 إيداع ناجح 』────\n│\n│ ✅ تم إيداع ${fmt(amount)}\n│ 💰 المحفظة: ${fmt(user.money)}\n│ 🏦 البنك:   ${fmt(user.bank)}\n│\n╰──────────────────`.trim())
   }
 
@@ -39,6 +40,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (user.bank < amount) return m.reply(`❌ رصيد بنكك غير كافٍ!\n🏦 البنك: ${fmt(user.bank)}`)
     user.bank -= amount
     user.money += amount
+    logTransaction(user, 'earn', amount, `🏦 سحب من البنك`)
     return m.reply(`╭────『 🏦 سحب ناجح 』────\n│\n│ ✅ تم سحب ${fmt(amount)}\n│ 💰 المحفظة: ${fmt(user.money)}\n│ 🏦 البنك:   ${fmt(user.bank)}\n│\n╰──────────────────`.trim())
   }
 
@@ -58,6 +60,8 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     user.money -= amount
     targetUser.money += net
     user.totalSpent = (user.totalSpent || 0) + amount
+    logTransaction(user, 'spend', amount, `💸 تحويل إلى @${target.split('@')[0]}`)
+    logTransaction(targetUser, 'earn', net, `💸 استقبال تحويل من @${m.sender.split('@')[0]}`)
     return m.reply(
       `╭────『 💸 تحويل ناجح 』────\n` +
       `│\n│ ✅ أرسلت ${fmt(amount)} إلى @${target.split('@')[0]}\n` +
@@ -79,17 +83,18 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   const workWait  = timeLeft(user.lastWork || user.lastwork || 0, 30 * 60 * 1000)
   const dailyWait = timeLeft(user.lastDaily || 0, 24 * 60 * 60 * 1000)
 
+  const isVipUser = isVip(m.sender)
   await m.reply(
 `╭────────『 🏦 بنك SHADOW 』────────
 │
 │ 👤 *الاسم:*    ${name}
-│ 👑 *الرتبة:*   ${role}
+│ 👑 *الرتبة:*   ${role}${isVipUser ? ' 👑 VIP' : ''}
 │ 🏆 *المستوى:*  ${level}  (XP: ${exp} / ${max})
 │
 │ ─────── 💰 الأموال ───────
-│ 💰 *المحفظة:*  ${fmt(user.money)}
-│ 🏦 *البنك:*    ${fmt(user.bank)}
-│ 💎 *الماس:*    ${user.diamond || 0} 💎
+│ 💰 *المحفظة:*  ${fmt(user.money, user)}
+│ 🏦 *البنك:*    ${fmt(user.bank, user)}
+│ 💎 *الماس:*    ${isVipUser ? '∞' : user.diamond || 0} 💎
 │
 │ ─────── ⚡ الطاقة ───────
 │ ${energyBar}

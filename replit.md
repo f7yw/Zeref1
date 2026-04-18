@@ -25,8 +25,30 @@ Arabic WhatsApp bot built with Node.js and Baileys. The bot is focused on useful
 - `plugins/study-games.js` contains lightweight educational games.
 - `plugins/شات.js` preserves automatic chat responses.
 
+## Economy System
+- `lib/economy.js` — central: `isVip()`, `logTransaction()`, `syncVipResources()`, `initEconomy()`, `fmt()` (∞ for VIP), `fmtEnergy()`, `syncEnergy()`, `deductEnergy()`, `getRole()`
+- `lib/userInit.js` — `initUser(user, name, jid)` with VIP sync on init
+- Every earn/spend calls `logTransaction(user, 'earn'|'spend', amount, reason)` — 30 per user stored in DB
+- VIP users: `user.infiniteResources = true`, money = 2B, bank = 2B, diamond = 999, energy always 100 — all in DB
+- Premium stored in DB: `user.premium = true`, `user.premiumTime = Date.now() + 10years` — survives restarts
+- `plugins/owner-addprem.js` sets DB fields + global.prems
+
+## Plugins (key)
+- `plugins/يومي.js` — daily reward, requires registration, logs transaction
+- `plugins/عمل.js` — work reward, requires registration, logs transaction
+- `plugins/البنك.js` — bank view/deposit/withdraw/transfer, logs all, ∞ display for VIP
+- `plugins/معاملاتي.js` — NEW: `.معاملاتي` shows last 20 transactions with earn/spend summary
+- `plugins/تسجيل.js` — registration with welcome bonus
+- `plugins/شطرنج.js` — chess with chess.com Neo-style pieces (bold, geometric, thicker outlines)
+- `plugins/شات.js` — 154 auto-response patterns, 500+ response strings, full Arabic coverage
+
+## Handler Features
+- Level-up notification: automatic message + reward (200×level coins, +30 energy, +1 diamond every 5 levels) on every message
+- Registration gate: `handler.register = true` on يومي + عمل blocks unregistered users with proper Arabic prompt
+- `global.dfail.unreg` updated to professional Arabic registration prompt
+
 ## Current Focus
-The bot is being trimmed toward a useful student/community assistant. Unrelated entertainment/media commands are excluded from plugin loading in `main.js`, while games and auto-response remain active.
+The bot is a professional Arabic WhatsApp assistant with economy, games, auto-responses, admin tools, and media features.
 
 ## Menu Sections
 1. 🎓 التعلم والدراسة — plans, summaries, flashcards, quizzes, GPA, study rules, Pomodoro, sources, daily schedule

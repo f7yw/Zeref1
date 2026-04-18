@@ -1,4 +1,4 @@
-import { deductEnergy, syncEnergy, fmt, initEconomy, msToHuman, MAX_ENERGY, isVip } from '../lib/economy.js'
+import { deductEnergy, syncEnergy, fmt, initEconomy, msToHuman, MAX_ENERGY, isVip, logTransaction } from '../lib/economy.js'
 
 const WORK_COOLDOWN = 30 * 60 * 1000  // 30 minutes
 const ENERGY_COST   = 10
@@ -59,6 +59,7 @@ const handler = async (m, { usedPrefix }) => {
   user.lastWork  = now
   user.lastwork  = now
   user.totalEarned = (user.totalEarned || 0) + coins
+  logTransaction(user, 'earn', coins, `${job.icon} ${job.text.slice(0, 28)}`)
 
   await m.reply(
 `╭────『 ${job.icon} نتيجة العمل 』────
@@ -78,8 +79,9 @@ const handler = async (m, { usedPrefix }) => {
   )
 }
 
-handler.help    = ['عمل', 'work']
-handler.tags    = ['economy']
-handler.command = /^(عمل|work|اعمل)$/i
+handler.help     = ['عمل', 'work']
+handler.tags     = ['economy']
+handler.command  = /^(عمل|work|اعمل)$/i
+handler.register = true
 handler.fail    = null
 export default handler

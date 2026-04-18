@@ -1,4 +1,4 @@
-import { syncEnergy, MAX_ENERGY, fmt, initEconomy, msToHuman, isVip } from '../lib/economy.js'
+import { syncEnergy, MAX_ENERGY, fmt, initEconomy, msToHuman, isVip, logTransaction } from '../lib/economy.js'
 
 const DAILY_COOLDOWN = 24 * 60 * 60 * 1000
 const ENERGY_BONUS   = 50
@@ -34,6 +34,7 @@ let handler = async (m) => {
   user.lastDaily = now
   user.totalEarned = (user.totalEarned || 0) + coins
   if (gotDia) user.diamond = (user.diamond || 0) + 1
+  logTransaction(user, 'earn', coins, `🎁 مكافأة يومية`)
 
   const lines = [
     `╭────『 🎁 المكافأة اليومية 』────`,
@@ -54,7 +55,8 @@ let handler = async (m) => {
   await m.reply(lines.join('\n'))
 }
 
-handler.help    = ['يومي', 'daily']
-handler.tags    = ['economy']
-handler.command = /^(يومي|daily|مكافأة|المكافأة)$/i
+handler.help     = ['يومي', 'daily']
+handler.tags     = ['economy']
+handler.command  = /^(يومي|daily|مكافأة|المكافأة)$/i
+handler.register = true
 export default handler

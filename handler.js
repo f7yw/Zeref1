@@ -6,6 +6,8 @@ import path, { join } from 'path'
 import { unwatchFile, watchFile } from 'fs'
 import fs from 'fs'
 import chalk from 'chalk'
+import { findLevel } from './lib/levelling.js'
+import { getRole, logTransaction, MAX_ENERGY } from './lib/economy.js'
 
 /**
  * @type {import('@whiskeysockets/baileys')}
@@ -1388,8 +1390,37 @@ if (botSpam.antispam && m.text && user && user.lastCommandTime && (Date.now() - 
         let user, stats = global.db.data.stats
         if (m) {
             if (m.sender && (user = global.db.data.users[m.sender])) {
+                const _oldLvl = findLevel(user.exp || 0, global.multiplier)
                 user.exp += m.exp
                 user.limit -= m.limit * 1
+                // ── Level-up notification ─────────────────────────────────
+                const _newLvl = findLevel(user.exp || 0, global.multiplier)
+                if (_newLvl > _oldLvl && user.autolevelup !== false) {
+                    user.level = _newLvl
+                    const _bonusMoney = _newLvl * 200
+                    const _bonusDia   = _newLvl % 5 === 0 ? 1 : 0
+                    user.money  = (user.money  || 0) + _bonusMoney
+                    user.energy = Math.min(MAX_ENERGY, (user.energy || 0) + 30)
+                    if (_bonusDia) user.diamond = (user.diamond || 0) + 1
+                    logTransaction(user, 'earn', _bonusMoney, `🆙 مكافأة المستوى ${_newLvl}`)
+                    const _role   = getRole(_newLvl)
+                    const _lvlMsg =
+`╭──────『 🆙 ارتفعت مستوى! 』──────
+│
+│ 🎊 مبروك @${m.sender.split('@')[0]}!
+│
+│ 🏆 *المستوى الجديد:* ${_newLvl}
+│ ${_role}
+│
+│ ─── 🎁 مكافآت الارتقاء ───
+│ 💰 +${_bonusMoney} 🪙
+│ ⚡ +30 طاقة${_bonusDia ? `\n│ 💎 +1 ماسة نادرة! ✨` : ''}
+│
+│ استمر للمستوى التالي 🔥
+│
+╰──────────────────────`
+                    this.sendMessage(m.chat, { text: _lvlMsg, mentions: [m.sender] }, { quoted: m }).catch(() => {})
+                }
             }
 
             let stat
@@ -1601,7 +1632,7 @@ global.dfail = (type, m, conn) => {
         private: '*『 الميزه دي للبرايفت - الخاص بس !』*',
         admin: '*『 الميزه دي للادمنز بس! 』*',
         botAdmin: '*『 ارفع شادو ادمن الاول !』*',
-        unreg: '*[ لحظة !! انت مش مسجل ]*\n\n*『 سجل الامر عشان تفعله 』*\n*➣ #التفعيل*',
+        unreg: `╭────『 🔐 تسجيل مطلوب 』────\n│\n│ ⚠️ هذا الأمر للمسجلين فقط!\n│\n│ 📌 اكتب: *.تسجيل*\n│ وستحصل على مكافأة ترحيبية 🎁\n│\n╰──────────────────`,
         restrict: '*『 الميزه دي المالك لغيها !』*'
     }[type]
     if (msg) return m.reply(msg)
