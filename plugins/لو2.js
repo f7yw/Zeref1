@@ -3,7 +3,7 @@ let handler = m => m;
  handler.all = async function (m) { 
    let chat = global.db.data.chats[m.chat]; 
    let responses; 
-   if (/\لو$/.test(m.text)) { 
+   if (/\لو.$/.test(m.text)) { 
      responses = [ 
  "تتوقع حد يسأل عليك لو قفلت فترة ؟", 
  "اكتر كذبة مشهوره عندك", 

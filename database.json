@@ -1822,7 +1822,7 @@
       "emas": 0,
       "emerald": 0,
       "esteh": 0,
-      "exp": 939,
+      "exp": 944,
       "expg": 0,
       "exphero": 0,
       "expired": 0,
@@ -2183,12 +2183,12 @@
       ],
       "notes": [],
       "messages": {
-        "total": 464,
+        "total": 465,
         "groups": {
           "120363427285079878@g.us": 325,
           "120363422912330057@g.us": 4
         },
-        "last": 1776505623003
+        "last": 1776508416283
       },
       "bannedReason": "",
       "transactions": [
@@ -2763,7 +2763,7 @@
       "crystal": 0,
       "cumi": 0,
       "cupon": 0,
-      "diamond": 48,
+      "diamond": 49,
       "dog": 0,
       "dogexp": 0,
       "doglastfeed": 0,
@@ -2774,7 +2774,7 @@
       "emas": 0,
       "emerald": 0,
       "esteh": 0,
-      "exp": null,
+      "exp": 6,
       "expg": 0,
       "exphero": 0,
       "expired": 0,
@@ -2943,7 +2943,7 @@
       "lelebakar": 0,
       "leleg": 0,
       "level": 0,
-      "limit": null,
+      "limit": 20,
       "limitjoinfree": 1,
       "lion": 0,
       "lionexp": 0,
@@ -3096,12 +3096,12 @@
         "soal": null
       },
       "messages": {
-        "total": 155,
+        "total": 156,
         "groups": {
           "120363427285079878@g.us": 110,
           "120363422912330057@g.us": 4
         },
-        "last": 1776504713986
+        "last": 1776508417016
       },
       "energy": 100,
       "lastEnergyRegen": 1776474223945,
@@ -3135,6 +3135,12 @@
       "lastCommandTime": 1776494137851,
       "commandCount": 1,
       "transactions": [
+        {
+          "type": "earn",
+          "amount": 0,
+          "reason": "🆙 مكافأة المستوى 0",
+          "time": 1776508417021
+        },
         {
           "type": "earn",
           "amount": 0,
@@ -3308,12 +3314,6 @@
           "amount": 0,
           "reason": "🆙 مكافأة المستوى 0",
           "time": 1776490673011
-        },
-        {
-          "type": "earn",
-          "amount": 0,
-          "reason": "🆙 مكافأة المستوى 0",
-          "time": 1776490396018
         }
       ]
     },
