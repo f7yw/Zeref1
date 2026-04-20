@@ -92,7 +92,7 @@
       "emas": 0,
       "emerald": 0,
       "esteh": 0,
-      "exp": 22619,
+      "exp": 22675,
       "expg": 0,
       "exphero": 0,
       "expired": 0,
@@ -414,7 +414,7 @@
         "soal": null
       },
       "energy": 100,
-      "lastEnergyRegen": 1776687402358,
+      "lastEnergyRegen": 1776687520009,
       "lastDaily": 0,
       "lastWork": 1776481197104,
       "totalEarned": 438,
@@ -442,7 +442,7 @@
       "psepick": 0,
       "robo": 0,
       "roboxp": 0,
-      "lastCommandTime": 1776687402358,
+      "lastCommandTime": 1776687532919,
       "commandCount": 1,
       "tasks": [
         {
@@ -453,13 +453,13 @@
       ],
       "notes": [],
       "messages": {
-        "total": 1112,
+        "total": 1116,
         "groups": {
           "120363427285079878@g.us": 837,
           "120363422912330057@g.us": 53,
           "120363360836384520@g.us": 41
         },
-        "last": 1776687402347
+        "last": 1776687532918
       },
       "bannedReason": "",
       "transactions": [
@@ -2253,10 +2253,10 @@
       "lastSuccess": 1776579456005
     },
     "menu.js": {
-      "total": 11,
-      "success": 11,
-      "last": 1776687406112,
-      "lastSuccess": 1776687406112
+      "total": 13,
+      "success": 13,
+      "last": 1776687522739,
+      "lastSuccess": 1776687522739
     },
     "اكس.js": {
       "total": 36,
@@ -2365,6 +2365,18 @@
       "success": 5,
       "last": 1776686112852,
       "lastSuccess": 1776686112852
+    },
+    "لفل.js": {
+      "total": 2,
+      "success": 0,
+      "last": 1776687503412,
+      "lastSuccess": 0
+    },
+    "البنك.js": {
+      "total": 2,
+      "success": 2,
+      "last": 1776687532927,
+      "lastSuccess": 1776687532927
     }
   },
   "msgs": {},
