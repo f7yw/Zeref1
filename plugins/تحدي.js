@@ -1,4 +1,4 @@
-import { fmt, initEconomy } from '../lib/economy.js'
+import { fmt, initEconomy, logTransaction } from '../lib/economy.js'
 
 const TIMEOUT   = 30000    // 30 seconds
 const LEVELS = [
@@ -99,6 +99,7 @@ handler.all = async function (m) {
     user.money += entry.reward
     user.exp   += entry.xpBonus
     user.totalEarned = (user.totalEarned || 0) + entry.reward
+    logTransaction(user, 'earn', entry.reward, `🧮 فوز تحدي الرياضيات`)
   }
 
   await this.reply(

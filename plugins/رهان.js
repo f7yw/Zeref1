@@ -31,23 +31,26 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   const roll    = () => emojis[Math.floor(Math.random() * emojis.length)]
   const [a, b, c] = [roll(), roll(), roll()]
 
-  let result, winMsg
+  // Always deduct the bet first
+  user.money -= bet
+  user.totalSpent = (user.totalSpent || 0) + bet
+  logTransaction(user, 'spend', bet, '🎰 رهان المقامرة')
+
+  let winMsg
   if (a === b && b === c) {
     const prize = bet * 3
     user.money += prize
     user.totalEarned = (user.totalEarned || 0) + prize
-    result  = prize
-    winMsg  = `🏆 *فوز كبير! جاك باكبوت!*\n│ 💰 ربحت: ${fmt(prize)} (×3)`
+    logTransaction(user, 'earn', prize, '🎰 فوز جاك باكبوت ×3')
+    winMsg = `🏆 *فوز كبير! جاك باكبوت!*\n│ 💰 ربحت: ${fmt(prize)} (×3)`
   } else if (a === b || b === c || a === c) {
     const prize = Math.floor(bet * 1.1)
     user.money += prize
-    result  = prize
-    winMsg  = `🎁 *تطابق جزئي!*\n│ 💰 استردّيت: ${fmt(prize)}`
+    user.totalEarned = (user.totalEarned || 0) + prize
+    logTransaction(user, 'earn', prize, '🎰 تطابق جزئي +10٪')
+    winMsg = `🎁 *تطابق جزئي!*\n│ 💰 استردّيت: ${fmt(prize)} (+10٪)`
   } else {
-    user.money -= bet
-    user.totalSpent = (user.totalSpent || 0) + bet
-    result  = -bet
-    winMsg  = `❌ *خسرت الرهان!*\n│ 💸 خسرت: ${fmt(bet)}`
+    winMsg = `❌ *خسرت الرهان!*\n│ 💸 خسرت: ${fmt(bet)}`
   }
 
   user.lastslot = now

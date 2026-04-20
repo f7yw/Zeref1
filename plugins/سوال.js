@@ -1,5 +1,5 @@
 import fs from 'fs'
-import { fmt, initEconomy } from '../lib/economy.js'
+import { fmt, initEconomy, logTransaction } from '../lib/economy.js'
 
 const TIMEOUT   = 60000    // 60 seconds
 const COIN_MIN  = 150
@@ -105,6 +105,7 @@ handler.all = async function (m) {
     user.money += entry.reward
     user.exp   += XP_BONUS
     user.totalEarned = (user.totalEarned || 0) + entry.reward
+    logTransaction(user, 'earn', entry.reward, `🧠 إجابة صحيحة في السؤال`)
     const gotDia = Math.random() < DIA_CHANCE
     if (gotDia) user.diamond = (user.diamond || 0) + 1
 

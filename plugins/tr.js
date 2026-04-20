@@ -14,6 +14,17 @@ const LANG_MAP = {
 const VALID_LANGS = new Set(Object.keys(LANG_MAP))
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
+  // Redirect if user mistakenly used this command for auto-translate toggle
+  const firstArg = (args[0] || '').trim().toLowerCase()
+  if (firstArg === 'تشغيل' || firstArg === 'ايقاف' || firstArg === 'إيقاف' || firstArg === 'on' || firstArg === 'off') {
+    return m.reply(
+      `💡 للمترجم التلقائي استخدم:\n` +
+      `• *${usedPrefix}مترجم تشغيل ar* ← تفعيل (ترجمة لعربي)\n` +
+      `• *${usedPrefix}مترجم ايقاف* ← إيقاف\n\n` +
+      `📌 الأمر الحالي *${usedPrefix}${command}* للترجمة الفورية فقط.`
+    )
+  }
+
   const usageMsg =
 `╭────『 🌍 الترجمة 』────
 │

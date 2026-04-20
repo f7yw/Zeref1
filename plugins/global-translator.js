@@ -63,6 +63,9 @@ handler.before = async (m, { conn }) => {
   if (!m.text || !m.text.trim()) return false
   if (!global.db.data.chats) return false
 
+  // Skip bot commands — don't translate prefixed messages
+  if (global.prefix && global.prefix.test(m.text)) return false
+
   const chat = global.db.data.chats[m.chat] || {}
   if (!chat.globalTranslate?.enabled) return false
 

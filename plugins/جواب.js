@@ -1,4 +1,4 @@
-import { fmt, initEconomy } from '../lib/economy.js'
+import { fmt, initEconomy, logTransaction } from '../lib/economy.js'
 
 const XP_BONUS = 50
 const DIA_CHANCE = 0.05
@@ -30,6 +30,7 @@ async function answerQuiz(conn, m, entry, answerText) {
     user.money += entry.reward
     user.exp += XP_BONUS
     user.totalEarned = (user.totalEarned || 0) + entry.reward
+    logTransaction(user, 'earn', entry.reward, `🧠 إجابة صحيحة في السؤال`)
     const gotDia = Math.random() < DIA_CHANCE
     if (gotDia) user.diamond = (user.diamond || 0) + 1
     return conn.reply(
@@ -66,6 +67,7 @@ async function answerMath(conn, m, entry, answerText) {
     user.money += entry.reward
     user.exp += entry.xpBonus
     user.totalEarned = (user.totalEarned || 0) + entry.reward
+    logTransaction(user, 'earn', entry.reward, `🧮 فوز تحدي الرياضيات`)
   }
 
   return conn.reply(
