@@ -12,7 +12,6 @@ import lodash from 'lodash';
 import chalk from 'chalk';
 import { tmpdir } from 'os';
 import { format } from 'util';
-
 import pino from 'pino';
 import { Boom } from '@hapi/boom';
 import { makeWASocket, protoType, serialize } from './lib/simple.js';
@@ -190,30 +189,86 @@ conn.logger.info(`Ƈᴀʀɢᴀɴᴅᴏ．．．\n`);
 
 // ====== CONNECTION HANDLER ======
 async function connectionUpdate(update) {
-  const { connection, lastDisconnect, qr } = update;
-  stopped = connection;
+  const { connection, lastDisconnect, qr } = update
+  stopped = connection
 
   if (qr && !conn.authState.creds.registered) {
-    console.log(chalk.yellow('📲 QR code received — use the pairing code above instead.'));
+    console.log(chalk.yellow('📲 QR code received — use the pairing code above instead.'))
   }
 
-  const errorData = lastDisconnect?.error;
-  let reason = new Boom(errorData)?.output?.statusCode;
+  const errorData = lastDisconnect?.error
+  const reason = new Boom(errorData)?.output?.statusCode
 
-  console.log(chalk.gray(`[CONNECTION] Status update → connection="${connection || 'none'}", reason code=${reason || 'none'}`));
+  console.log(
+    chalk.gray(
+      `[CONNECTION] Status update → connection="${connection || 'none'}", reason code=${reason || 'none'}`
+    )
+  )
+
+  const restartBot = (delay = 5000) => {
+    if (global.__reconnectTimer) return
+
+    console.log(chalk.yellow(`  ➤ Restarting in ${Math.round(delay / 1000)}s...`))
+
+    global.__reconnectTimer = setTimeout(async () => {
+      global.__reconnectTimer = null
+
+      try {
+        if (typeof connectToWhatsApp === 'function') {
+          await connectToWhatsApp()
+          return
+        }
+
+        if (typeof global.connectToWhatsApp === 'function') {
+          await global.connectToWhatsApp()
+          return
+        }
+
+        if (typeof global.startBot === 'function') {
+          await global.startBot()
+          return
+        }
+
+        console.log(chalk.red('  ➤ No reconnect function found.'))
+      } catch (e) {
+        console.error(chalk.red('[RECONNECT ERROR]'), e)
+      }
+    }, delay)
+  }
+
+  const clearSessionAndRestart = async (msg, delay = 3000) => {
+    console.log(chalk.red(msg))
+
+    try {
+      await global.saveDatabase?.().catch(() => {})
+    } catch {}
+
+    try {
+      const authPath = `./${global.authFile}`
+      if (existsSync(authPath)) {
+        rmSync(authPath, { recursive: true, force: true })
+        console.log(chalk.yellow('  ➤ Session deleted successfully.'))
+      }
+    } catch (err) {
+      console.log(chalk.red('  ➤ Could not delete session folder:'), err.message)
+    }
+
+    restartBot(delay)
+  }
 
   if (connection === 'open') {
-    console.log(chalk.green.bold('\n✅ Connected to WhatsApp successfully!'));
-    console.log(chalk.green(`  ➤ Bot is active and listening for messages.`));
+    console.log(chalk.green.bold('\n✅ Connected to WhatsApp successfully!'))
+    console.log(chalk.green(`  ➤ Bot is active and listening for messages.`))
 
-    // ── Send startup log to developer ──
     setTimeout(async () => {
       try {
         const { readdirSync: _rdr } = await import('fs')
         const pluginFiles = _rdr('./plugins').filter(f => f.endsWith('.js'))
         const totalUsers = Object.keys(global.db?.data?.users || {}).length
         const totalChats = Object.keys(global.db?.data?.chats || {}).length
-        const premUsers = Object.values(global.db?.data?.users || {}).filter(u => u?.premium === true || (u?.premiumTime || 0) > Date.now()).length
+        const premUsers = Object.values(global.db?.data?.users || {}).filter(
+          u => u?.premium === true || (u?.premiumTime || 0) > Date.now()
+        ).length
         const memMB = Math.round(process.memoryUsage().rss / 1024 / 1024)
         const uptime = Math.round(process.uptime())
         const pluginList = pluginFiles.map((f, i) => `${i + 1}. ${f}`).join('\n')
@@ -238,6 +293,7 @@ ${pluginList}
 ╰──────────────────────`
 
         const ownerNumbers = (global.owner || []).filter(([, , isDev]) => isDev).map(([n]) => n)
+
         for (const num of ownerNumbers) {
           const jid = `${String(num).replace(/\D/g, '')}@s.whatsapp.net`
           try {
@@ -251,78 +307,58 @@ ${pluginList}
         console.error('[STARTUP LOG ERROR]', e.message)
       }
     }, 5000)
+
+    return
   }
 
-  if (connection === 'close') {
-    await global.saveDatabase().catch(console.error);
-    console.log(chalk.red.bold('\n⚠️  Connection closed. Diagnosing reason...'));
+  if (connection !== 'close') return
 
-    if (errorData) {
-      console.log(chalk.red(`  ➤ Raw error  : ${errorData?.message || String(errorData)}`));
-      console.log(chalk.red(`  ➤ Status code: ${reason || 'unknown'}`));
-    }
+  await global.saveDatabase().catch(console.error)
+  console.log(chalk.red.bold('\n⚠️  Connection closed. Diagnosing reason...'))
 
-    switch (reason) {
-      case DisconnectReason.badSession:
-        console.log(chalk.red('  ➤ Reason: BAD SESSION — the saved session is corrupted or rejected.'));
-        console.log(chalk.yellow('  ➤ Action: Clearing session files and restarting...'));
-        try {
-          if (existsSync(`./${global.authFile}`)) {
-            rmSync(`./${global.authFile}`, { recursive: true, force: true });
-            console.log(chalk.yellow('  ➤ Session folder deleted. Restart the bot to re-pair.'));
-          }
-        } catch (err) {
-          console.log(chalk.red('  ➤ Could not delete session folder:'), err.message);
-        }
-        process.exit(1);
+  if (errorData) {
+    console.log(chalk.red(`  ➤ Raw error  : ${errorData?.message || String(errorData)}`))
+    console.log(chalk.red(`  ➤ Status code: ${reason || 'unknown'}`))
+  }
 
-      case DisconnectReason.connectionClosed:
-        console.log(chalk.yellow('  ➤ Reason: CONNECTION CLOSED by server. Restarting...'));
-        process.exit();
-        break;
+  switch (reason) {
+    case DisconnectReason.badSession:
+      await clearSessionAndRestart(
+        '  ➤ Reason: BAD SESSION — the saved session is corrupted or rejected.\n' +
+          '  ➤ Action: Clearing session files and restarting...'
+      )
+      return
 
-      case DisconnectReason.connectionLost:
-        console.log(chalk.yellow('  ➤ Reason: CONNECTION LOST (network issue). Restarting...'));
-        process.exit();
-        break;
+    case DisconnectReason.loggedOut:
+      await clearSessionAndRestart(
+        '  ➤ Reason: LOGGED OUT — the device was removed from WhatsApp Linked Devices.\n' +
+          '  ➤ Action: Clearing session and restarting...'
+      )
+      return
 
-      case DisconnectReason.timedOut:
-        console.log(chalk.yellow('  ➤ Reason: TIMED OUT waiting for server response. Restarting...'));
-        process.exit();
-        break;
+    case DisconnectReason.multideviceMismatch:
+      await clearSessionAndRestart(
+        '  ➤ Reason: MULTIDEVICE MISMATCH — session conflict detected.\n' +
+          '  ➤ Action: Clearing session and restarting...'
+      )
+      return
 
-      case DisconnectReason.loggedOut:
-        console.log(chalk.red('  ➤ Reason: LOGGED OUT — the device was removed from WhatsApp Linked Devices.'));
-        console.log(chalk.yellow('  ➤ Action: Clearing session and exiting. Restart the bot to re-pair.'));
-        try {
-          if (existsSync(`./${global.authFile}`)) {
-            rmSync(`./${global.authFile}`, { recursive: true, force: true });
-            console.log(chalk.yellow('  ➤ Session folder deleted successfully.'));
-          }
-        } catch (err) {
-          console.log(chalk.red('  ➤ Could not delete session folder:'), err.message);
-        }
-        process.exit(1);
+    case DisconnectReason.connectionClosed:
+    case DisconnectReason.connectionLost:
+    case DisconnectReason.timedOut:
+      console.log(chalk.yellow('  ➤ Temporary disconnect. Reconnecting...'))
+      restartBot(5000)
+      return
 
-      case DisconnectReason.restartRequired:
-        console.log(chalk.yellow('  ➤ Reason: RESTART REQUIRED by server. Restarting...'));
-        process.exit();
-        break;
+    case DisconnectReason.restartRequired:
+      console.log(chalk.yellow('  ➤ Reason: RESTART REQUIRED by server. Recreating socket...'))
+      restartBot(1000)
+      return
 
-      case DisconnectReason.multideviceMismatch:
-        console.log(chalk.red('  ➤ Reason: MULTIDEVICE MISMATCH — session conflict detected.'));
-        console.log(chalk.yellow('  ➤ Action: Clearing session and restarting...'));
-        try {
-          if (existsSync(`./${global.authFile}`)) {
-            rmSync(`./${global.authFile}`, { recursive: true, force: true });
-          }
-        } catch (_) {}
-        process.exit(1);
-
-      default:
-        console.log(chalk.red(`  ➤ Reason: UNKNOWN (code ${reason}). Restarting in 5 seconds...`));
-        setTimeout(() => process.exit(), 5000);
-    }
+    default:
+      console.log(chalk.red(`  ➤ Reason: UNKNOWN (code ${reason}). Reconnecting in 5 seconds...`))
+      restartBot(5000)
+      return
   }
 }
 

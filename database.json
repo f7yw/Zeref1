@@ -606,7 +606,7 @@
       "emas": 0,
       "emerald": 0,
       "esteh": 0,
-      "exp": 390,
+      "exp": 398,
       "expg": 0,
       "exphero": 0,
       "expired": 0,
@@ -957,11 +957,11 @@
       "robo": 0,
       "roboxp": 0,
       "messages": {
-        "total": 25,
+        "total": 26,
         "groups": {
-          "120363422912330057@g.us": 25
+          "120363422912330057@g.us": 26
         },
-        "last": 1776689022113
+        "last": 1776691002141
       },
       "transactions": [
         {
@@ -2139,7 +2139,7 @@
       "expired": 0,
       "messageStats": {
         "28648019066900@lid": 26,
-        "158884446605486@lid": 25,
+        "158884446605486@lid": 26,
         "967782114485@s.whatsapp.net": 9
       },
       "botOff": false
