@@ -1,29 +1,38 @@
 import { fmt, initEconomy, logTransaction } from '../lib/economy.js'
 
-const TIMEOUT   = 30000    // 30 seconds
+const TIMEOUT = 30000
 const LEVELS = [
-  { ops: ['+', '-'],              range: 20,  reward: [80,  150], label: 'سهل 🟢'   },
-  { ops: ['+', '-', '*'],         range: 50,  reward: [150, 280], label: 'متوسط 🟡' },
-  { ops: ['+', '-', '*'],         range: 100, reward: [280, 450], label: 'صعب 🔴'   },
-  { ops: ['+', '-', '*', '/'],    range: 200, reward: [450, 700], label: 'خبير 🔥'  },
+  { ops: ['+', '-'],           range: 20,  reward: [80,  150], label: 'سهل 🟢'   },
+  { ops: ['+', '-', '*'],      range: 50,  reward: [150, 280], label: 'متوسط 🟡' },
+  { ops: ['+', '-', '*'],      range: 100, reward: [280, 450], label: 'صعب 🔴'   },
+  { ops: ['+', '-', '*', '/'], range: 200, reward: [450, 700], label: 'خبير 🔥'  },
 ]
 const makeId = () => Math.random().toString(36).slice(2, 6).toUpperCase()
 
 function buildQ(lvl) {
   const { ops, range } = lvl
-  const op  = ops[Math.floor(Math.random() * ops.length)]
-  let a     = Math.floor(Math.random() * range) + 1
-  let b     = Math.floor(Math.random() * range) + 1
-
-  if (op === '/' ) {
-    // ensure clean division
+  const op = ops[Math.floor(Math.random() * ops.length)]
+  let a = Math.floor(Math.random() * range) + 1
+  let b = Math.floor(Math.random() * range) + 1
+  if (op === '/') {
     b = Math.floor(Math.random() * 9) + 2
     a = b * (Math.floor(Math.random() * 10) + 2)
   }
   if (op === '-' && b > a) [a, b] = [b, a]
-
   const answer = eval(`${a} ${op} ${b}`)
   return { expr: `${a} ${op} ${b}`, answer: String(answer) }
+}
+
+function giveReward(m, entry) {
+  const user = global.db.data.users[m.sender]
+  if (user) {
+    initEconomy(user)
+    user.money += entry.reward
+    user.exp   += entry.xpBonus
+    user.totalEarned = (user.totalEarned || 0) + entry.reward
+    logTransaction(user, 'earn', entry.reward, `🧮 فوز تحدي الرياضيات`)
+  }
+  return user
 }
 
 let handler = async (m, { conn, args, usedPrefix }) => {
@@ -31,7 +40,7 @@ let handler = async (m, { conn, args, usedPrefix }) => {
   const chatId = m.chat
 
   if (chatId in conn.math) {
-    await conn.reply(m.chat, '❗ هناك تحدٍّ نشط الآن، أجب عليه أولاً!', conn.math[chatId].msg)
+    await conn.reply(m.chat, '❗ هناك تحدٍّ نشط الآن، ردّ على رسالة السؤال بالإجابة!', conn.math[chatId].msg)
     return false
   }
 
@@ -54,9 +63,7 @@ let handler = async (m, { conn, args, usedPrefix }) => {
 │ 💰 الجائزة: ${fmt(reward)}
 │ ⭐ XP: +${xpBonus}
 │
-│ 💡 للإجابة اكتب:
-│ *${usedPrefix}جواب ${id} الرقم*
-│ ويمكنك الرد على رسالة السؤال بالرقم مباشرة.
+│ 💡 *ردّ على هذه الرسالة بالرقم مباشرة*
 ╰──────────────────`.trim()
 
   const sent = await conn.reply(m.chat, caption, m)
@@ -80,27 +87,42 @@ let handler = async (m, { conn, args, usedPrefix }) => {
   }
 }
 
+// ── Answer detection: runs on every message ──────────────────────────────────
 handler.all = async function (m) {
   const chatId = m.chat
   if (!this.math || !(chatId in this.math)) return
   if (m.isBaileys) return
 
   const entry = this.math[chatId]
-  const text  = (m.text || '').trim()
-  if (!text || isNaN(text)) return
-  if (String(parseFloat(text)) !== entry.question.answer && text !== entry.question.answer) return
+  const rawText = (m.text || '').trim()
+  if (!rawText) return
+
+  const isReplyToQuestion = m.quoted && entry.msg && (
+    m.quoted.id === entry.msg?.key?.id ||
+    m.quoted.id === entry.msg?.id
+  )
+
+  // Accept: a reply to the question msg, OR a bare number sent in the chat
+  const isBareNumber = /^\-?\d+(\.\d+)?$/.test(rawText)
+  if (!isReplyToQuestion && !isBareNumber) return
+
+  // Validate the answer
+  const answerMatch =
+    String(parseFloat(rawText)) === entry.question.answer ||
+    rawText === entry.question.answer
+
+  if (!answerMatch) {
+    // Only send "wrong" feedback on direct replies — avoid spam for bare numbers
+    if (isReplyToQuestion) {
+      await this.reply(m.chat, `❌ إجابة خاطئة، حاول مرة أخرى.`, m)
+    }
+    return
+  }
 
   clearTimeout(entry.timer)
   delete this.math[chatId]
 
-  const user = global.db.data.users[m.sender]
-  if (user) {
-    initEconomy(user)
-    user.money += entry.reward
-    user.exp   += entry.xpBonus
-    user.totalEarned = (user.totalEarned || 0) + entry.reward
-    logTransaction(user, 'earn', entry.reward, `🧮 فوز تحدي الرياضيات`)
-  }
+  const user = giveReward(m, entry)
 
   await this.reply(
     m.chat,

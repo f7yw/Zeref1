@@ -1,18 +1,26 @@
 import fs from 'fs'
 import { fmt, initEconomy, logTransaction } from '../lib/economy.js'
 
-const TIMEOUT   = 60000    // 60 seconds
+const TIMEOUT   = 60000
 const COIN_MIN  = 150
 const COIN_MAX  = 400
 const XP_BONUS  = 50
-const DIA_CHANCE = 0.05    // 5% chance for a diamond on correct answer
+const DIA_CHANCE = 0.05
 const makeId = () => Math.random().toString(36).slice(2, 6).toUpperCase()
+
+function normalize(s) {
+  return String(s || '').trim().toLowerCase()
+    .replace(/[ًٌٍَُِّْـ]/g, '')
+    .replace(/\s+/g, '')
+    .replace(/[أإآا]/g, 'ا')
+    .replace(/ة/g, 'ه')
+    .replace(/[^\p{L}\p{N}]/gu, '')
+}
 
 let handler = async (m, { conn, usedPrefix }) => {
   conn.quiz = conn.quiz || {}
   const chatId = m.chat
 
-  // Already active question?
   if (chatId in conn.quiz) {
     await conn.reply(m.chat, `❗ *هناك سؤال لم تتم الإجابة عليه بعد!*`, conn.quiz[chatId].msg)
     return false
@@ -34,9 +42,7 @@ let handler = async (m, { conn, usedPrefix }) => {
 │ 💰 الجائزة: ${fmt(reward)}
 │ ⭐ XP: +${XP_BONUS}
 │
-│ 💡 للإجابة اكتب:
-│ *${usedPrefix}جواب ${id} إجابتك*
-│ ويمكنك الرد على رسالة السؤال بالإجابة مباشرة.
+│ 💡 *ردّ على هذه الرسالة بإجابتك مباشرة*
 ╰──────────────────`.trim()
 
   const sent = await conn.reply(m.chat, caption, m)
@@ -59,7 +65,7 @@ let handler = async (m, { conn, usedPrefix }) => {
   }
 }
 
-// ── Answer detection (runs on every message) ────────────────────────────────
+// ── Answer detection: runs on every message ──────────────────────────────────
 handler.all = async function (m) {
   const chatId = m.chat
   if (!this.quiz || !(chatId in this.quiz)) return
@@ -67,27 +73,22 @@ handler.all = async function (m) {
 
   const entry = this.quiz[chatId]
 
-  // Accept: direct text in chat OR a reply to the question message
-  const isReplyToQuestion = m.quoted &&
-    entry.msg &&
-    (m.quoted.id === entry.msg?.key?.id || m.quoted.id === entry.msg?.id)
+  const isReplyToQuestion = m.quoted && entry.msg && (
+    m.quoted.id === entry.msg?.key?.id ||
+    m.quoted.id === entry.msg?.id
+  )
 
   const rawText = (m.text || '').trim()
+  if (!rawText) return
 
-  // If it's not a reply to the question, require minimum length to avoid noise
-  if (!isReplyToQuestion && (!rawText || rawText.length < 2)) return
-  if (m.isBaileys) return
-
-  const normalize = s => String(s || '').trim().toLowerCase()
-    .replace(/[ًٌٍَُِّْـ]/g, '')
-    .replace(/\s+/g, '')
-    .replace(/[أإآا]/g, 'ا')
-    .replace(/ة/g, 'ه')
-    .replace(/[^\p{L}\p{N}]/gu, '')
+  // For non-replies: require minimum 3 chars and skip messages starting with a command prefix
+  if (!isReplyToQuestion) {
+    if (rawText.length < 3) return
+    if (/^[./#!]/.test(rawText)) return
+  }
 
   const answer = normalize(entry.question.response)
   const text   = normalize(rawText)
-
   if (!text) return
 
   const correct = text === answer ||
