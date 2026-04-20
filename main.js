@@ -17,6 +17,7 @@ import { Boom } from '@hapi/boom';
 import { makeWASocket, protoType, serialize } from './lib/simple.js';
 import { Low, JSONFile } from 'lowdb';
 import store from './lib/store.js';
+import { mongoDB } from './lib/mongoDB.js';
 
 const { proto } = (await import('@whiskeysockets/baileys')).default;
 const {
@@ -68,7 +69,15 @@ global.prefix = new RegExp(
 );
 
 // ====== DATABASE ======
-global.db = new Low(new JSONFile(`database.json`));
+const MONGODB_URI = process.env.MONGODB_URI;
+
+if (MONGODB_URI) {
+  global.db = new mongoDB(MONGODB_URI);
+  console.log('[DB] Using MongoDB Atlas for persistent storage.');
+} else {
+  global.db = new Low(new JSONFile(`database.json`));
+  console.log('[DB] Using local JSON file for storage (development mode).');
+}
 global.DATABASE = global.db;
 
 global.loadDatabase = async function () {
@@ -81,7 +90,9 @@ global.loadDatabase = async function () {
     settings: {},
     ...(global.db.data || {})
   };
-  global.db.chain = chain(global.db.data);
+  if (global.db.chain !== undefined || !MONGODB_URI) {
+    global.db.chain = chain(global.db.data);
+  }
 };
 await loadDatabase();
 
@@ -302,201 +313,65 @@ ${pluginList}
           } catch (_) {}
         }
       } catch (e) {
-        console.error('[STARTUP LOG ERROR]', e.message)
+        console.error(chalk.red('[STARTUP NOTIFY ERROR]'), e)
       }
     }, 5000)
-
-    return
   }
 
-  if (connection !== 'close') return
-
-  await global.saveDatabase().catch(console.error)
-  console.log(chalk.red.bold('\n⚠️  Connection closed. Diagnosing reason...'))
-
-  if (errorData) {
-    console.log(chalk.red(`  ➤ Raw error  : ${errorData?.message || String(errorData)}`))
-    console.log(chalk.red(`  ➤ Status code: ${reason || 'unknown'}`))
-  }
-
-  switch (reason) {
-    case DisconnectReason.badSession:
-      await clearSessionAndRestart(
-        '  ➤ Reason: BAD SESSION — the saved session is corrupted or rejected.\n' +
-          '  ➤ Action: Clearing session files and restarting...'
-      )
-      return
-
-    case DisconnectReason.loggedOut:
-      await clearSessionAndRestart(
-        '  ➤ Reason: LOGGED OUT — the device was removed from WhatsApp Linked Devices.\n' +
-          '  ➤ Action: Clearing session and restarting...'
-      )
-      return
-
-    case DisconnectReason.multideviceMismatch:
-      await clearSessionAndRestart(
-        '  ➤ Reason: MULTIDEVICE MISMATCH — session conflict detected.\n' +
-          '  ➤ Action: Clearing session and restarting...'
-      )
-      return
-
-    case DisconnectReason.connectionClosed:
-    case DisconnectReason.connectionLost:
-    case DisconnectReason.timedOut:
-      console.log(chalk.yellow('  ➤ Temporary disconnect. Reconnecting...'))
+  if (connection === 'close') {
+    if (reason === DisconnectReason.loggedOut) {
+      await clearSessionAndRestart('❌ Session logged out. Clearing data...')
+    } else if (reason === DisconnectReason.restartRequired) {
+      console.log(chalk.cyan('🔄 Restart required. Reconnecting...'))
+      restartBot(2000)
+    } else if (reason === DisconnectReason.timedOut) {
+      console.log(chalk.red('⏰ Connection timed out. Retrying...'))
+      restartBot(3000)
+    } else if (reason === DisconnectReason.connectionLost) {
+      console.log(chalk.red('📡 Connection lost. Reconnecting...'))
+      restartBot(3000)
+    } else if (reason === DisconnectReason.connectionClosed) {
+      console.log(chalk.red('🔌 Connection closed. Reconnecting...'))
+      restartBot(3000)
+    } else if (reason === DisconnectReason.connectionReplaced) {
+      console.log(chalk.yellow('🔄 Connection replaced. Please check if another instance is running.'))
+    } else {
+      console.log(chalk.red(`❓ Connection closed with unknown reason: ${reason}`))
       restartBot(5000)
-      return
-
-    case DisconnectReason.restartRequired:
-      console.log(chalk.yellow('  ➤ Reason: RESTART REQUIRED by server. Recreating socket...'))
-      restartBot(1000)
-      return
-
-    default:
-      console.log(chalk.red(`  ➤ Reason: UNKNOWN (code ${reason}). Reconnecting in 5 seconds...`))
-      restartBot(5000)
-      return
+    }
   }
 }
 
-// ====== HANDLER ======
-let handler = await import('./handler.js');
+conn.ev.on('connection.update', connectionUpdate)
+conn.ev.on('creds.update', saveCreds)
 
-conn.handler = handler.handler.bind(conn);
-conn.connectionUpdate = connectionUpdate.bind(conn);
-conn.credsUpdate = saveCreds.bind(conn);
-conn.participantsUpdate = handler.participantsUpdate.bind(conn);
-conn.groupsUpdate = handler.groupsUpdate.bind(conn);
-
-// ====== EVENTS ======
-conn.ev.on('messages.upsert', conn.handler);
-conn.ev.on('connection.update', conn.connectionUpdate);
-conn.ev.on('creds.update', conn.credsUpdate);
-conn.ev.on('group-participants.update', conn.participantsUpdate);
-conn.ev.on('groups.update', conn.groupsUpdate);
-
-// ====== POLL VOTE HANDLER (menu navigation) ======
-global.menuPolls = global.menuPolls || new Map();
-
-conn.ev.on('messages.update', async (updates) => {
-  for (const update of updates) {
-    if (!update.update?.pollUpdates) continue;
-
-    const pollId = update.key?.id;
-    const meta = global.menuPolls.get(pollId);
-    if (!meta) continue;
-
-    // Expired polls
-    if (Date.now() > meta.expires) {
-      global.menuPolls.delete(pollId);
-      continue;
-    }
-
-    try {
-      const pollMsg = await store.loadMessage(update.key.remoteJid, pollId);
-      if (!pollMsg) continue;
-
-      const votes = getAggregateVotesInPollMessage({
-        message: pollMsg.message,
-        pollUpdates: update.update.pollUpdates
-      });
-
-      const selected = votes.find(v => v.voters.length > 0);
-      if (!selected) continue;
-
-      const sectionName = selected.name;
-      const { menuPollSections } = await import('./plugins/menu.js');
-      const sectionFn = menuPollSections[sectionName];
-      if (!sectionFn) continue;
-
-      const text = sectionFn(meta.prefix);
-      await conn.sendMessage(meta.chat, {
-        text,
-        contextInfo: {
-          externalAdReply: {
-            showAdAttribution: true,
-            mediaType: 'IMAGE',
-            title: sectionName,
-            body: global.wm,
-            thumbnail: global.imagen4,
-            sourceUrl: global.md
-          }
-        }
-      });
-    } catch (e) {
-      console.error('[POLL VOTE ERROR]', e.message);
-    }
+// ====== MESSAGE HANDLER ======
+conn.ev.on('messages.upsert', async (chatUpdate) => {
+  try {
+    const m = chatUpdate.messages[0]
+    if (!m) return
+    if (m.message?.viewOnceMessageV2) m.message = m.message.viewOnceMessageV2.message
+    if (m.message?.documentWithCaptionMessage) m.message = m.message.documentWithCaptionMessage.message
+    if (m.message?.viewOnceMessageV2Extension) m.message = m.message.viewOnceMessageV2Extension.message
+    if (!m.message) return
+    
+    const { handler } = await import('./handler.js')
+    await handler(conn, m, chatUpdate)
+  } catch (e) {
+    console.error(chalk.red('[MESSAGE HANDLER ERROR]'), e)
   }
-});
+})
 
-// ====== PLUGINS ======
-const pluginFolder = global.__dirname(join(__dirname, './plugins/index'));
-const excludedPlugins = new Set([
-  
-  'جمال.js',
-  
-]);
-const pluginFilter = (filename) => /\.js$/.test(filename) && !excludedPlugins.has(filename);
-global.plugins = {};
-
-async function filesInit() {
-  const files = readdirSync(pluginFolder).filter(pluginFilter);
-  await Promise.all(files.map(async (filename) => {
-    try {
-      const file = global.__filename(join(pluginFolder, filename));
-      const module = await import(file);
-      global.plugins[filename] = module.default || module;
-    } catch (e) {
-      console.error('[PLUGIN ERROR]', filename, e.message);
-    }
-  }));
-  console.log(chalk.green(`[PLUGINS] Loaded ${Object.keys(global.plugins).length} plugins`));
-}
-
-await filesInit();
-
+// ====== AUTO SAVE ======
 setInterval(async () => {
-  await global.saveDatabase().catch(console.error);
-}, 30000);
+  if (global.db?.data) await global.saveDatabase()
+}, 30 * 1000)
 
-process.on('SIGTERM', async () => {
-  await global.saveDatabase().catch(console.error);
-  process.exit(0);
-});
-
+// ====== CLEANUP ON EXIT ======
 process.on('SIGINT', async () => {
-  await global.saveDatabase().catch(console.error);
-  process.exit(0);
-});
+  console.log(chalk.yellow('\n[EXIT] Shutting down...'))
+  await global.saveDatabase()
+  process.exit(0)
+})
 
-// ====== AUTO CLEAN TMP ======
-setInterval(() => {
-  if (stopped === 'close') return;
-  if (global.menuPolls) {
-    const now = Date.now();
-    for (const [id, meta] of global.menuPolls) {
-      if (now > meta.expires) global.menuPolls.delete(id);
-    }
-  }
-}, 300000);
-
-// ====== QUICK TEST ======
-async function _quickTest() {
-  const test = await Promise.all([
-    spawn('ffmpeg'),
-    spawn('ffprobe')
-  ].map((p) => {
-    return new Promise((resolve) => {
-      p.on('close', (code) => resolve(code !== 127));
-      p.on('error', () => resolve(false));
-    });
-  }));
-
-  global.support = {
-    ffmpeg: test[0],
-    ffprobe: test[1]
-  };
-}
-
-_quickTest().catch(console.error);
+export default conn;
