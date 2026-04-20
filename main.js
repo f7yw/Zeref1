@@ -108,10 +108,11 @@ global.authFile = `Zeref`;
 const { state, saveCreds } = await useMultiFileAuthState(global.authFile);
 
 // ====== CONNECTION OPTIONS ======
+// ====== CONNECTION OPTIONS (محسن للاستقرار) ======
 const connectionOptions = {
-  connectTimeoutMs: 60000,
-  keepAliveIntervalMs: 10000,
-
+  connectTimeoutMs: 120000, // زيادة المهلة لـ 120 ثانية لتجنب خطأ 408
+  keepAliveIntervalMs: 30000, // إرسال نبضات قلب كل 30 ثانية
+  
   logger: pino({ level: 'silent' }),
 
   auth: {
@@ -119,21 +120,22 @@ const connectionOptions = {
     keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'silent' }))
   },
 
-  browser: ["Ubuntu", "Chrome", "20.0.04"],
+  browser: ["Mac OS", "Safari", "15.0"], // تغيير هوية المتصفح لتحسين القبول
   version,
   syncFullHistory: false,
   markOnlineOnConnect: true,
   generateHighQualityLinkPreview: true,
+  retryRequestDelayMs: 5000, // تأخير إعادة المحاولة عند الفشل
+  maxRetries: 5, // عدد محاولات إعادة الاتصال
   getMessage: async (key) => {
     if (store) {
         const msg = await store.loadMessage(key.remoteJid, key.id)
         return msg?.message || undefined
     }
-    return {
-        conversation: 'Zeref-Bot is here!'
-    }
+    return { conversation: 'Zeref-Bot is here!' }
   }
 };
+
 
 // ====== PHONE NUMBER FROM ENV ======
 const phoneNumber = (process.env.PHONE_NUMBER || '').replace(/[^0-9]/g, '');
@@ -397,36 +399,9 @@ conn.ev.on('messages.update', async (updates) => {
 // ====== PLUGINS ======
 const pluginFolder = global.__dirname(join(__dirname, './plugins/index'));
 const excludedPlugins = new Set([
-  'anime.js',
+  
   'جمال.js',
-  'ذكاء.js',
-  'حظ.js',
-  'قلب.js',
-  'صراحه.js',
-  'مقولات.js',
-  'قط.js',
-  'كلب.js',
-  'شخصية.js',
-  'حقوق.js',
-  'احرف.js',
-  'اختفاء.js',
-  'اختفاء2.js',
-  'انطقي.js',
-  'تفكيك.js',
-  'تجميع.js',
-  'حساب.js',
-  'حجره.js',
-  'رياضه.js',
-  'رابطي.js',
-  'علم2.js',
-  'زخرفه.js',
-  'زيريف.js',
-  'speak.js',
-  'mipilot-jadibot-parar.js',
-  'mipilot-serbot-info.js',
-  'owner-join.js',
-  'فتح_اغلاق.js',
-  'ملف.js'
+  
 ]);
 const pluginFilter = (filename) => /\.js$/.test(filename) && !excludedPlugins.has(filename);
 global.plugins = {};

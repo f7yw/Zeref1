@@ -36,8 +36,9 @@ externalPort = 80
 [userenv]
 
 [userenv.shared]
+# PHONE_NUMBER = "SET_YOUR_PHONE_NUMBER_HERE"
 PHONE_NUMBER = "967782114485"
-
 [deployment]
-build = ["sh", "-c", "Zeref Just Run In Web"]
+build = ["npm", "install"]
+run = ["node", "index.js"]
 deploymentTarget = "cloudrun"

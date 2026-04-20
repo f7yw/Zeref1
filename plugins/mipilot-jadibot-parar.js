@@ -4,7 +4,7 @@ let handler  = async (m, { conn }) => {
   }
   handler.help = ['berhenti','stop']
   handler.tags = ['General']
-  handler.command = /^(توقف|stop)$/i
+  handler.command = /^(إعادة)$/i
   handler.owner = true
   handler.mods = false
   handler.premium = false

@@ -10,11 +10,21 @@ function clockString(ms) {
 }
 
 function normalizeChoice(text = '') {
-  const map = { '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4', '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9', '۰': '0', '۱': '1', '۲': '2', '۳': '3', '۴': '4', '۵': '5', '۶': '6', '۷': '7', '۸': '8', '۹': '9' }
-  return text.trim().replace(/[٠-٩۰-۹]/g, d => map[d] || d)
+  const map = {
+    '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
+    '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9',
+    '۰': '0', '۱': '1', '۲': '2', '۳': '3', '۴': '4',
+    '۵': '5', '۶': '6', '۷': '7', '۸': '8', '۹': '9'
+  }
+
+  return text
+    .trim()
+    .replace(/[٠-٩۰-۹]/g, d => map[d] || d)
+    .replace(/^\.+/, '')   // يشيل النقطة من البداية
+    .replace(/\.+$/, '')   // يشيل النقطة من النهاية
 }
 
-export const sections = {
+const sections = {
   free: {
     title: '🎁 المجاني — خدمات مجانية',
     text: (p) => `
@@ -329,29 +339,21 @@ ${p}إعادة           ⟵ إعادة تشغيل البوت
 ${p}مسح_المستخدمين تأكيد ⟵ مسح المستخدمين (عدا المميزين)
 ${p}مسح_المحادثات تأكيد ⟵ مسح المحادثات
 ${p}مسح_الكل تأكيد      ⟵ مسح شامل (احتياط!)`.trim()
-  },
-
-  all: {
-    title: '📜 عرض كل الأقسام',
-    text: (p) => Object.entries(sections)
-      .filter(([k]) => k !== 'all')
-      .map(([, s]) => s.text(p))
-      .join('\n\n─────────────────────\n\n')
   }
 }
 
-export const menuSections = Object.fromEntries(
+const menuSections = Object.fromEntries(
   Object.keys(sections).map((key, i) => [String(i + 1), { key, ...sections[key] }])
 )
 
 function buildStats(m, user, level, role, max, uptime) {
-  const name  = m.pushName || 'مستخدم'
+  const name = m.pushName || 'مستخدم'
   const money = user.money || 0
-  const bank  = user.bank  || 0
+  const bank = user.bank || 0
   const energy = typeof user.energy === 'number' ? user.energy : 100
-  const epct  = Math.max(0, Math.min(10, Math.floor((energy / 100) * 10)))
-  const ebar  = '█'.repeat(epct) + '░'.repeat(10 - epct)
-  const vip   = user.premium || (user.premiumTime > Date.now())
+  const epct = Math.max(0, Math.min(10, Math.floor((energy / 100) * 10)))
+  const ebar = '█'.repeat(epct) + '░'.repeat(10 - epct)
+  const vip = user.premium || (user.premiumTime > Date.now())
 
   return `╔══〘 🌟 *SHADOW - Bot* 🌟 〙══╗
 ║
@@ -373,10 +375,16 @@ function buildStats(m, user, level, role, max, uptime) {
 ╚══〘 👇 اختر رقم القسم 〙══╝`.trim()
 }
 
-function buildPageText(prefix) {
-  return Object.entries(menuSections)
+function buildMenu(prefix, stats) {
+  const pageText = Object.entries(menuSections)
     .map(([num, s]) => `*${num}.* ${s.title}`)
     .join('\n')
+
+  return `${stats}\n\n${pageText}\n\n💡 أرسل رقم القسم للتفاصيل — مثال: *1*`
+}
+
+function buildSection(prefix, key, stats) {
+  return `${stats}\n\n${sections[key].text(prefix)}`
 }
 
 let handler = async (m, { conn, usedPrefix }) => {
@@ -384,52 +392,62 @@ let handler = async (m, { conn, usedPrefix }) => {
   initEconomy(user)
   syncEnergy(user, m.sender)
 
-  const level  = user.level || 0
-  const role   = getRole(level)
+  const level = user.level || 0
+  const role = getRole(level)
   const { max } = xpRange(level, global.multiplier)
   const uptime = clockString(process.uptime() * 1000)
-  const stats  = buildStats(m, user, level, role, max, uptime)
+  const stats = buildStats(m, user, level, role, max, uptime)
 
-  // Human-like typing delay before sending menu
   await typingDelay(conn, m.chat, 2200)
 
-  if (!global.menuSessions) global.menuSessions = {}
+  global.menuSessions ??= {}
   global.menuSessions[m.sender] = { prefix: usedPrefix, ts: Date.now() }
 
-  const pageText = buildPageText(usedPrefix)
-  const fullText = `${stats}\n\n${pageText}\n\n💡 أرسل رقم القسم للتفاصيل — مثال: *1*`
-
-  await conn.sendMessage(m.chat, { image: global.imagen4, caption: fullText }, { quoted: m })
+  await conn.sendMessage(
+    m.chat,
+    { image: global.imagen4, caption: buildMenu(usedPrefix, stats) },
+    { quoted: m }
+  )
 }
 
 handler.command = /^(اوامر|أوامر|الاوامر|الأوامر|كل_الاوامر|كل-الاوامر|المهام|مهام|menu|help|قائمة|القائمة|قائمه|القائمه)$/i
-handler.exp  = 0
+handler.exp = 0
 handler.fail = null
 
 handler.before = async (m, { conn }) => {
+  const session = global.menuSessions?.[m.sender]
+  if (!session) return false
+
   const choice = normalizeChoice(m.text || '')
   const section = menuSections[choice]
   if (!section) return false
 
-  const session = global.menuSessions?.[m.sender] || {}
-  const prefix  = session?.prefix || '.'
+  if (Date.now() - session.ts > 5 * 60 * 1000) {
+    delete global.menuSessions[m.sender]
+    return false
+  }
+
+  const prefix = session.prefix || '.'
 
   const user = global.db.data.users[m.sender] || {}
   initEconomy(user)
   syncEnergy(user, m.sender)
-  const level  = user.level || 0
-  const role   = getRole(level)
+
+  const level = user.level || 0
+  const role = getRole(level)
   const { max } = xpRange(level, global.multiplier)
   const uptime = clockString(process.uptime() * 1000)
-  const stats  = buildStats(m, user, level, role, max, uptime)
+  const stats = buildStats(m, user, level, role, max, uptime)
 
-  // Typing delay for section content too
   await typingDelay(conn, m.chat, 1500)
 
-  const text = `${stats}\n\n${section.text(prefix)}`
-  await conn.sendMessage(m.chat, { text }, { quoted: m })
+  await conn.sendMessage(
+    m.chat,
+    { text: buildSection(prefix, section.key, stats) },
+    { quoted: m }
+  )
 
-  if (global.menuSessions?.[m.sender]) delete global.menuSessions[m.sender]
+  delete global.menuSessions[m.sender]
   return true
 }
 
