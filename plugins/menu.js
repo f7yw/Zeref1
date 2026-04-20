@@ -20,8 +20,7 @@ function normalizeChoice(text = '') {
   return text
     .trim()
     .replace(/[٠-٩۰-۹]/g, d => map[d] || d)
-    .replace(/^\.+/, '')   // يشيل النقطة من البداية
-    .replace(/\.+$/, '')   // يشيل النقطة من النهاية
+    .trim()
 }
 
 const sections = {
@@ -380,7 +379,7 @@ function buildMenu(prefix, stats) {
     .map(([num, s]) => `*${num}.* ${s.title}`)
     .join('\n')
 
-  return `${stats}\n\n${pageText}\n\n💡 أرسل رقم القسم للتفاصيل — مثال: *1*`
+  return `${stats}\n\n${pageText}\n\n💡 أرسل رقم القسم مع نقطة البوت للتفاصيل — مثال: *${prefix}1*`
 }
 
 function buildSection(prefix, key, stats) {
@@ -418,7 +417,13 @@ handler.before = async (m, { conn }) => {
   const session = global.menuSessions?.[m.sender]
   if (!session) return false
 
-  const choice = normalizeChoice(m.text || '')
+  const prefix = session.prefix || '.'
+  const raw = (m.text || '').trim()
+
+  if (!raw.startsWith(prefix)) return false
+
+  const afterPrefix = raw.slice(prefix.length).trim()
+  const choice = normalizeChoice(afterPrefix)
   const section = menuSections[choice]
   if (!section) return false
 
@@ -426,8 +431,6 @@ handler.before = async (m, { conn }) => {
     delete global.menuSessions[m.sender]
     return false
   }
-
-  const prefix = session.prefix || '.'
 
   const user = global.db.data.users[m.sender] || {}
   initEconomy(user)
