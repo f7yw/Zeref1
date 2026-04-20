@@ -88,6 +88,9 @@ export async function handler(chatUpdate) {
 
     if (m.key.remoteJid === 'status@broadcast') return
 
+    global.BOT_START ||= Date.now()
+    global.seenMessages ||= new Set()
+
 if (global.db.data == null) await global.loadDatabase()
 let chat = global.db.data.chats[m.chat] || {};
 /* Creditos a Otosaka (https://wa.me/51993966345) */
@@ -97,6 +100,19 @@ try {
     if (!m) return
     if (typeof m.text !== 'string')
         m.text = ''
+
+    const msgId = `${m?.key?.remoteJid || ''}:${m?.key?.id || ''}:${m?.key?.participant || ''}`
+    if (global.seenMessages.has(msgId)) return
+    global.seenMessages.add(msgId)
+
+    if (global.seenMessages.size > 5000) {
+        const first = global.seenMessages.values().next().value
+        if (first) global.seenMessages.delete(first)
+    }
+
+    const ts = Number(m?.messageTimestamp || 0) * 1000
+    if (ts && ts < global.BOT_START - 5000) return
+
     if ((m.fromMe || isBotOwnMessage(m, this)) && !global.prefix.test(m.text))
         return
     m.exp = 0
@@ -1653,5 +1669,4 @@ watchFile(file, async () => {
     console.log(chalk.redBright("Update 'handler.js'"))
     if (global.reloadHandler) console.log(await global.reloadHandler())
 })
-
 

@@ -109,31 +109,29 @@ const { state, saveCreds } = await useMultiFileAuthState(global.authFile);
 // ====== CONNECTION OPTIONS ======
 // ====== CONNECTION OPTIONS (محسن للاستقرار) ======
 const connectionOptions = {
-  connectTimeoutMs: 120000, // زيادة المهلة لـ 120 ثانية لتجنب خطأ 408
-  keepAliveIntervalMs: 30000, // إرسال نبضات قلب كل 30 ثانية
-  
+  connectTimeoutMs: 120000,
+  keepAliveIntervalMs: 30000,
   logger: pino({ level: 'silent' }),
-
   auth: {
     creds: state.creds,
     keys: makeCacheableSignalKeyStore(state.keys, pino({ level: 'silent' }))
   },
-
-  browser: ["Mac OS", "Safari", "15.0"], // تغيير هوية المتصفح لتحسين القبول
+  browser: ["Mac OS", "Safari", "15.0"],
   version,
   syncFullHistory: false,
+  shouldSyncHistoryMessage: () => false,
   markOnlineOnConnect: true,
   generateHighQualityLinkPreview: true,
-  retryRequestDelayMs: 5000, // تأخير إعادة المحاولة عند الفشل
-  maxRetries: 5, // عدد محاولات إعادة الاتصال
+  retryRequestDelayMs: 5000,
+  maxRetries: 5,
   getMessage: async (key) => {
     if (store) {
-        const msg = await store.loadMessage(key.remoteJid, key.id)
-        return msg?.message || undefined
+      const msg = await store.loadMessage(key.remoteJid, key.id)
+      return msg?.message || undefined
     }
     return { conversation: 'Zeref-Bot is here!' }
   }
-};
+}
 
 
 // ====== PHONE NUMBER FROM ENV ======

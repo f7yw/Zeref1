@@ -23,14 +23,13 @@ let handler = async (m, { conn, usedPrefix }) => {
 
   if (chatId in conn.quiz) {
     await conn.reply(m.chat, `❗ *هناك سؤال لم تتم الإجابة عليه بعد!*`, conn.quiz[chatId].msg)
-    return false
+    return
   }
 
   const baseQ = JSON.parse(fs.readFileSync('./src/game/acertijo.json'))
   const itQ   = JSON.parse(fs.readFileSync('./src/game/it_questions.json'))
   const questions = [...baseQ, ...itQ]
   const q = questions[Math.floor(Math.random() * questions.length)]
-  const id = makeId()
   const reward = Math.floor(Math.random() * (COIN_MAX - COIN_MIN + 1)) + COIN_MIN
 
   const caption =
@@ -42,21 +41,27 @@ let handler = async (m, { conn, usedPrefix }) => {
 │ 💰 الجائزة: ${fmt(reward)}
 │ ⭐ XP: +${XP_BONUS}
 │
-│ 💡 *ردّ على هذه الرسالة بإجابتك مباشرة*
+│ 💡 *ردّ على هذه الرسالة فقط للإجابة*
 ╰──────────────────`.trim()
 
   const sent = await conn.reply(m.chat, caption, m)
 
   conn.quiz[chatId] = {
     msg: sent,
-    id,
+    msgId: sent?.key?.id,
     question: q,
     reward,
     timer: setTimeout(async () => {
       if (conn.quiz[chatId]) {
         await conn.reply(
           m.chat,
-          `╭────『 ⌛ انتهى الوقت! 』────\n│\n│ ✅ الإجابة الصحيحة:\n│ *${q.response}*\n│\n│ 😢 لم يُجب أحد في الوقت المحدد.\n│\n╰──────────────────`.trim(),
+          `╭────『 ⌛ انتهى الوقت! 』────
+│
+│ ✅ الإجابة الصحيحة:
+│ *${q.response}*
+│
+│ 😢 لم يُجب أحد.
+╰──────────────────`.trim(),
           conn.quiz[chatId].msg
         )
         delete conn.quiz[chatId]
@@ -65,7 +70,7 @@ let handler = async (m, { conn, usedPrefix }) => {
   }
 }
 
-// ── Answer detection: runs on every message ──────────────────────────────────
+// ── Answer detection ─────────────────────────────────────────
 handler.all = async function (m) {
   const chatId = m.chat
   if (!this.quiz || !(chatId in this.quiz)) return
@@ -73,25 +78,23 @@ handler.all = async function (m) {
 
   const entry = this.quiz[chatId]
 
-  const isReplyToQuestion = m.quoted && entry.msg && (
-    m.quoted.id === entry.msg?.key?.id ||
-    m.quoted.id === entry.msg?.id
-  )
+  // ✅ يسمح فقط بالرد على نفس رسالة السؤال
+  const isReplyToQuestion =
+    m.quoted &&
+    entry.msgId &&
+    m.quoted.id === entry.msgId
+
+  if (!isReplyToQuestion) return
 
   const rawText = (m.text || '').trim()
   if (!rawText) return
-
-  // For non-replies: require minimum 3 chars and skip messages starting with a command prefix
-  if (!isReplyToQuestion) {
-    if (rawText.length < 3) return
-    if (/^[./#!]/.test(rawText)) return
-  }
 
   const answer = normalize(entry.question.response)
   const text   = normalize(rawText)
   if (!text) return
 
-  const correct = text === answer ||
+  const correct =
+    text === answer ||
     text.includes(answer) ||
     (answer.includes(text) && text.length >= 3)
 
@@ -106,7 +109,8 @@ handler.all = async function (m) {
     user.money += entry.reward
     user.exp   += XP_BONUS
     user.totalEarned = (user.totalEarned || 0) + entry.reward
-    logTransaction(user, 'earn', entry.reward, `🧠 إجابة صحيحة في السؤال`)
+    logTransaction(user, 'earn', entry.reward, `🧠 إجابة صحيحة`)
+
     const gotDia = Math.random() < DIA_CHANCE
     if (gotDia) user.diamond = (user.diamond || 0) + 1
 
@@ -121,17 +125,23 @@ handler.all = async function (m) {
 │ ─── المكافآت ───
 │ 💰 +${fmt(entry.reward)}
 │ ⭐ +${XP_BONUS} XP
-${gotDia ? '│ 💎 +1 ماسة نادرة بالحظ!\n' : ''}│
+${gotDia ? '│ 💎 +1 ماسة!\n' : ''}│
 │ 💰 رصيدك: ${fmt(user.money)}
 ╰──────────────────`.trim(),
-      m, { mentions: [m.sender] }
+      m,
+      { mentions: [m.sender] }
     )
   } else {
-    await this.reply(m.chat, `✅ إجابة صحيحة!\n✔️ *${entry.question.response}*`, m)
+    await this.reply(
+      m.chat,
+      `✅ إجابة صحيحة!\n✔️ *${entry.question.response}*`,
+      m
+    )
   }
 }
 
-handler.help    = ['سوال', 'quiz']
-handler.tags    = ['game']
+handler.help = ['سوال', 'quiz']
+handler.tags = ['game']
 handler.command = /^(سوال|quiz|سؤال|اسأل)$/i
+
 export default handler
