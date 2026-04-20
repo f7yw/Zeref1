@@ -1,19 +1,19 @@
-FROM node:lts-buster
+FROM node:20-alpine
 
-RUN apt-get update && \
-  apt-get install -y \
+RUN apk add --no-cache \
   ffmpeg \
   imagemagick \
-  webp && \
-  apt-get upgrade -y && \
-  rm -rf /var/lib/apt/lists/*
+  libwebp
 
-COPY package.json .
+WORKDIR /app
 
-RUN npm install && npm install qrcode-terminal
+COPY package.json package-lock.json* ./
+
+RUN npm install --legacy-peer-deps && \
+    npm cache clean --force
 
 COPY . .
 
 EXPOSE 5000
 
-CMD ["node", "index.js", "--server"]
+CMD ["node", "index.js"]
