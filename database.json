@@ -92,7 +92,7 @@
       "emas": 0,
       "emerald": 0,
       "esteh": 0,
-      "exp": 22920,
+      "exp": 22989,
       "expg": 0,
       "exphero": 0,
       "expired": 0,
@@ -442,7 +442,7 @@
       "psepick": 0,
       "robo": 0,
       "roboxp": 0,
-      "lastCommandTime": 1776688503451,
+      "lastCommandTime": 1776688572604,
       "commandCount": 1,
       "tasks": [
         {
@@ -453,13 +453,13 @@
       ],
       "notes": [],
       "messages": {
-        "total": 1133,
+        "total": 1136,
         "groups": {
           "120363427285079878@g.us": 837,
-          "120363422912330057@g.us": 65,
+          "120363422912330057@g.us": 68,
           "120363360836384520@g.us": 41
         },
-        "last": 1776688503450
+        "last": 1776688572602
       },
       "bannedReason": "",
       "transactions": [
@@ -606,7 +606,7 @@
       "emas": 0,
       "emerald": 0,
       "esteh": 0,
-      "exp": 72,
+      "exp": 82,
       "expg": 0,
       "exphero": 0,
       "expired": 0,
@@ -957,11 +957,11 @@
       "robo": 0,
       "roboxp": 0,
       "messages": {
-        "total": 8,
+        "total": 9,
         "groups": {
-          "120363422912330057@g.us": 8
+          "120363422912330057@g.us": 9
         },
-        "last": 1776688173883
+        "last": 1776688593857
       },
       "transactions": [
         {
@@ -971,7 +971,7 @@
           "time": 1776579136024
         }
       ],
-      "lastCommandTime": 1776688173890,
+      "lastCommandTime": 1776688593859,
       "commandCount": 1
     },
     "967782114485@s.whatsapp.net": {
@@ -1055,7 +1055,7 @@
       "crystal": 0,
       "cumi": 0,
       "cupon": 0,
-      "diamond": 34,
+      "diamond": 35,
       "dog": 0,
       "dogexp": 0,
       "doglastfeed": 0,
@@ -1388,16 +1388,22 @@
         "soal": null
       },
       "messages": {
-        "total": 62,
+        "total": 63,
         "groups": {
-          "120363422912330057@g.us": 6,
+          "120363422912330057@g.us": 7,
           "120363427285079878@g.us": 53,
           "120363408934664388@g.us": 1
         },
-        "last": 1776688181238
+        "last": 1776688594193
       },
       "energy": 100,
       "transactions": [
+        {
+          "type": "earn",
+          "amount": 0,
+          "reason": "🆙 مكافأة المستوى 0",
+          "time": 1776688594200
+        },
         {
           "type": "earn",
           "amount": 0,
@@ -1571,12 +1577,6 @@
           "amount": 0,
           "reason": "🆙 مكافأة المستوى 0",
           "time": 1776639420925
-        },
-        {
-          "type": "earn",
-          "amount": 0,
-          "reason": "🆙 مكافأة المستوى 0",
-          "time": 1776579247717
         }
       ],
       "lastEnergyRegen": 1776579247714,
@@ -2113,9 +2113,9 @@
       "simi": false,
       "expired": 0,
       "messageStats": {
-        "28648019066900@lid": 16,
-        "158884446605486@lid": 8,
-        "967782114485@s.whatsapp.net": 6
+        "28648019066900@lid": 19,
+        "158884446605486@lid": 9,
+        "967782114485@s.whatsapp.net": 7
       },
       "botOff": false
     },
@@ -2350,10 +2350,10 @@
       "lastSuccess": 1776644350216
     },
     "owner-block-unblock.js": {
-      "total": 4,
-      "success": 1,
-      "last": 1776688504012,
-      "lastSuccess": 1776688504012
+      "total": 7,
+      "success": 4,
+      "last": 1776688593869,
+      "lastSuccess": 1776688593869
     },
     "انطقي.js": {
       "total": 3,
@@ -2408,6 +2408,12 @@
       "success": 2,
       "last": 1776688154895,
       "lastSuccess": 1776688154895
+    },
+    "owner-listprem.js": {
+      "total": 2,
+      "success": 2,
+      "last": 1776688572605,
+      "lastSuccess": 1776688572605
     }
   },
   "msgs": {},

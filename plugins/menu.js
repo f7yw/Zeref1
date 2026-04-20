@@ -468,6 +468,13 @@ handler.before = async (m, { conn }) => {
     return false
   }
 
+  // Don't hijack number input if the sender is in an active game
+  const inGame = conn.game && Object.values(conn.game).some(r =>
+    r.state === 'PLAYING' && r.game &&
+    [r.game.playerX, r.game.playerO].includes(m.sender)
+  )
+  if (inGame) return false
+
   const user = global.db.data.users[m.sender] || {}
   initEconomy(user)
   syncEnergy(user, m.sender)
