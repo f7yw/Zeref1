@@ -433,19 +433,20 @@ let handler = async (m, { conn, usedPrefix }) => {
     buttonText: "📋 عرض الأقسام"
   }
 
+  global.menuSessions ??= {}
+  global.menuSessions[m.sender] = { prefix: usedPrefix, ts: Date.now() }
+
   try {
+    // Attempt to send list message
     await conn.sendListM(m.chat, button, rows, m)
-    global.menuSessions ??= {}
-    global.menuSessions[m.sender] = { prefix: usedPrefix, ts: Date.now() }
   } catch (e) {
     console.error("Error sending list message:", e)
+    // Fallback to text message if list fails
     await conn.sendMessage(
       m.chat,
       { image: global.imagen4, caption: buildMenuText(usedPrefix, stats) },
       { quoted: m }
     )
-    global.menuSessions ??= {}
-    global.menuSessions[m.sender] = { prefix: usedPrefix, ts: Date.now() }
   }
 }
 
