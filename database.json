@@ -92,7 +92,7 @@
       "emas": 0,
       "emerald": 0,
       "esteh": 0,
-      "exp": 22899,
+      "exp": 22920,
       "expg": 0,
       "exphero": 0,
       "expired": 0,
@@ -442,7 +442,7 @@
       "psepick": 0,
       "robo": 0,
       "roboxp": 0,
-      "lastCommandTime": 1776688232115,
+      "lastCommandTime": 1776688503451,
       "commandCount": 1,
       "tasks": [
         {
@@ -453,13 +453,13 @@
       ],
       "notes": [],
       "messages": {
-        "total": 1132,
+        "total": 1133,
         "groups": {
           "120363427285079878@g.us": 837,
-          "120363422912330057@g.us": 64,
+          "120363422912330057@g.us": 65,
           "120363360836384520@g.us": 41
         },
-        "last": 1776688244971
+        "last": 1776688503450
       },
       "bannedReason": "",
       "transactions": [
@@ -2113,7 +2113,7 @@
       "simi": false,
       "expired": 0,
       "messageStats": {
-        "28648019066900@lid": 15,
+        "28648019066900@lid": 16,
         "158884446605486@lid": 8,
         "967782114485@s.whatsapp.net": 6
       },
@@ -2350,10 +2350,10 @@
       "lastSuccess": 1776644350216
     },
     "owner-block-unblock.js": {
-      "total": 3,
-      "success": 0,
-      "last": 1776642244140,
-      "lastSuccess": 0
+      "total": 4,
+      "success": 1,
+      "last": 1776688504012,
+      "lastSuccess": 1776688504012
     },
     "انطقي.js": {
       "total": 3,
