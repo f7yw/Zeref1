@@ -5,7 +5,7 @@ import path, { join } from 'path';
 import { fileURLToPath, pathToFileURL } from 'url';
 import { platform } from 'process';
 import * as ws from 'ws';
-import { readdirSync, rmSync, existsSync } from 'fs';
+import { readdirSync, rmSync, existsSync, watchFile } from 'fs';
 import yargs from 'yargs';
 import { spawn } from 'child_process';
 import lodash from 'lodash';
@@ -118,6 +118,43 @@ global.loadChatgptDB = async function () {
   };
 };
 await global.loadChatgptDB();
+
+// ====== PLUGINS ======
+global.plugins = {}
+
+async function loadPlugins() {
+  const pluginsDir = join(__dirname, 'plugins')
+  const pluginFiles = readdirSync(pluginsDir).filter(f => f.endsWith('.js'))
+  let loaded = 0, failed = 0
+  for (const file of pluginFiles) {
+    try {
+      const filePath = pathToFileURL(join(pluginsDir, file)).href
+      const mod = await import(`${filePath}?t=${Date.now()}`)
+      global.plugins[file] = mod.default || mod.handler || mod
+      loaded++
+    } catch (e) {
+      console.error(chalk.red(`[PLUGIN ERROR] ${file}: ${e.message}`))
+      global.plugins[file] = null
+      failed++
+    }
+  }
+  console.log(chalk.green(`[PLUGINS] Loaded ${loaded} plugins${failed ? `, ${failed} failed` : ''}`))
+}
+await loadPlugins()
+
+// Watch plugins for changes
+for (const file of readdirSync(join(__dirname, 'plugins')).filter(f => f.endsWith('.js'))) {
+  const filePath = join(__dirname, 'plugins', file)
+  watchFile(filePath, async () => {
+    try {
+      const mod = await import(`${pathToFileURL(filePath).href}?t=${Date.now()}`)
+      global.plugins[file] = mod.default || mod.handler || mod
+      console.log(chalk.cyan(`[PLUGINS] Reloaded: ${file}`))
+    } catch (e) {
+      console.error(chalk.red(`[PLUGIN RELOAD ERROR] ${file}: ${e.message}`))
+    }
+  })
+}
 
 // ====== AUTH ======
 global.authFile = `Zeref`;
