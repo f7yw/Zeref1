@@ -92,7 +92,7 @@
       "emas": 0,
       "emerald": 0,
       "esteh": 0,
-      "exp": 22989,
+      "exp": 30106,
       "expg": 0,
       "exphero": 0,
       "expired": 0,
@@ -313,7 +313,7 @@
       "pointxp": 0,
       "potion": 10,
       "premium": true,
-      "premiumTime": 2092047935186,
+      "premiumTime": 2092048633726,
       "ramuan": 0,
       "ramuancentaurlast": 0,
       "ramuangriffinlast": 0,
@@ -414,7 +414,7 @@
         "soal": null
       },
       "energy": 100,
-      "lastEnergyRegen": 1776688244975,
+      "lastEnergyRegen": 1776688677776,
       "lastDaily": 0,
       "lastWork": 1776481197104,
       "totalEarned": 438,
@@ -442,7 +442,7 @@
       "psepick": 0,
       "robo": 0,
       "roboxp": 0,
-      "lastCommandTime": 1776688572604,
+      "lastCommandTime": 1776688688711,
       "commandCount": 1,
       "tasks": [
         {
@@ -453,13 +453,13 @@
       ],
       "notes": [],
       "messages": {
-        "total": 1136,
+        "total": 1143,
         "groups": {
           "120363427285079878@g.us": 837,
-          "120363422912330057@g.us": 68,
+          "120363422912330057@g.us": 75,
           "120363360836384520@g.us": 41
         },
-        "last": 1776688572602
+        "last": 1776688688706
       },
       "bannedReason": "",
       "transactions": [
@@ -558,7 +558,7 @@
       "babihutan": 0,
       "babipanggang": 0,
       "bandage": 0,
-      "bank": 0,
+      "bank": 10000,
       "banned": false,
       "BannedReason": "",
       "Banneduser": false,
@@ -595,7 +595,7 @@
       "crystal": 0,
       "cumi": 0,
       "cupon": 0,
-      "diamond": 4,
+      "diamond": 54,
       "dog": 0,
       "dogexp": 0,
       "doglastfeed": 0,
@@ -606,7 +606,7 @@
       "emas": 0,
       "emerald": 0,
       "esteh": 0,
-      "exp": 82,
+      "exp": 261,
       "expg": 0,
       "exphero": 0,
       "expired": 0,
@@ -774,7 +774,7 @@
       "leleb": 0,
       "lelebakar": 0,
       "leleg": 0,
-      "level": 0,
+      "level": 1,
       "limit": 20,
       "limitjoinfree": 1,
       "lion": 0,
@@ -795,7 +795,7 @@
       "mana": 20,
       "mangga": 0,
       "misi": "",
-      "money": 15,
+      "money": 50215,
       "monyet": 0,
       "mythic": 0,
       "naga": 0,
@@ -826,8 +826,8 @@
       "pisang": 0,
       "pointxp": 0,
       "potion": 10,
-      "premium": false,
-      "premiumTime": 0,
+      "premium": true,
+      "premiumTime": 2092048650448,
       "ramuan": 0,
       "ramuancentaurlast": 0,
       "ramuangriffinlast": 0,
@@ -928,12 +928,12 @@
         "soal": null
       },
       "energy": 100,
-      "lastEnergyRegen": 1776688036019,
+      "lastEnergyRegen": 1776688650448,
       "lastDaily": 0,
       "lastWork": 0,
       "totalEarned": 0,
       "totalSpent": 0,
-      "premiumDate": -1,
+      "premiumDate": 1776688650448,
       "catexp": 0,
       "enchant": 0,
       "glimit": 20,
@@ -957,13 +957,25 @@
       "robo": 0,
       "roboxp": 0,
       "messages": {
-        "total": 9,
+        "total": 17,
         "groups": {
-          "120363422912330057@g.us": 9
+          "120363422912330057@g.us": 17
         },
-        "last": 1776688593857
+        "last": 1776688878921
       },
       "transactions": [
+        {
+          "type": "earn",
+          "amount": 200,
+          "reason": "🆙 مكافأة المستوى 1",
+          "time": 1776688698437
+        },
+        {
+          "type": "earn",
+          "amount": 50000,
+          "reason": "👑 هدية ترقية VIP",
+          "time": 1776688650448
+        },
         {
           "type": "earn",
           "amount": 0,
@@ -971,8 +983,9 @@
           "time": 1776579136024
         }
       ],
-      "lastCommandTime": 1776688593859,
-      "commandCount": 1
+      "lastCommandTime": 1776688873551,
+      "commandCount": 1,
+      "infiniteResources": true
     },
     "967782114485@s.whatsapp.net": {
       "afk": -1,
@@ -1055,7 +1068,7 @@
       "crystal": 0,
       "cumi": 0,
       "cupon": 0,
-      "diamond": 35,
+      "diamond": 37,
       "dog": 0,
       "dogexp": 0,
       "doglastfeed": 0,
@@ -1388,16 +1401,28 @@
         "soal": null
       },
       "messages": {
-        "total": 63,
+        "total": 65,
         "groups": {
-          "120363422912330057@g.us": 7,
+          "120363422912330057@g.us": 9,
           "120363427285079878@g.us": 53,
           "120363408934664388@g.us": 1
         },
-        "last": 1776688594193
+        "last": 1776688698207
       },
       "energy": 100,
       "transactions": [
+        {
+          "type": "earn",
+          "amount": 0,
+          "reason": "🆙 مكافأة المستوى 0",
+          "time": 1776688698210
+        },
+        {
+          "type": "earn",
+          "amount": 0,
+          "reason": "🆙 مكافأة المستوى 0",
+          "time": 1776688643076
+        },
         {
           "type": "earn",
           "amount": 0,
@@ -1565,18 +1590,6 @@
           "amount": 0,
           "reason": "🆙 مكافأة المستوى 0",
           "time": 1776639774672
-        },
-        {
-          "type": "earn",
-          "amount": 0,
-          "reason": "🆙 مكافأة المستوى 0",
-          "time": 1776639732353
-        },
-        {
-          "type": "earn",
-          "amount": 0,
-          "reason": "🆙 مكافأة المستوى 0",
-          "time": 1776639420925
         }
       ],
       "lastEnergyRegen": 1776579247714,
@@ -2113,9 +2126,9 @@
       "simi": false,
       "expired": 0,
       "messageStats": {
-        "28648019066900@lid": 19,
-        "158884446605486@lid": 9,
-        "967782114485@s.whatsapp.net": 7
+        "28648019066900@lid": 26,
+        "158884446605486@lid": 17,
+        "967782114485@s.whatsapp.net": 9
       },
       "botOff": false
     },
@@ -2272,16 +2285,16 @@
       "lastSuccess": 1776579456005
     },
     "menu.js": {
-      "total": 18,
-      "success": 18,
-      "last": 1776688235457,
-      "lastSuccess": 1776688235457
+      "total": 19,
+      "success": 19,
+      "last": 1776688681080,
+      "lastSuccess": 1776688681080
     },
     "اكس.js": {
-      "total": 41,
-      "success": 38,
-      "last": 1776688181761,
-      "lastSuccess": 1776688181761
+      "total": 43,
+      "success": 40,
+      "last": 1776688698437,
+      "lastSuccess": 1776688698437
     },
     "العاب3.js": {
       "total": 61,
@@ -2296,10 +2309,10 @@
       "lastSuccess": 1776640086428
     },
     "سوال.js": {
-      "total": 5,
-      "success": 5,
-      "last": 1776640602170,
-      "lastSuccess": 1776640602170
+      "total": 6,
+      "success": 6,
+      "last": 1776688857613,
+      "lastSuccess": 1776688857613
     },
     "جواب.js": {
       "total": 2,
@@ -2386,9 +2399,9 @@
       "lastSuccess": 1776686112852
     },
     "لفل.js": {
-      "total": 3,
+      "total": 4,
       "success": 0,
-      "last": 1776687920579,
+      "last": 1776688634707,
       "lastSuccess": 0
     },
     "البنك.js": {
@@ -2410,10 +2423,22 @@
       "lastSuccess": 1776688154895
     },
     "owner-listprem.js": {
+      "total": 3,
+      "success": 3,
+      "last": 1776688668321,
+      "lastSuccess": 1776688668321
+    },
+    "owner-addprem.js": {
+      "total": 3,
+      "success": 1,
+      "last": 1776688650758,
+      "lastSuccess": 1776688650758
+    },
+    "علم.js": {
       "total": 2,
       "success": 2,
-      "last": 1776688572605,
-      "lastSuccess": 1776688572605
+      "last": 1776688873826,
+      "lastSuccess": 1776688873826
     }
   },
   "msgs": {},
