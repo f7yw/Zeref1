@@ -5,13 +5,19 @@ let handler = async (m, { conn, usedPrefix, command, args, isOwner }) => {
     if (!user || !user.registered) {
       return m.reply('❌ لست مسجلاً أصلاً. استخدم .تسجيل للتسجيل.')
     }
-    user.registered = false
-    user.name = ''
-    user.age = -1
-    user.regTime = -1
-    user.level = 0
-    user.exp = 0
-    return m.reply(`✅ *تم إلغاء تسجيلك بنجاح.*\n\nتم حذف بياناتك من البوت.\nيمكنك التسجيل مجدداً في أي وقت باستخدام *.تسجيل*`)
+    user.registered  = false
+    user.name        = ''
+    user.age         = -1
+    user.regTime     = -1
+    user.level       = 0
+    user.exp         = 0
+    user.money       = 0
+    user.bank        = 0
+    user.diamond     = 0
+    user.energy      = 100
+    user.transactions = []
+    user.totalEarned  = 0
+    return m.reply(`✅ *تم إلغاء تسجيلك بنجاح.*\n\nتم حذف جميع بياناتك من البوت بما فيها رصيدك.\nيمكنك التسجيل مجدداً في أي وقت باستخدام *.تسجيل*`)
   }
 
   if (/^(حذف_عضو|حذف-عضو|deluser|مسح_عضو)$/i.test(command)) {

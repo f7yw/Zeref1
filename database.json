@@ -92,7 +92,7 @@
       "emas": 0,
       "emerald": 0,
       "esteh": 0,
-      "exp": 22480,
+      "exp": 22619,
       "expg": 0,
       "exphero": 0,
       "expired": 0,
@@ -414,7 +414,7 @@
         "soal": null
       },
       "energy": 100,
-      "lastEnergyRegen": 1776686040100,
+      "lastEnergyRegen": 1776687402358,
       "lastDaily": 0,
       "lastWork": 1776481197104,
       "totalEarned": 438,
@@ -442,7 +442,7 @@
       "psepick": 0,
       "robo": 0,
       "roboxp": 0,
-      "lastCommandTime": 1776686040100,
+      "lastCommandTime": 1776687402358,
       "commandCount": 1,
       "tasks": [
         {
@@ -453,13 +453,13 @@
       ],
       "notes": [],
       "messages": {
-        "total": 1101,
+        "total": 1112,
         "groups": {
           "120363427285079878@g.us": 837,
           "120363422912330057@g.us": 53,
           "120363360836384520@g.us": 41
         },
-        "last": 1776686057337
+        "last": 1776687402347
       },
       "bannedReason": "",
       "transactions": [
@@ -2210,8 +2210,8 @@
       "simi": false,
       "expired": 0,
       "globalTranslate": {
-        "enabled": true,
-        "to": "en"
+        "enabled": false,
+        "to": "ar"
       }
     }
   },
@@ -2241,10 +2241,10 @@
       "lastSuccess": 1776579299483
     },
     "tr.js": {
-      "total": 3,
-      "success": 3,
-      "last": 1776685637986,
-      "lastSuccess": 1776685637986
+      "total": 5,
+      "success": 5,
+      "last": 1776686729192,
+      "lastSuccess": 1776686729192
     },
     "general-sections.js": {
       "total": 4,
@@ -2253,10 +2253,10 @@
       "lastSuccess": 1776579456005
     },
     "menu.js": {
-      "total": 8,
-      "success": 8,
-      "last": 1776686044251,
-      "lastSuccess": 1776686044251
+      "total": 11,
+      "success": 11,
+      "last": 1776687406112,
+      "lastSuccess": 1776687406112
     },
     "اكس.js": {
       "total": 36,
@@ -2289,10 +2289,10 @@
       "lastSuccess": 1776640191907
     },
     "ai.js": {
-      "total": 13,
-      "success": 12,
-      "last": 1776685975478,
-      "lastSuccess": 1776685975478
+      "total": 14,
+      "success": 13,
+      "last": 1776686135704,
+      "lastSuccess": 1776686135704
     },
     "رهان.js": {
       "total": 4,
@@ -2361,10 +2361,10 @@
       "lastSuccess": 1776645180944
     },
     "global-translator.js": {
-      "total": 4,
-      "success": 4,
-      "last": 1776685957558,
-      "lastSuccess": 1776685957558
+      "total": 5,
+      "success": 5,
+      "last": 1776686112852,
+      "lastSuccess": 1776686112852
     }
   },
   "msgs": {},

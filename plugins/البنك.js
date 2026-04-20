@@ -92,9 +92,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 │ 🏆 *المستوى:*  ${level}  (XP: ${exp} / ${max})
 │
 │ ─────── 💰 الأموال ───────
-│ 💰 *المحفظة:*  ${fmt(user.money, user)}
-│ 🏦 *البنك:*    ${fmt(user.bank, user)}
-│ 💎 *الماس:*    ${isVipUser ? '∞' : user.diamond || 0} 💎
+│ 💰 *المحفظة:*  ${fmt(user.money)}
+│ 🏦 *البنك:*    ${fmt(user.bank)}
+│ 💎 *الماس:*    ${user.diamond || 0} 💎
 │
 │ ─────── ⚡ الطاقة ───────
 │ ${energyBar}

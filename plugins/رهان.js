@@ -1,4 +1,4 @@
-import { fmt, initEconomy, msToHuman } from '../lib/economy.js'
+import { fmt, initEconomy, msToHuman, logTransaction } from '../lib/economy.js'
 
 const SLOT_COOLDOWN = 15 * 1000  // 15 seconds
 const MIN_BET       = 50

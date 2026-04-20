@@ -1,118 +1,129 @@
 # Zeref - SHADOW WhatsApp Bot
 
 ## Overview
-Arabic WhatsApp bot built with Node.js and Baileys. The bot is focused on useful group/community features: study support, games, economy, group administration, media downloads, productivity tools, analytics, safety/privacy, developer helpers, wellness prompts, global auto-translation, profile/status tools, and preserved automatic chat responses.
+Arabic WhatsApp bot built with Node.js and Baileys. Focused on: study support, economy, games, group administration, media downloads, productivity tools, analytics, safety, auto-translation, and Islamic content.
 
 ## Owner / Config
 - **Owner number:** 967778088098
-- **GitHub:** https://github.com/farisatif
-- **Bot name:** 彡ℤ𝕖𝕣𝕖𝕗 / SHADOW Bot
-- **Prefix:** `.` and other prefixes from `global.prefix`
+- **Bot number:** 967782114485
+- **Bot name:** SHADOW - Bot
+- **Prefix:** `.` (and Arabic variations via global.prefix)
 
 ## Tech Stack
 - **Runtime:** Node.js ES Modules
 - **WhatsApp:** `@whiskeysockets/baileys`
-- **Database:** Lowdb JSON in `database.json`, auto-saved every 30 seconds, after handled messages, and on shutdown/disconnect
+- **Database:** Lowdb JSON (`database.json`) — auto-saved every 30 seconds, after each handled message, and on shutdown
 - **Server:** Express on port 3000
 
 ## Architecture
-- `index.js` starts the app and Express server.
-- `main.js` initializes WhatsApp, loads database, binds message/group events, and loads plugins.
-- `handler.js` routes commands, applies permissions, XP/money, and bot status gating.
-- `plugins/menu.js` contains the numbered menu sections.
-- `plugins/general-sections.js` contains productivity, analytics, safety, developer, media helper, and wellness commands.
-- `plugins/study.js` contains student learning commands.
-- `plugins/study-games.js` contains lightweight educational games.
-- `plugins/شات.js` preserves automatic chat responses.
+- `index.js` — starts app and Express server
+- `main.js` — initializes WhatsApp, loads DB, binds events, loads plugins
+- `handler.js` — command routing, permissions, XP/money, bot status gating
+- `plugins/menu.js` — numbered menu sections with `normalizeChoice()` (supports Arabic/Persian numerals)
+- `plugins/general-sections.js` — productivity, analytics, safety, developer, media helper, wellness
+- `plugins/advanced-stats.js` — new: balance report, VIP review, group/user stats, error log, backup
+- `plugins/media-tools.js` — new: link info, audio/video extract, OCR, format convert, image search
 
-## Economy System
-- `lib/economy.js` — central: `isVip()`, `logTransaction()`, `syncVipResources()`, `initEconomy()`, `fmt()` (∞ for VIP), `fmtEnergy()`, `syncEnergy()`, `deductEnergy()`, `getRole()`
-- `lib/userInit.js` — `initUser(user, name, jid)` with VIP sync on init
-- Every earn/spend calls `logTransaction(user, 'earn'|'spend', amount, reason)` — 30 per user stored in DB
-- VIP users: `user.infiniteResources = true`, money = 2B, bank = 2B, diamond = 999, energy always 100 — all in DB
-- Premium stored in DB: `user.premium = true`, `user.premiumTime = Date.now() + 10years` — survives restarts
-- `plugins/owner-addprem.js` sets DB fields + global.prems
+## Economy System (Single Source of Truth)
+- **`lib/economy.js`** — `initEconomy()`, `isVip()`, `logTransaction()`, `syncVipResources()`, `fmt()`, `fmtEnergy()`, `syncEnergy()`, `deductEnergy()`, `getRole()`, `MAX_ENERGY`, `FEES`
+- **`lib/userInit.js`** — `initUser(user, name, jid?)` — calls `initEconomy` + optional VIP sync
+- All financial changes MUST call `logTransaction(user, 'earn'|'spend', amount, reason)` — 30 per user stored in DB
 
-## Plugins (key)
-- `plugins/يومي.js` — daily reward, requires registration, logs transaction
-- `plugins/عمل.js` — work reward, requires registration, logs transaction
-- `plugins/البنك.js` — bank view/deposit/withdraw/transfer, logs all, ∞ display for VIP
-- `plugins/معاملاتي.js` — NEW: `.معاملاتي` shows last 20 transactions with earn/spend summary
-- `plugins/تسجيل.js` — registration with welcome bonus
-- `plugins/شطرنج.js` — chess with chess.com Neo-style pieces (bold, geometric, thicker outlines)
-- `plugins/شات.js` — 154 auto-response patterns, 500+ response strings, full Arabic coverage
+### Economy Fields (canonical)
+| Field | Default | Description |
+|-------|---------|-------------|
+| `money` | 0 | Wallet balance |
+| `bank` | 0 | Bank balance |
+| `energy` | 100 | Energy (max 100) |
+| `diamond` | 0 | Diamond count |
+| `premium` | false | VIP status flag |
+| `premiumTime` | 0 | VIP expiry (ms timestamp) |
+| `infiniteResources` | false | Bypasses energy checks |
+| `transactions` | [] | Last 30 transaction records |
+| `totalEarned` | 0 | Cumulative earned |
+| `totalSpent` | 0 | Cumulative spent |
+
+### VIP / Premium Rules
+- `premium = true` → status flag only
+- `premiumTime = Date.now() + 10years` → expiry
+- `infiniteResources = true` → bypasses energy consumption in commands
+- **Does NOT inflate money/bank to fake 2B** — VIP users have REAL balances
+- Welcome bonus on addprem: +50,000 🪙, +10,000 bank, +50 💎
+- `syncVipResources()` — syncs flags only, no money inflation
+- `plugins/owner-addprem.js` — sets DB fields + global.prems, gives modest bonus
+- `plugins/مغادرة.js` — when user unregisters: resets ALL fields including money/bank/diamond
+
+## Shop System
+- `plugins/شراء الماس.js` — buy diamonds with coins: 1💎 = 1,000🪙
+- `plugins/شراء عملات.js` — sell diamonds for coins: 1💎 = 800🪙
+- Both use `initEconomy()` and `logTransaction()`
+
+## New Commands Added
+### Advanced Stats (`plugins/advanced-stats.js`)
+- `.تقرير_المال` — detailed financial report with last 5 transactions
+- `.مراجعة_البريم` — VIP status, expiry, real balance
+- `.احصائيات_القروب` — group member count, admins, top 5 active, settings
+- `.احصائياتي_مفصل` — full user stats (level, XP, messages, economy)
+- `.اخطاء` — owner: shows recent bot errors (tracked in `global._recentErrors`)
+- `.نسخة_احتياطية` — owner: sends DB as JSON document to WhatsApp
+
+### Media Tools (`plugins/media-tools.js`)
+- `.معلومات_رابط <url>` — detect platform, safety check
+- `.تحميل_صوت <url>` — extract audio (uses lib/ytdlp.js or lib/y2mate.js)
+- `.تحميل_فيديو <url>` — download video
+- `.ocr` — extract text from image (requires tesseract.js)
+- `.تحويل_صيغة` — image→sticker, video→audio conversion
+- `.بحث_صورة <كلمة>` — image search via Unsplash
+
+## Level System (`plugins/لفل.js`)
+- Fixed: `conn.getName` now properly awaited
+- Fixed: `initUser` + `initEconomy` called before accessing user fields
+- `getRole(level)` computed inline — no undefined `user.role` reference
+- Bonus: +1 diamond every 5 levels on level-up
+
+## Bet System (`plugins/رهان.js`)
+- Bet deducted FIRST from wallet before any calculation
+- Prize added ONLY on win (partial or jackpot)
+- All outcomes logged with `logTransaction`
+- Import fixed: `logTransaction` added to import
+
+## Bug Fixes Applied (Audit)
+1. `رهان.js` — missing `logTransaction` import (CRITICAL — was using undefined function)
+2. `رهان.js` — bet inflation exploit fixed (deduct before calculate)
+3. `لفل.js` — `conn.getName` not awaited (crash on slow connections)
+4. `لفل.js` — `user.role` undefined (not in schema) → replaced with `getRole(level)`
+5. `لفل.js` — no `initUser`/`initEconomy` before field access
+6. `شراء الماس.js` — completely rewritten (was just balance display, Spanish commands)
+7. `شراء عملات.js` — completely rewritten (was spending XP for `limit` tokens, broken)
+8. `owner-addprem.js` — removed 2B money/bank inflation → now gives modest welcome bonus
+9. `lib/economy.js syncVipResources` — removed 2B inflation, flags only
+10. `lib/economy.js fmt()` — removed `user.infiniteResources` → "∞" display (real balance now shown)
+11. `البنك.js` — removed `fmt(user.money, user)` second arg (no longer needed)
+12. `مغادرة.js` — unregister now resets money/bank/diamond/energy/transactions
+13. `سوال.js` + `جواب.js` + `تحدي.js` — `logTransaction` added to all reward paths
+14. `global-translator.js` — fixed: skips command messages (prefix check)
+15. `tr.js` — fixed redirect when Arabic translator command used instead of مترجم
+16. Menu — shop descriptions updated to match new شراء_الماس / شراء_عملات logic
+
+## Plugins (127 total, as of last audit)
+- **Games:** شطرنج, اكس/اكس1, سوال, تحدي, رهان, فزوره, خمن, تخمين, حجره, لو, لو2, حظ, رياضيات, جواب, علم/علم1/علم2, العاب3, العاب-سريعة
+- **Economy:** البنك, عمل, يومي, طاقة, معاملاتي, شراء الماس, شراء عملات, لفل
+- **Media:** اغنيه, بنترست, تحميل, mp3, hd, media-tools
+- **Islamic:** قران, آية الكرسي, اذكار الصباح, اذكار المساء, حديث
+- **Group:** group-admin, group-request, ايقافوتشغيل, فتح_اغلاق, صورة-القروب
+- **Owner:** owner-addprem, owner-banlist, owner-banuser, owner-block-unblock, owner-blocklist, owner-join, owner-listprem, db-clear, مغادرة
+- **Utility:** global-translator, tr/tr2, general-sections, advanced-stats, reminder, منبه, study, study-games, offensive-words, security, bot-status, شات, profile, تسجيل, بلاغ, menu
 
 ## Handler Features
-- Level-up notification: **SILENT** — level stored in DB, shown in `.بروفايل` only; bonuses still granted (200×level coins, +30 energy, +1 diamond every 5 levels)
-- Registration gate: `handler.register = true` on يومي + عمل blocks unregistered users with proper Arabic prompt
-- Temp ban check: users with `user.tempBannedUntil > Date.now()` are blocked from all commands with time remaining message
-- Response delay: 400–1000ms random realistic delay before responding to commands
-- Startup log: sent to all developer-flagged owners (5s after connect) with plugin list, DB stats, and memory usage
+- Level-up: silent in DB, shown on `.لفل`; bonuses granted automatically
+- `handler.register = true` blocks unregistered users on يومي/عمل
+- Temp ban: `user.tempBannedUntil` blocks all commands with time remaining
+- Response delay: 500–1200ms realistic delay per command
+- Startup log: sent to all developer-flagged owners (5s after connect)
+- Message tracking: `user.messages.total`, `user.messages.groups[chat]`, `chat.messageStats`
 
-## Security & Safety Features
-- `plugins/offensive-words.js` — auto-block offensive Arabic/English words with 3-warning system and 30-minute temp ban
-- `plugins/db-clear.js` — `.مسح_المستخدمين`, `.مسح_المحادثات`, `.مسح_الكل` commands that preserve blocked/premium users
-- `plugins/صورة-القروب.js` — get and set group profile picture
-- `plugins/مغادرة.js` — users can delete their own registration data
-
-## Questions System
-- `src/game/acertijo.json` — original trivia questions (anime, general knowledge)
-- `src/game/it_questions.json` — 350+ IT/Computer Science questions (Arabic) covering: programming, networking, security, cloud, DevOps, AI/ML, databases, algorithms, OS, web dev
-- `plugins/سوال.js` — loads BOTH question banks and picks randomly
-
-## Join Request System
-- `plugins/group-request.js` — request/accept/reject workflow for joining groups
-- `plugins/owner-join.js` — instant join for developer/owner/premium; approval flow for regular users
-
-## Current Focus
-The bot is a professional Arabic WhatsApp assistant with economy, games, auto-responses, admin tools, and media features.
-
-## Menu Sections
-1. 🎓 التعلم والدراسة — plans, summaries, flashcards, quizzes, GPA, study rules, Pomodoro, sources, daily schedule
-2. 📖 القرآن الكريم — adhkar and Quran commands
-3. 🤖 الذكاء الاصطناعي — AI chat/image quality where configured
-4. 🎮 الألعاب — quiz, math, chess, tic-tac-toe, dice, coin, RPS, educational games
-5. 🛠️ أدوات نافعة — global translator, reminders, alarm, QR
-6. 💰 الاقتصاد — bank, deposit, withdraw, transfer, work, daily reward, energy
-7. 👤 الحساب والمعلومات — profile with picture and full saved information, bot status, time, report, owner
-8. 🎧 الوسائط والتحميل — songs as audio/video, YouTube search, video download
-9. 📌 الإنتاجية والتنظيم — tasks and notes
-10. 📊 التحليل والإحصاءات — user stats, leaderboard, group activity, plugin usage
-11. 🛡️ السلامة والخصوصية — link checks, privacy tips, group safety rules
-12. 💻 البرمجة والمطور — code formatting, JSON formatting, regex testing
-13. 🌱 الصحة والعادات — water, breathing, and smart break prompts
-14. 👥 إدارة القروب — name/description, kick/add, promote/demote, lock/open, mentions, anti-link
-15. 👑 أوامر المالك — bot control and moderation
-16. 📜 كل الأقسام — combined section view
-
-## Study Commands
-- `.تعلم` — shows the study section help
-- `.خطة رياضيات 7` — study plan by subject and days
-- `.تلخيص <نص>` — quick local summary
-- `.بطاقات <نص>` — flashcards from notes
-- `.اختبرني فيزياء` — quick self-test question
-- `.معدلي 90 85 77` — approximate average/grade
-- `.قاعدة` — useful study rule
-- `.بومودورو` — focus method
-- `.مصادر` — recommended study resources
-- `.جدول` — short daily study schedule
-
-## Educational Games
-- `.كلمة` / `.رتب` — arrange a study-related word
-- `.سرعة` / `.حساب_سريع` — quick arithmetic
-- `.ذاكرة` — memory number challenge
-- `.حل <الإجابة>` — answer educational games
-
-## Important Fixes
-- Menu supports English, Arabic, and Persian numerals.
-- Bot admin detection supports newer WhatsApp JID/LID participant formats.
-- Promote/demote group update parsing avoids `@undefined` and crash cases.
-- Bot ignores its own sent messages before plugin processing to prevent reply loops.
-- Owner/mod/admin/bot matching is more tolerant of decoded JIDs, LID participant IDs, phoneNumber fields, and number formats.
-- Profile command safely handles missing names and now sends profile picture plus full stored account/economy information.
-- Group message tracking stores total messages per user and per-group counts; `.رسائلي`, `.رسائل @عضو`, and `.ترتيب_الرسائل` display the tracker.
-- Main command list sends with the bot menu image.
-- Database writes are triggered after message handling and before reconnect/exit to reduce data loss on restart.
-- Song command supports explicit audio/video choice: `.اغنيه صوت ...`, `.اغنيه فيديو ...`, `.فيديو ...`.
-- Legacy `.ترجم` plugins are disabled; global translator remains active.
-- Duplicate bank commands are removed from active use; `plugins/البنك.js` is the main bank.
+## Important Rules
+- Never duplicate economy logic outside `lib/economy.js` and `lib/userInit.js`
+- Every money/bank/energy/diamond change must call `logTransaction`
+- Arabic command names must not be changed without necessity
+- `premium = true` = status; real balance = always one record; `infiniteResources = true` = bypass energy checks only

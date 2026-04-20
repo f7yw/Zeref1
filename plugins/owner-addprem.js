@@ -1,7 +1,9 @@
-import { logTransaction } from '../lib/economy.js'
+import { logTransaction, initEconomy, MAX_ENERGY } from '../lib/economy.js'
 
-const VIP_DURATION = 10 * 365 * 24 * 60 * 60 * 1000  // 10 years
-const VIP_MONEY    = 2_000_000_000                      // "infinite" wallet
+const VIP_DURATION = 10 * 365 * 24 * 60 * 60 * 1000
+const VIP_BONUS_MONEY   = 50_000
+const VIP_BONUS_BANK    = 10_000
+const VIP_BONUS_DIAMOND = 50
 
 let handler = async (m, { conn, text }) => {
   let who
@@ -15,34 +17,36 @@ let handler = async (m, { conn, text }) => {
 
   if (global.prems.includes(num)) throw `*[❗] @${num} مميّز بالفعل*`
 
-  // ── Persist in global.prems (runtime) ───────────────────────────────────
   global.prems.push(num)
 
-  // ── Persist in local database ────────────────────────────────────────────
   if (!global.db.data.users[jid]) global.db.data.users[jid] = {}
   const user = global.db.data.users[jid]
-  user.premium          = true
-  user.premiumTime      = Date.now() + VIP_DURATION
-  user.premiumDate      = Date.now()
+  initEconomy(user)
+
+  user.premium           = true
+  user.premiumTime       = Date.now() + VIP_DURATION
+  user.premiumDate       = Date.now()
   user.infiniteResources = true
-  user.energy           = 100
-  user.lastEnergyRegen  = Date.now()
-  if ((user.money  || 0) < 1_000_000) user.money  = VIP_MONEY
-  if ((user.bank   || 0) < 1_000_000) user.bank   = VIP_MONEY
-  if ((user.diamond|| 0) < 100)       user.diamond = 999
-  logTransaction(user, 'earn', VIP_MONEY, `👑 ترقية VIP — موارد لا نهاية لها`)
+  user.energy            = MAX_ENERGY
+  user.lastEnergyRegen   = Date.now()
+
+  user.money   = (user.money   || 0) + VIP_BONUS_MONEY
+  user.bank    = (user.bank    || 0) + VIP_BONUS_BANK
+  user.diamond = (user.diamond || 0) + VIP_BONUS_DIAMOND
+
+  logTransaction(user, 'earn', VIP_BONUS_MONEY, `👑 هدية ترقية VIP`)
 
   const msg = `╭────『 👑 ترقية VIP 』────
 │
 │ ✅ @${num} الآن مميّز!
 │
-│ 💰 محفظة: ∞ لا نهاية
-│ 🏦 بنك:    ∞ لا نهاية
-│ 💎 ماس:   ∞
-│ ⚡ طاقة:  100/100 (دائمة)
+│ 💰 هدية ترحيب: +${VIP_BONUS_MONEY.toLocaleString('en')} 🪙
+│ 🏦 بنك:        +${VIP_BONUS_BANK.toLocaleString('en')} 🪙
+│ 💎 ماس:        +${VIP_BONUS_DIAMOND}
+│ ⚡ طاقة:       ${MAX_ENERGY}/${MAX_ENERGY} (دائمة)
 │
-│ يمكنه استخدام أي أمر بلا قيود.
-│ البيانات محفوظة في قاعدة البيانات.
+│ ⭐ يتخطى حدود الطاقة في جميع الأوامر.
+│ 💡 رصيده الحقيقي محفوظ ويمكن تتبعه.
 │
 ╰──────────────────`
   await m.reply(msg, null, { mentions: [jid] })
