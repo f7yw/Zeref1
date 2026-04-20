@@ -150,40 +150,63 @@ if (!phoneNumber) {
 console.log(chalk.cyan(`\n[CONFIG] Phone number loaded: ${phoneNumber}`));
 
 // ====== CONNECT ======
-global.conn = makeWASocket(connectionOptions);
-conn.isInit = false;
+async function startWhatsAppBot() {
+  global.conn = makeWASocket(connectionOptions);
+  conn.isInit = false;
 
-// Pairing Code Logic
-if (!conn.authState.creds.registered) {
-  console.log(chalk.cyan(`\n[PAIRING] Session not registered. Requesting pairing code for: +${phoneNumber}`));
-  console.log(chalk.gray('  ➤ Open WhatsApp → Linked Devices → Link a Device → Link with phone number'));
-  setTimeout(async () => {
-    try {
-      console.log(chalk.cyan('[PAIRING] Contacting WhatsApp servers...'));
-      let code = await conn.requestPairingCode(phoneNumber.trim());
-      code = code?.match(/.{1,4}/g)?.join('-') || code;
-      console.log(chalk.green.bold('\n╔══════════════════════════════════════════════════╗'));
-      console.log(chalk.green.bold(`║         📱  YOUR PAIRING CODE: ${code.padEnd(16)}║`));
-      console.log(chalk.green.bold('╚══════════════════════════════════════════════════╝\n'));
-    } catch (e) {
-      console.log(chalk.red.bold('\n[PAIRING ERROR] Failed to generate pairing code!'));
-      console.log(chalk.red(`  ➤ Error type   : ${e?.output?.payload?.error || e?.name || 'Unknown'}`));
-      console.log(chalk.red(`  ➤ Error message: ${e?.output?.payload?.message || e?.message || String(e)}`));
-      console.log(chalk.red(`  ➤ Status code  : ${e?.output?.statusCode || 'N/A'}`));
-      console.log(chalk.yellow('  ➤ Possible causes:'));
-      console.log(chalk.yellow('      • Invalid phone number format (must include country code, digits only)'));
-      console.log(chalk.yellow('      • WhatsApp server refused the connection'));
-      console.log(chalk.yellow('      • A stale session exists — the bot will retry on restart'));
-      console.log(chalk.yellow('  ➤ Full error:\n'), e);
-    }
-  }, 3000);
-} else {
-  console.log(chalk.cyan('[AUTH] Existing session found. Attempting to reconnect...'));
+  // Pairing Code Logic
+  if (!conn.authState.creds.registered) {
+    console.log(chalk.cyan(`\n[PAIRING] Session not registered. Requesting pairing code for: +${phoneNumber}`));
+    console.log(chalk.gray("  ➤ Open WhatsApp → Linked Devices → Link a Device → Link with phone number"));
+    setTimeout(async () => {
+      try {
+        console.log(chalk.cyan("[PAIRING] Contacting WhatsApp servers..."));
+        let code = await conn.requestPairingCode(phoneNumber.trim());
+        code = code?.match(/.{1,4}/g)?.join("-") || code;
+        console.log(chalk.green.bold("\n╔══════════════════════════════════════════════════╗"));
+        console.log(chalk.green.bold(`║         📱  YOUR PAIRING CODE: ${code.padEnd(16)}║`));
+        console.log(chalk.green.bold("╚══════════════════════════════════════════════════╝\n"));
+      } catch (e) {
+        console.log(chalk.red.bold("\n[PAIRING ERROR] Failed to generate pairing code!"));
+        console.log(chalk.red(`  ➤ Error type   : ${e?.output?.payload?.error || e?.name || 'Unknown'}`));
+        console.log(chalk.red(`  ➤ Error message: ${e?.output?.payload?.message || e?.message || String(e)}`));
+        console.log(chalk.red(`  ➤ Status code  : ${e?.output?.statusCode || 'N/A'}`));
+        console.log(chalk.yellow("  ➤ Possible causes:"));
+        console.log(chalk.yellow("      • Invalid phone number format (must include country code, digits only)"));
+        console.log(chalk.yellow("      • WhatsApp server refused the connection"));
+        console.log(chalk.yellow("      • A stale session exists — the bot will retry on restart"));
+        console.log(chalk.yellow("  ➤ Full error:\n"), e);
+      }
+    }, 3000);
+  } else {
+    console.log(chalk.cyan("[AUTH] Existing session found. Attempting to reconnect..."));
+  }
+  conn.logger.info(`Ƈᴀʀɢᴀɴᴅᴏ．．．\n`);
+
+  // ====== HANDLER ======
+  let handler = await import('./handler.js');
+
+  conn.handler = handler.handler.bind(conn);
+  conn.connectionUpdate = connectionUpdate.bind(conn);
+  conn.credsUpdate = saveCreds.bind(conn);
+  conn.participantsUpdate = handler.participantsUpdate.bind(conn);
+  conn.groupsUpdate = handler.groupsUpdate.bind(conn);
+
+  // ====== EVENTS ======
+  conn.ev.on('messages.upsert', conn.handler);
+  conn.ev.on('connection.update', conn.connectionUpdate);
+  conn.ev.on('creds.update', conn.credsUpdate);
+  conn.ev.on('group-participants.update', conn.participantsUpdate);
+  conn.ev.on('groups.update', conn.groupsUpdate);
 }
+
+global.startWhatsAppBot = startWhatsAppBot;
+startWhatsAppBot();
 
 let stopped = false;
 
-conn.logger.info(`Ƈᴀʀɢᴀɴᴅᴏ．．．\n`);
+// Ensure connectionUpdate has access to startWhatsAppBot
+const connectToWhatsApp = startWhatsAppBot;
 
 // ====== CONNECTION HANDLER ======
 async function connectionUpdate(update) {
@@ -212,18 +235,8 @@ async function connectionUpdate(update) {
       global.__reconnectTimer = null
 
       try {
-        if (typeof connectToWhatsApp === 'function') {
-          await connectToWhatsApp()
-          return
-        }
-
-        if (typeof global.connectToWhatsApp === 'function') {
-          await global.connectToWhatsApp()
-          return
-        }
-
-        if (typeof global.startBot === 'function') {
-          await global.startBot()
+        if (typeof global.startWhatsAppBot === 'function') {
+          await global.startWhatsAppBot()
           return
         }
 
@@ -359,22 +372,6 @@ ${pluginList}
       return
   }
 }
-
-// ====== HANDLER ======
-let handler = await import('./handler.js');
-
-conn.handler = handler.handler.bind(conn);
-conn.connectionUpdate = connectionUpdate.bind(conn);
-conn.credsUpdate = saveCreds.bind(conn);
-conn.participantsUpdate = handler.participantsUpdate.bind(conn);
-conn.groupsUpdate = handler.groupsUpdate.bind(conn);
-
-// ====== EVENTS ======
-conn.ev.on('messages.upsert', conn.handler);
-conn.ev.on('connection.update', conn.connectionUpdate);
-conn.ev.on('creds.update', conn.credsUpdate);
-conn.ev.on('group-participants.update', conn.participantsUpdate);
-conn.ev.on('groups.update', conn.groupsUpdate);
 
 // ====== POLL VOTE HANDLER (menu navigation) ======
 global.menuPolls = global.menuPolls || new Map();
