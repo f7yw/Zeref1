@@ -6,38 +6,38 @@ const VIP_BONUS_BANK    = 10000
 const VIP_BONUS_DIAMOND = 50
 
 let handler = async (m, { conn, text }) => {
-  // نفس طريقة البروفايل (مضمونة)
-  let who = m.mentionedJid?.[0] || m.quoted?.sender || (text ? text.replace(/\D/g, '') + '@s.whatsapp.net' : null)
+  let jid = m.mentionedJid?.[0] || m.quoted?.sender
 
-  if (!who) throw `*[❗] يرجى تحديد المستخدم (@منشن أو رد أو رقم)*`
+  if (!jid && text) {
+    const cleaned = text.replace(/[^0-9]/g, '')
+    if (cleaned.length >= 7) jid = cleaned + '@s.whatsapp.net'
+  }
 
-  const jid = who
-  const num = jid.split('@')[0]
+  if (!jid) throw `*[❗] يرجى تحديد المستخدم (@منشن أو رد أو رقم الهاتف)*`
 
-  // منع التكرار
+  const num = jid.split('@')[0].replace(/[^0-9]/g, '')
+
+  if (!num) throw `*[❗] رقم المستخدم غير صالح*`
+
+  const normalJid = num + '@s.whatsapp.net'
+
   if (global.prems.includes(num)) {
-    throw `*[❗] @${num} مميّز بالفعل*`
+    throw `*[❗] المستخدم +${num} مميّز بالفعل*`
   }
 
   global.prems.push(num)
 
-  // تأكد من وجود المستخدم
-  global.db.data.users[jid] ||= {}
-  const user = global.db.data.users[jid]
+  global.db.data.users[normalJid] ||= {}
+  const user = global.db.data.users[normalJid]
 
   initEconomy(user)
 
-  // تعيين VIP
   user.premium = true
   user.premiumTime = Date.now() + VIP_DURATION
   user.premiumDate = Date.now()
-
-  // مزايا VIP
   user.infiniteResources = true
   user.energy = MAX_ENERGY
   user.lastEnergyRegen = Date.now()
-
-  // مكافآت
   user.money = (user.money || 0) + VIP_BONUS_MONEY
   user.bank = (user.bank || 0) + VIP_BONUS_BANK
   user.diamond = (user.diamond || 0) + VIP_BONUS_DIAMOND
@@ -58,7 +58,7 @@ let handler = async (m, { conn, text }) => {
 │
 ╰──────────────────`
 
-  await conn.sendMessage(m.chat, { text: msg, mentions: [jid] }, { quoted: m })
+  await conn.sendMessage(m.chat, { text: msg, mentions: [normalJid] }, { quoted: m })
 }
 
 handler.help = ['addprem <@user>']

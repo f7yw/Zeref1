@@ -1,5 +1,5 @@
 import FormData from 'form-data'
-import * as Jimp from 'jimp'
+import { Jimp, JimpMime } from 'jimp'
 import { deductEnergy, syncEnergy, initEconomy, FEES, MAX_ENERGY } from '../lib/economy.js'
 
 let handler = async (m, { conn, usedPrefix }) => {
@@ -111,13 +111,13 @@ async function localEnhance(buffer) {
   const w = image.bitmap.width
   const h = image.bitmap.height
 
-  image.resize(Math.max(1, w * 2), Math.max(1, h * 2))
+  image.resize({ w: Math.max(1, w * 2), h: Math.max(1, h * 2) })
   image.normalize()
   image.contrast(0.15)
   image.brightness(0.05)
   image.quality(92)
 
-  return await image.getBufferAsync(Jimp.MIME_JPEG)
+  return await image.getBuffer(JimpMime.jpeg)
 }
 
 async function processing(urlPath, method) {
@@ -168,13 +168,16 @@ async function processing(urlPath, method) {
             const asText = buffer.toString('utf8').trim()
 
             if (
+              asText.startsWith('<!') ||
               asText.startsWith('{') ||
               asText.startsWith('[') ||
               asText.toLowerCase().includes('error') ||
               asText.toLowerCase().includes('blocked') ||
               asText.toLowerCase().includes('rate') ||
               asText.toLowerCase().includes('forbidden') ||
-              asText.toLowerCase().includes('unauthorized')
+              asText.toLowerCase().includes('unauthorized') ||
+              asText.toLowerCase().includes('not supported') ||
+              asText.toLowerCase().includes('method not allowed')
             ) {
               return reject(new Error(asText.slice(0, 300)))
             }

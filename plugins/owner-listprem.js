@@ -1,28 +1,29 @@
 let handler = async (m, { conn }) => {
   let prem = global.prems
-    .map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net')
-    .filter(v => v != conn.user.jid)
+    .map(v => v.replace(/[^0-9]/g, ''))
+    .filter(v => v && v !== conn.user.jid?.split('@')[0])
+
+  if (!prem.length) {
+    return conn.sendMessage(m.chat, { text: '▢ *لا يوجد مستخدمون مميزون حالياً*' }, { quoted: m })
+  }
 
   let teks = `▢ *المستخدمين البريميوم*\n─────────────\n`
+  let mentions = []
 
-  for (let jid of prem) {
-    let name = jid.split('@')[0]
+  for (let num of prem) {
+    const jid = num + '@s.whatsapp.net'
+    mentions.push(jid)
 
+    let name = `+${num}`
     try {
-      name = await conn.getName(jid)
+      const fetched = conn.getName(jid)
+      if (fetched && fetched !== 'undefined' && fetched !== num) name = fetched
     } catch {}
 
     teks += `❈↲ ${name}\n`
   }
 
-  await conn.sendMessage(
-    m.chat,
-    {
-      text: teks,
-      mentions: prem
-    },
-    { quoted: m }
-  )
+  await conn.sendMessage(m.chat, { text: teks, mentions }, { quoted: m })
 }
 
 handler.help = ['listprem']
