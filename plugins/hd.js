@@ -1,13 +1,14 @@
-import { deductEnergy, syncEnergy, initEconomy, isVip, FEES, MAX_ENERGY } from '../lib/economy.js'
-import { typingDelay } from '../lib/presence.js'
+import FormData from 'form-data'
+import * as Jimp from 'jimp'
+import { deductEnergy, syncEnergy, initEconomy, FEES, MAX_ENERGY } from '../lib/economy.js'
 
 let handler = async (m, { conn, usedPrefix }) => {
   const user = global.db.data.users[m.sender]
-  const vip = isVip(m.sender)
 
-  if (user && !vip) {
+  if (user) {
     initEconomy(user)
     syncEnergy(user)
+
     if (user.energy < FEES.hd) {
       throw `╭────『 ⚡ طاقة ناضبة 』────
 │
@@ -25,36 +26,43 @@ let handler = async (m, { conn, usedPrefix }) => {
 
   const q = m.quoted ? m.quoted : m
   const mime = (q.msg || q).mimetype || q.mediaType || ''
+
   if (!mime) throw '❌ أرسل أو اقتبس صورة مع الأمر.'
-  if (!/image\/(jpe?g|png|webp)/i.test(mime)) throw '❌ الصيغة المدعومة: JPG أو PNG فقط.'
+  if (!/image\/(jpe?g|png)/i.test(mime)) throw '❌ الصيغة المدعومة: JPG أو PNG فقط.'
 
   conn.hdr[m.sender] = true
-  if (user && !vip) deductEnergy(user, FEES.hd, m.sender)
-  await typingDelay(conn, m.chat, 1000)
-  await m.reply(`⚙️ جاري رفع جودة الصورة...${!vip ? ` ⚡ -${FEES.hd} طاقة` : ''}`)
+
+  if (user) deductEnergy(user, FEES.hd)
+
+  await m.reply(`⚙️ جاري رفع جودة الصورة... ⚡ -${FEES.hd} طاقة`)
 
   try {
-    const { default: sharp } = await import('sharp')
-    const img = await q.download()
-    if (!img || !Buffer.isBuffer(img) || img.length < 100) throw new Error('تعذر تحميل الصورة')
+    const img = await downloadMedia(q)
+    if (!img || !Buffer.isBuffer(img) || img.length < 100) {
+      throw new Error('تعذر تحميل الصورة بشكل صحيح')
+    }
 
-    const meta = await sharp(img).metadata()
-    const newW = Math.min((meta.width || 800) * 2, 4000)
-    const newH = Math.min((meta.height || 800) * 2, 4000)
+    let out
+    try {
+      out = await processing(img, 'enhance')
+      if (!isImageBuffer(out)) throw new Error('API returned non-image buffer')
+    } catch (apiError) {
+      console.error('[HD API ERROR]', apiError)
+      out = await localEnhance(img)
+      if (!isImageBuffer(out)) throw new Error('Local enhancement failed')
+    }
 
-    const out = await sharp(img)
-      .resize(newW, newH, { fit: 'fill', kernel: sharp.kernel.lanczos3 })
-      .sharpen({ sigma: 1.5, m1: 0.8, m2: 0.5 })
-      .jpeg({ quality: 95, chromaSubsampling: '4:4:4' })
-      .toBuffer()
-
-    await conn.sendMessage(m.chat, {
-      image: out,
-      caption: `✅ تم رفع الجودة!\n📐 ${meta.width}×${meta.height} ➜ ${newW}×${newH}`
-    }, { quoted: m })
+    await conn.sendMessage(
+      m.chat,
+      {
+        image: out,
+        caption: '✅ تم رفع الجودة!'
+      },
+      { quoted: m }
+    )
   } catch (er) {
     console.error('[HD ERROR]', er)
-    m.reply('❌ فشل تحسين الجودة، تأكد أن الصورة واضحة وحاول مجدداً.')
+    m.reply('❌ فشل تحسين الجودة، حاول مجدداً.')
   } finally {
     delete conn.hdr[m.sender]
   }
@@ -67,3 +75,116 @@ handler.register = false
 handler.limit = false
 
 export default handler
+
+function isImageBuffer(buf) {
+  if (!buf || !Buffer.isBuffer(buf) || buf.length < 4) return false
+  const b0 = buf[0], b1 = buf[1], b2 = buf[2], b3 = buf[3]
+
+  const isJpeg = b0 === 0xff && b1 === 0xd8
+  const isPng = b0 === 0x89 && b1 === 0x50 && b2 === 0x4e && b3 === 0x47
+
+  return isJpeg || isPng
+}
+
+async function downloadMedia(msg) {
+  if (typeof msg.download === 'function') {
+    const data = await msg.download()
+    if (data) return Buffer.isBuffer(data) ? data : Buffer.from(data)
+  }
+
+  if (msg.msg && typeof msg.msg.download === 'function') {
+    const data = await msg.msg.download()
+    if (data) return Buffer.isBuffer(data) ? data : Buffer.from(data)
+  }
+
+  if (msg.downloadMediaMessage) {
+    const data = await msg.downloadMediaMessage()
+    if (data) return Buffer.isBuffer(data) ? data : Buffer.from(data)
+  }
+
+  throw new Error('No download method available for media')
+}
+
+async function localEnhance(buffer) {
+  const image = await Jimp.read(buffer)
+
+  const w = image.bitmap.width
+  const h = image.bitmap.height
+
+  image.resize(Math.max(1, w * 2), Math.max(1, h * 2))
+  image.normalize()
+  image.contrast(0.15)
+  image.brightness(0.05)
+  image.quality(92)
+
+  return await image.getBufferAsync(Jimp.MIME_JPEG)
+}
+
+async function processing(urlPath, method) {
+  return new Promise((resolve, reject) => {
+    const methods = ['enhance', 'recolor', 'dehaze']
+    if (!methods.includes(method)) method = methods[0]
+
+    const form = new FormData()
+    const scheme = `https://inferenceengine.vyro.ai/${method}`
+
+    form.append('model_version', 1, {
+      'Content-Transfer-Encoding': 'binary',
+      contentType: 'multipart/form-data; charset=utf-8'
+    })
+
+    form.append('image', Buffer.from(urlPath), {
+      filename: 'enhance_image_body.jpg',
+      contentType: 'image/jpeg'
+    })
+
+    form.submit(
+      {
+        url: scheme,
+        host: 'inferenceengine.vyro.ai',
+        path: `/${method}`,
+        protocol: 'https:',
+        headers: {
+          'User-Agent': 'okhttp/4.9.3',
+          Connection: 'Keep-Alive',
+          'Accept-Encoding': 'gzip'
+        }
+      },
+      (err, res) => {
+        if (err) return reject(err)
+
+        const data = []
+
+        res.on('data', chunk => data.push(chunk))
+
+        res.on('end', () => {
+          const buffer = Buffer.concat(data)
+
+          if (!buffer || buffer.length < 100) {
+            return reject(new Error('Empty response from API'))
+          }
+
+          if (buffer.length >= 2) {
+            const asText = buffer.toString('utf8').trim()
+
+            if (
+              asText.startsWith('{') ||
+              asText.startsWith('[') ||
+              asText.toLowerCase().includes('error') ||
+              asText.toLowerCase().includes('blocked') ||
+              asText.toLowerCase().includes('rate') ||
+              asText.toLowerCase().includes('forbidden') ||
+              asText.toLowerCase().includes('unauthorized')
+            ) {
+              return reject(new Error(asText.slice(0, 300)))
+            }
+          }
+
+          resolve(buffer)
+        })
+
+        res.on('error', reject)
+      }
+    )
+  })
+}
