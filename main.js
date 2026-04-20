@@ -359,7 +359,7 @@ conn.ev.on('messages.upsert', async (chatUpdate) => {
     if (!m.message) return
     
     const { handler } = await import('./handler.js')
-    await handler(conn, m, chatUpdate)
+    await handler.call(conn, chatUpdate)
   } catch (e) {
     console.error(chalk.red('[MESSAGE HANDLER ERROR]'), e)
   }
