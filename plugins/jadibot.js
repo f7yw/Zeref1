@@ -75,10 +75,17 @@ WhatsApp ← الأجهزة المرتبطة ← ربط جهاز ← ربط بر
   if (/^(قائمة_البوتات_الفرعية|قائمة_البوتات|listsubbots|subbots)$/i.test(cmd)) {
     const list = listSubBots()
     if (!list.length) return m.reply('📭 لا توجد بوتات فرعية مسجّلة.')
+    const online  = list.filter(b => b.online).length
+    const offline = list.length - online
     const lines = list.map((b, i) =>
-      `${i + 1}. +${b.phone}  ${b.online ? '🟢' : '🔴'}\n   🧩 المزايا: ${b.features.join(', ') || '—'}\n   📅 ${b.createdAt ? new Date(b.createdAt).toLocaleString('ar') : '—'}`
+      `${i + 1}. +${b.phone}  ${b.online ? '🟢 متصل' : '🔴 غير متصل'}\n   🧩 المزايا: ${b.features.join(', ') || '—'}\n   📅 ${b.createdAt ? new Date(b.createdAt).toLocaleString('ar') : '—'}`
     )
-    return m.reply(`╭──『 🤖 البوتات الفرعية 』──\n\n${lines.join('\n\n')}\n╰──────────`)
+    return m.reply(
+`╭──『 🤖 البوتات الفرعية 』──
+📊 الإجمالي: ${list.length}  •  🟢 ${online} متصل  •  🔴 ${offline} غير متصل
+
+${lines.join('\n\n')}
+╰──────────`)
   }
 
   // ── ضبط المزايا ──

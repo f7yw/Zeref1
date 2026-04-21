@@ -310,6 +310,27 @@ ${bar} ${pct}%
     const meName = conn.user?.name || conn.user?.verifiedName || 'البوت'
     const platform = conn.authState?.creds?.platform || 'غير معروف'
 
+    // ── البوتات الفرعية (Jadibot) — تُعرض في الحالتين ──
+    let subBotsBlock = ''
+    let totalConnections = 1
+    try {
+      const { listSubBots } = await import('../lib/jadibot.js')
+      const subs = listSubBots()
+      const onlineCount  = subs.filter(s => s.online).length
+      const offlineCount = subs.length - onlineCount
+      totalConnections = 1 + onlineCount
+      if (subs.length) {
+        const subLines = subs.map((s, i) =>
+          `   ${i + 1}. +${s.phone}  ${s.online ? '🟢 متصل' : '🔴 غير متصل'}\n      🧩 ${s.features.join(', ') || '—'}`
+        ).join('\n')
+        subBotsBlock = `\n\n🤖 *البوتات الفرعية (${subs.length})*  —  🟢 ${onlineCount} | 🔴 ${offlineCount}\n${subLines}`
+      } else {
+        subBotsBlock = `\n\n🤖 *البوتات الفرعية:* لا يوجد بوتات فرعية مسجّلة.`
+      }
+    } catch (e) {
+      subBotsBlock = `\n\n⚠️ تعذّر جلب البوتات الفرعية: ${e?.message || e}`
+    }
+
     if (!devices.length) {
       return m.reply(
 `📱 *الأجهزة المرتبطة*
@@ -319,8 +340,10 @@ ${bar} ${pct}%
    • المعرّف: \`${meId}\`
    • المنصّة: *${platform}*
 
+🔗 إجمالي الاتصالات النشطة: *${totalConnections}*
+
 ⚠️ Baileys لا يوفّر سرداً كاملاً لكل الأجهزة المرتبطة بالحساب.
-لرؤية كل الأجهزة افتح: واتساب → الأجهزة المرتبطة على هاتفك.`
+لرؤية كل الأجهزة افتح: واتساب → الأجهزة المرتبطة على هاتفك.${subBotsBlock}`
       )
     }
 
@@ -329,7 +352,14 @@ ${bar} ${pct}%
       const plat = (typeof d === 'object' && (d.platform || d.device)) || ''
       return `${i + 1}. 📱 ${plat ? `*${plat}*\n   ` : ''}ID: \`${id}\``
     }).join('\n')
-    return m.reply(`📱 *الأجهزة المرتبطة (${devices.length})*\n\n${lines}`)
+
+    return m.reply(
+`📱 *الأجهزة المرتبطة (${devices.length})*
+
+${lines}
+
+🔗 إجمالي الاتصالات النشطة: *${totalConnections}* (البوت الرئيسي + البوتات الفرعية المتصلة)${subBotsBlock}`
+    )
   }
 
   // ─── رفض المكالمات ──────────────────────────────────────────────────────
