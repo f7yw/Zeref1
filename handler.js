@@ -62,7 +62,7 @@ const sameJidLoose = (a, b, conn) => {
  *   - buttonsResponseMessage.selectedButtonId
  *   - listResponseMessage.singleSelectReply.selectedRowId
  *   - templateButtonReplyMessage.selectedId
- *   - interactiveResponseMessage.nativeFlowResponseMessage.paramsJson.id
+ *   - interactiveResponseMessage.nativeFlowResponseMessage.paramsJson / name
  * ويضع m.selectedId و m.selectedDisplayText و m.isInteractive.
  * إذا كان المعرّف لا يبدأ ببادئة، نُضيف '.' افتراضياً ليُعامل كأمر.
  */
@@ -73,52 +73,84 @@ function parseInteractiveResponse(m) {
     let displayText = ''
     let kind = ''
 
-    // 1) أزرار Quick Reply
+    // 1) أزرار Quick Reply (Baileys buttonsResponseMessage)
     if (msg.buttonsResponseMessage) {
-        selectedId  = msg.buttonsResponseMessage.selectedButtonId || ''
+        selectedId  = msg.buttonsResponseMessage.selectedButtonId
+                   || msg.buttonsResponseMessage.selectedId
+                   || ''
         displayText = msg.buttonsResponseMessage.selectedDisplayText || ''
         kind = 'button'
     }
-    // 2) قائمة (List)
+    // 2) قائمة اختيار (List)
     else if (msg.listResponseMessage) {
         const sel = msg.listResponseMessage.singleSelectReply || {}
-        selectedId  = sel.selectedRowId || ''
-        displayText = msg.listResponseMessage.title || msg.listResponseMessage.description || ''
+        selectedId  = sel.selectedRowId || msg.listResponseMessage.selectedRowId || ''
+        displayText = msg.listResponseMessage.title
+                   || msg.listResponseMessage.description
+                   || sel.selectedRowId || ''
         kind = 'list'
     }
-    // 3) Template Button
+    // 3) Template Button Reply
     else if (msg.templateButtonReplyMessage) {
         selectedId  = msg.templateButtonReplyMessage.selectedId || ''
         displayText = msg.templateButtonReplyMessage.selectedDisplayText || ''
         kind = 'template'
     }
-    // 4) Native Flow / Interactive Response
+    // 4) Native Flow / Interactive Response (واتساب الأحدث)
     else if (msg.interactiveResponseMessage) {
         const ir = msg.interactiveResponseMessage
         const nf = ir.nativeFlowResponseMessage || {}
+
+        // محاولة قراءة paramsJson
         let paramsJson = nf.paramsJson || ''
-        if (paramsJson) {
+        if (typeof paramsJson === 'string' && paramsJson.trim().startsWith('{')) {
             try {
                 const parsed = JSON.parse(paramsJson)
-                selectedId = parsed.id || parsed.selectedId || parsed.button_id || parsed.row_id || ''
-                displayText = parsed.title || parsed.text || parsed.display_text || ''
+                selectedId  = parsed.id
+                           || parsed.selectedId
+                           || parsed.button_id
+                           || parsed.row_id
+                           || parsed.id_flow
+                           || ''
+                displayText = parsed.title
+                           || parsed.display_text
+                           || parsed.text
+                           || ''
             } catch (_) {}
         }
+        // Fallback: اسم الـ flow مباشرة
         if (!selectedId) selectedId = nf.name || ''
-        if (!displayText) displayText = ir.body?.text || ''
+        // Fallback: نص الجسم
+        if (!displayText) {
+            displayText = ir.body?.text
+                       || ir.header?.text
+                       || ir.footer?.text
+                       || ''
+        }
         kind = 'interactive'
+    }
+    // 5) pollUpdateMessage (التصويت — استخرج عنوان الخيار)
+    else if (msg.pollUpdateMessage) {
+        const votes = msg.pollUpdateMessage.vote?.selectedOptions || []
+        if (votes.length) {
+            selectedId  = votes[0]
+            displayText = votes[0]
+            kind = 'poll'
+        }
     }
 
     if (!selectedId) return
 
-    m.selectedId         = selectedId
+    m.selectedId          = selectedId
     m.selectedDisplayText = displayText
-    m.isInteractive      = true
-    m.interactiveType    = kind
+    m.isInteractive       = true
+    m.interactiveType     = kind
 
     // ضع m.text كأمر قابل للتوجيه — أَضِف بادئة افتراضية إن لم تكن موجودة
     const looksLikeCommand = global.prefix?.test?.(selectedId)
-    const commandText = looksLikeCommand ? selectedId : ('.' + String(selectedId).replace(/^[/\s]+/, ''))
+    const commandText = looksLikeCommand
+        ? selectedId
+        : ('.' + String(selectedId).replace(/^[./\s]+/, ''))
     m.text = commandText
 }
 
@@ -176,9 +208,13 @@ try {
     if (global.seenMessages.has(msgId)) return
     global.seenMessages.add(msgId)
 
+    // تنظيف فعّال: احذف أقدم 1000 عنصر دفعة واحدة عند تجاوز 5000
     if (global.seenMessages.size > 5000) {
-        const first = global.seenMessages.values().next().value
-        if (first) global.seenMessages.delete(first)
+        let count = 0
+        for (const key of global.seenMessages) {
+            if (count++ >= 1000) break
+            global.seenMessages.delete(key)
+        }
     }
 
     const ts = Number(m?.messageTimestamp || 0) * 1000
@@ -1170,11 +1206,12 @@ try {
         const participants = (m.isGroup ? groupMetadata.participants : []) || []
         const sameJid = (a, b) => sameJidLoose(a, b, conn)
 
-        // ── LID→Phone mapping: restore from persistent DB first, then update from participants ──
+        // ── LID→Phone mapping: sync from DB once per session, then update per-message from participants ──
         global.lidPhoneMap ??= {}
-        // Restore persisted LID map on every message (covers bot restarts)
-        if (global.db?.data?.lidPhoneMap) {
+        // Sync from DB only once after startup (not on every message to reduce overhead)
+        if (!global.__lidMapSynced && global.db?.data?.lidPhoneMap) {
             Object.assign(global.lidPhoneMap, global.db.data.lidPhoneMap)
+            global.__lidMapSynced = true
         }
         for (const p of participants) {
             const lid = p?.lid || p?.userJid?.split('@')[0]
@@ -1231,45 +1268,56 @@ try {
             (_senderUser.premium === true) ||
             (global.prems || []).some(n => String(n).replace(/\D/g,'') === String(resolvedSender).replace(/@.*/,'').replace(/\D/g,''))
 
-        // ── إنفاذ "مطور لا نهائي": كل مالك يستلم تلقائياً موارد لا نهائية + تسجيل + تجاوز كل القيود ──
+        // ── إنفاذ "مطور لا نهائي": يُحدَّث مرة كل 5 دقائق فقط (ليس كل رسالة) ──
         try {
-            if (isROwner || isOwner) {
+            const _now = Date.now()
+            global.__ownerUpdateAt ??= {}
+            const _ownerKey = m.sender || 'unknown'
+            const _shouldUpdateOwner = (isROwner || isOwner) &&
+                (_now - (global.__ownerUpdateAt[_ownerKey] || 0) > 5 * 60 * 1000)
+
+            if (_shouldUpdateOwner) {
+                global.__ownerUpdateAt[_ownerKey] = _now
                 const _ou = global.db.data.users[m.sender] || (global.db.data.users[m.sender] = {})
                 _ou.registered        = true
-                if (!_ou.regTime || _ou.regTime <= 0) _ou.regTime = Date.now()
+                if (!_ou.regTime || _ou.regTime <= 0) _ou.regTime = _now
                 if (!_ou.name) _ou.name = m.pushName || 'المطور'
                 _ou.premium           = true
-                _ou.premiumTime       = Math.max(_ou.premiumTime || 0, Date.now() + (50 * 365 * 24 * 60 * 60 * 1000))
+                _ou.premiumTime       = Math.max(_ou.premiumTime || 0, _now + (50 * 365 * 24 * 60 * 60 * 1000))
                 _ou.infiniteResources = true
                 _ou.banned            = false
                 _ou.tempBannedUntil   = 0
                 _ou.energy            = 100
-                _ou.lastEnergyRegen   = Date.now()
+                _ou.lastEnergyRegen   = _now
                 _ou.money             = Math.max(_ou.money   || 0, 1_000_000_000)
                 _ou.bank              = Math.max(_ou.bank    || 0, 1_000_000_000)
                 _ou.diamond           = Math.max(_ou.diamond || 0, 1_000_000)
                 _ou.limit             = Math.max(_ou.limit   || 0, 999_999)
                 _ou.role              = '👑 مطور'
             }
-            // ── البوت كـ "تاجر NPC": ضمان موارد لا نهائية في كل رسالة ──
+            // ── البوت كـ "تاجر NPC": يُحدَّث مرة كل 10 دقائق فقط ──
             try {
-                const botJidsArr = botJidsOf(this)
-                for (const bj of botJidsArr) {
-                    if (!bj) continue
-                    const bu = global.db.data.users[bj] || (global.db.data.users[bj] = {})
-                    bu.registered        = true
-                    if (!bu.regTime || bu.regTime <= 0) bu.regTime = Date.now()
-                    bu.name              = bu.name || (this?.user?.name || 'زيريف ⚜️ التاجر')
-                    bu.bio               = bu.bio  || '🤖 التاجر الرسمي للبوت — موارد لا نهائية'
-                    bu.premium           = true
-                    bu.premiumTime       = Math.max(bu.premiumTime || 0, Date.now() + (50 * 365 * 24 * 60 * 60 * 1000))
-                    bu.infiniteResources = true
-                    bu.energy            = 100
-                    bu.money             = Math.max(bu.money   || 0, 1_000_000_000)
-                    bu.bank              = Math.max(bu.bank    || 0, 1_000_000_000)
-                    bu.diamond           = Math.max(bu.diamond || 0, 1_000_000)
-                    bu.role              = '🤖 التاجر الرسمي'
-                    bu.banned            = false
+                const _shouldUpdateBot = _now - (global.__botUpdateAt || 0) > 10 * 60 * 1000
+                if (_shouldUpdateBot) {
+                    global.__botUpdateAt = _now
+                    const botJidsArr = botJidsOf(this)
+                    for (const bj of botJidsArr) {
+                        if (!bj) continue
+                        const bu = global.db.data.users[bj] || (global.db.data.users[bj] = {})
+                        bu.registered        = true
+                        if (!bu.regTime || bu.regTime <= 0) bu.regTime = _now
+                        bu.name              = bu.name || (this?.user?.name || 'زيريف ⚜️ التاجر')
+                        bu.bio               = bu.bio  || '🤖 التاجر الرسمي للبوت — موارد لا نهائية'
+                        bu.premium           = true
+                        bu.premiumTime       = Math.max(bu.premiumTime || 0, _now + (50 * 365 * 24 * 60 * 60 * 1000))
+                        bu.infiniteResources = true
+                        bu.energy            = 100
+                        bu.money             = Math.max(bu.money   || 0, 1_000_000_000)
+                        bu.bank              = Math.max(bu.bank    || 0, 1_000_000_000)
+                        bu.diamond           = Math.max(bu.diamond || 0, 1_000_000)
+                        bu.role              = '🤖 التاجر الرسمي'
+                        bu.banned            = false
+                    }
                 }
             } catch (_) {}
         } catch (_) {}
@@ -1718,8 +1766,9 @@ if (botSpam.antispam && m.text && user && user.lastCommandTime && (Date.now() - 
         }
 
         try {
-            if (global.db?.data) await global.db.write().catch(console.error)
-            if (global.chatgpt?.data) await global.chatgpt.write().catch(console.error)
+            // تعليم البيانات كـ "متغيّرة" بدلاً من الكتابة الفورية بعد كل رسالة
+            // الكتابة الفعلية تتم عبر setInterval الذكي في main.js
+            if (global.db?.data && typeof global.markDirty === 'function') global.markDirty()
             if (!opts['noprint']) await (await import(`./lib/print.js`)).default(m, this)
         } catch (e) {
             console.log(m, m.quoted, e)

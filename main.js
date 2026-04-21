@@ -153,8 +153,12 @@ try {
 } catch (e) { console.error('[VIP-RESTORE]', e?.message) }
 
 global.saveDatabase = async function () {
-  if (global.db?.data) await global.db.write().catch(console.error);
-  if (global.chatgpt?.data) await global.chatgpt.write().catch(console.error);
+  const writeFn = global.__dbWrite || (global.db?.write?.bind?.(global.db))
+  if (global.db?.data && writeFn) await writeFn().catch(console.error)
+  if (global.chatgpt?.data) {
+    try { await global.chatgpt.write().catch(console.error) } catch (_) {}
+  }
+  if (global.db) global.db.__dirty = false
 };
 
 // ====== CHATGPT DATABASE ======
@@ -544,33 +548,82 @@ async function connectionUpdate(update) {
 conn.ev.on('connection.update', connectionUpdate)
 conn.ev.on('creds.update', saveCreds)
 
+// ====== DIRTY FLAG + ACTIVITY TRACKING FOR SMART DB SAVES ======
+global.db.__dirty = false
+global.__lastActivity = Date.now()
+
+// الدالة الأصلية للكتابة (لا تُعدَّل)
+global.__dbWrite = global.db.write.bind(global.db)
+
+// markDirty: يُعلَّم عند أي تغيير حقيقي في البيانات
+global.markDirty = function () {
+  global.db.__dirty = true
+  global.__lastActivity = Date.now()
+}
+
 // ====== MESSAGE HANDLER ======
+let _handlerModule = null
 conn.ev.on('messages.upsert', async (chatUpdate) => {
   try {
-    const m = chatUpdate.messages[0]
-    if (!m) return
-    if (m.message?.viewOnceMessageV2) m.message = m.message.viewOnceMessageV2.message
-    if (m.message?.documentWithCaptionMessage) m.message = m.message.documentWithCaptionMessage.message
-    if (m.message?.viewOnceMessageV2Extension) m.message = m.message.viewOnceMessageV2Extension.message
-    if (!m.message) return
-    
-    const { handler } = await import('./handler.js')
-    await handler.call(conn, chatUpdate)
+    global.db.__lastActivity = Date.now()
+    const msgs = chatUpdate.messages
+    if (!msgs || !msgs.length) return
+
+    // Unwrap view-once / document-with-caption for all messages in batch
+    for (const m of msgs) {
+      if (!m) continue
+      if (m.message?.viewOnceMessageV2) m.message = m.message.viewOnceMessageV2.message
+      if (m.message?.documentWithCaptionMessage) m.message = m.message.documentWithCaptionMessage.message
+      if (m.message?.viewOnceMessageV2Extension) m.message = m.message.viewOnceMessageV2Extension.message
+    }
+
+    if (!_handlerModule) _handlerModule = await import('./handler.js')
+    await _handlerModule.handler.call(conn, chatUpdate)
   } catch (e) {
     console.error(chalk.red('[MESSAGE HANDLER ERROR]'), e)
   }
 })
 
-// ====== AUTO SAVE ======
+// ====== AUTO SAVE (SMART — only when dirty and bot has recent activity) ======
+const IDLE_THRESHOLD_MS = 5 * 60 * 1000   // 5 دقائق خمول → لا حفظ
+const SAVE_INTERVAL_MS  = 2 * 60 * 1000   // يفحص كل دقيقتين
+
+let _chatgptOrigWrite = null
+try { _chatgptOrigWrite = global.chatgpt.write.bind(global.chatgpt) } catch (_) {}
+
 setInterval(async () => {
-  if (global.db?.data) await global.saveDatabase()
-}, 30 * 1000)
+  try {
+    const idleFor = Date.now() - (global.__lastActivity || 0)
+    const isIdle  = idleFor > IDLE_THRESHOLD_MS
+
+    // لا كتابة إذا البوت خامل وليس هناك تغييرات
+    if (isIdle && !global.db.__dirty) return
+
+    // استخدم الدالة الأصلية مباشرة لتجنّب تحديث __lastActivity بشكل وهمي
+    if (global.db?.data) await global.__dbWrite().catch(console.error)
+    if (global.chatgpt?.data && _chatgptOrigWrite) await _chatgptOrigWrite().catch(console.error)
+
+    global.db.__dirty = false
+  } catch (e) {
+    console.error('[AUTO-SAVE ERROR]', e)
+  }
+}, SAVE_INTERVAL_MS)
 
 // ====== CLEANUP ON EXIT ======
 process.on('SIGINT', async () => {
   console.log(chalk.yellow('\n[EXIT] Shutting down...'))
   await global.saveDatabase()
   process.exit(0)
+})
+
+// ====== UNCAUGHT EXCEPTION GUARD (prevent crash on unexpected errors) ======
+process.on('uncaughtException', (err) => {
+  console.error(chalk.red('[UNCAUGHT EXCEPTION]'), err?.message || err)
+  // Don't exit — let the bot keep running unless it's a fatal error
+})
+
+process.on('unhandledRejection', (reason) => {
+  console.error(chalk.red('[UNHANDLED REJECTION]'), reason?.message || reason)
 })
 
 export default conn;

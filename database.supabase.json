@@ -27,11 +27,11 @@
       "lastDaily": 0,
       "registered": true,
       "totalSpent": 0,
-      "premiumTime": 3353582310123,
+      "premiumTime": 3353583044561,
       "totalEarned": 0,
       "bannedReason": "",
       "transactions": [],
-      "lastEnergyRegen": 1776782310123,
+      "lastEnergyRegen": 1776783044561,
       "infiniteResources": true
     },
     "967782114485@s.whatsapp.net": {
@@ -381,7 +381,7 @@
       "lastnambang": 0,
       "makanannaga": 0,
       "premiumDate": -1,
-      "premiumTime": 3353582310123,
+      "premiumTime": 3353583044561,
       "seedbrokoli": 0,
       "seedkentang": 0,
       "totalEarned": 0,
@@ -639,7 +639,7 @@
       "kerjatujuhbelas": 0,
       "kucinglastclaim": 0,
       "lastCommandTime": 1776761763373,
-      "lastEnergyRegen": 1776782310123,
+      "lastEnergyRegen": 1776783044561,
       "lastmancingeasy": 0,
       "lastmancinghard": 0,
       "lastpotionclaim": 0,
@@ -710,7 +710,7 @@
       "premium": true,
       "regTime": 1776761136586,
       "registered": true,
-      "premiumTime": 3353581986009,
+      "premiumTime": 3353583019425,
       "infiniteResources": true
     }
   },
@@ -857,10 +857,10 @@
       "lastSuccess": 1776762355121
     },
     "menu.js": {
-      "last": 1776781891512,
-      "total": 49,
-      "success": 49,
-      "lastSuccess": 1776781891512
+      "last": 1776783022313,
+      "total": 50,
+      "success": 50,
+      "lastSuccess": 1776783022313
     },
     "anime.js": {
       "last": 1776762332593,
@@ -1011,6 +1011,12 @@
       "total": 7,
       "success": 7,
       "lastSuccess": 1776762061253
+    },
+    "test-interactive.js": {
+      "last": 1776783027718,
+      "total": 2,
+      "success": 2,
+      "lastSuccess": 1776783027718
     },
     "العاب-سريعة.js": {
       "last": 1776736640473,
