@@ -6,9 +6,7 @@
  * بعد الإصلاح في handler.js → parseInteractiveResponse():
  *   ضغط أي زر يُحوَّل إلى m.text = '.<id>' ويعمل كأمر عادي.
  */
-import { generateWAMessageFromContent } from '@whiskeysockets/baileys'
-const baileysDefault = (await import('@whiskeysockets/baileys')).default
-const { proto } = baileysDefault
+import { generateWAMessageFromContent, proto } from '@whiskeysockets/baileys'
 
 const ROWS = [
   { id: 'بروفايل',  title: '👤 بروفايل',     description: 'عرض بروفايلك الكامل' },
