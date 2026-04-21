@@ -48,7 +48,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
   // ── .تحويل @user <amount> ───────────────────────────────────────────────
   if (/^(تحويل|حول|transfer)$/i.test(sub)) {
-    const target = m.mentionedJid?.[0] || (m.quoted?.sender)
+    let target = m.mentionedJid?.[0] || (m.quoted?.sender)
     const amount = parseInt(dataArgs.find(arg => /^\d+$/.test(arg)) || args.find(arg => /^\d+$/.test(arg)))
     if (!target || !amount || amount < 1)
       return m.reply(`*مثال:* ${usedPrefix}تحويل @شخص 500\n📌 رسوم التحويل: 5٪\n👤 العضوية: ${vipStatus}`)
@@ -56,20 +56,42 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     if (user.money < amount) return m.reply(`❌ ليس لديك ما يكفي!\n💰 محفظتك: ${fmt(user.money)}\n👤 العضوية: ${vipStatus}`)
     const fee = Math.ceil(amount * 0.05)
     const net = amount - fee
-    const targetUser = global.db.data.users[target]
-    if (!targetUser) return m.reply('❌ المستخدم المحدد غير موجود في قاعدة البيانات.\n👤 العضوية: ' + vipStatus)
+
+    // ابحث عن المستلم حتى لو لم يكن مسجلاً (دعم @lid و @s.whatsapp.net)
+    const users = global.db.data.users
+    let targetKey = target
+    if (!users[targetKey]) {
+      // جرّب الصيغة البديلة
+      if (target.endsWith('@lid')) {
+        const phoneJid = global.lidPhoneMap?.[target]
+        if (phoneJid && users[phoneJid]) targetKey = phoneJid
+      } else if (target.endsWith('@s.whatsapp.net')) {
+        const num = target.split('@')[0]
+        for (const [lid, phone] of Object.entries(global.lidPhoneMap || {})) {
+          if (phone === target || phone?.split('@')[0] === num) { targetKey = lid; break }
+        }
+      }
+    }
+    // إن لم يوجد، أنشئ السجل تلقائياً (التحويل مفتوح للجميع)
+    if (!users[targetKey]) {
+      users[targetKey] = {}
+      initUser(users[targetKey], undefined, targetKey)
+    }
+    const targetUser = users[targetKey]
     initEconomy(targetUser)
     user.money -= amount
     targetUser.money += net
     user.totalSpent = (user.totalSpent || 0) + amount
     logTransaction(user, 'spend', amount, `💸 تحويل إلى @${target.split('@')[0]}`)
     logTransaction(targetUser, 'earn', net, `💸 استقبال تحويل من @${m.sender.split('@')[0]}`)
+    await global.db.write()
+    const notice = targetUser.registered ? '' : '\n📝 ملاحظة: المستلم غير مسجل، أُنشئ له حساب تلقائياً.'
     return m.reply(
       `╭────『 💸 تحويل ناجح 』────\n` +
       `│\n│ ✅ أرسلت ${fmt(amount)} إلى @${target.split('@')[0]}\n` +
       `│ 📋 رسوم 5٪: -${fmt(fee)}\n` +
       `│ 💵 وصل الطرف الآخر: ${fmt(net)}\n` +
-      `│ 💰 محفظتك: ${fmt(user.money)}\n│\n╰──────────────────`,
+      `│ 💰 محفظتك: ${fmt(user.money)}\n│\n╰──────────────────${notice}`,
       null, { mentions: [target] }
     )
   }

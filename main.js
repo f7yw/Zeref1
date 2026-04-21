@@ -126,6 +126,22 @@ try {
   }
 } catch (_) {}
 
+// ====== إعادة بناء قائمة المميزين من قاعدة البيانات ======
+try {
+  global.prems = global.prems || []
+  const now    = Date.now()
+  const seen   = new Set(global.prems.map(n => String(n).replace(/\D/g, '')))
+  let restored = 0
+  for (const [jid, u] of Object.entries(global.db?.data?.users || {})) {
+    if (!u) continue
+    const isPremActive = (u.premium === true) || (u.premiumTime && u.premiumTime > now)
+    if (!isPremActive) continue
+    const num = jid.split('@')[0].replace(/\D/g, '')
+    if (num && !seen.has(num)) { global.prems.push(num); seen.add(num); restored++ }
+  }
+  if (restored) console.log(chalk.cyan(`[VIP] استُعيد ${restored} مميز من قاعدة البيانات.`))
+} catch (e) { console.error('[VIP-RESTORE]', e?.message) }
+
 global.saveDatabase = async function () {
   if (global.db?.data) await global.db.write().catch(console.error);
   if (global.chatgpt?.data) await global.chatgpt.write().catch(console.error);
