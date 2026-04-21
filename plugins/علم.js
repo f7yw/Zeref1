@@ -80,12 +80,14 @@ handler.all = async function (m) {
   if (!this.tekateki || !(id in this.tekateki)) return
   if (m.isBaileys) return
 
-  const entry = this.tekateki[id]
-  const isReplyToQuestion = m.quoted && entry.msgId && m.quoted.id === entry.msgId
-  if (!isReplyToQuestion) return
-
   const rawText = (m.text || '').trim()
   if (!rawText) return
+  if (global.prefix?.test?.(rawText)) return
+
+  const entry = this.tekateki[id]
+  const isReplyToQuestion = m.quoted && entry.msgId && m.quoted.id === entry.msgId
+  const isPlainAnswer = !m.quoted || !rawText.startsWith('.')
+  if (!isReplyToQuestion && !isPlainAnswer) return
 
   const answer = normalize(entry.question.response)
   const text   = normalize(rawText)

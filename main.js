@@ -309,6 +309,54 @@ async function connectionUpdate(update) {
     console.log(chalk.green.bold('\n✅ Connected to WhatsApp successfully!'))
     console.log(chalk.green(`  ➤ Bot is active and listening for messages.`))
 
+    // ── بناء جدول LID→Phone من جهات الاتصال ──────────────────────────────
+    setTimeout(() => {
+      try {
+        global.lidPhoneMap ??= {}
+        // Load persisted map from DB
+        const savedMap = global.db?.data?.lidPhoneMap || {}
+        Object.assign(global.lidPhoneMap, savedMap)
+
+        // Scan conn.contacts (Baileys stores {id, lid, name} per contact)
+        const contacts = conn.contacts || {}
+        let mapped = 0
+        for (const [jid, contact] of Object.entries(contacts)) {
+          const lid = contact?.lid || contact?.userJid
+          const phone = contact?.id || (jid?.endsWith('@s.whatsapp.net') ? jid : null)
+          if (lid && phone && lid !== phone) {
+            global.lidPhoneMap[lid] = phone
+            mapped++
+          }
+          // Also reverse: if key is lid, map it to phone
+          if (jid?.endsWith('@lid') && contact?.id) {
+            global.lidPhoneMap[jid] = contact.id
+            mapped++
+          }
+        }
+        // Also scan chats for participant LID mappings
+        const chats = conn.chats || {}
+        for (const [, chatData] of Object.entries(chats)) {
+          for (const p of (chatData?.metadata?.participants || [])) {
+            if (p?.lid && p?.id && p.lid !== p.id) {
+              global.lidPhoneMap[p.lid] = p.id
+              if (!p.lid.includes('@')) global.lidPhoneMap[p.lid + '@lid'] = p.id
+              mapped++
+            }
+          }
+        }
+        // Persist map to DB
+        if (mapped > 0) {
+          global.db.data.lidPhoneMap = global.lidPhoneMap
+          global.db.write().catch(() => {})
+          console.log(chalk.cyan(`[LID] Built ${mapped} LID→Phone mappings from contacts.`))
+        } else {
+          console.log(chalk.gray('[LID] No LID mappings found in contacts yet.'))
+        }
+      } catch (e) {
+        console.error('[LID] Error building map:', e.message)
+      }
+    }, 3000)
+
     setTimeout(async () => {
       try {
         const { readdirSync: _rdr } = await import('fs')

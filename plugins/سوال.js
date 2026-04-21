@@ -92,12 +92,16 @@ handler.all = async function (m) {
   if (!this.quiz || !(chatId in this.quiz)) return
   if (m.isBaileys) return
 
-  const entry = this.quiz[chatId]
-  const isReplyToQuestion = m.quoted && entry.msgId && m.quoted.id === entry.msgId
-  if (!isReplyToQuestion) return
-
   const rawText = (m.text || '').trim()
   if (!rawText) return
+  // تجاهل الأوامر
+  if (global.prefix?.test?.(rawText)) return
+
+  const entry = this.quiz[chatId]
+  // اقبل reply مباشرة للسؤال، أو أي نص عادي في نفس الشات
+  const isReplyToQuestion = m.quoted && entry.msgId && m.quoted.id === entry.msgId
+  const isPlainAnswer = !m.quoted || !rawText.startsWith('.')
+  if (!isReplyToQuestion && !isPlainAnswer) return
 
   const answer = normalize(entry.question.response)
   const text   = normalize(rawText)

@@ -77,16 +77,17 @@ handler.all = async function (m) {
   if (!game) return
   if (m.isBaileys) return
 
-  // Only process if the user is replying to the game message
+  const rawText = (m.text || '').trim()
+  if (!rawText) return
+  if (/^[./#!]/.test(rawText)) return   // ignore command messages
+  if (global.prefix?.test?.(rawText)) return
+
+  // قبول: رد مباشر على رسالة السؤال، أو نص عادي في نفس المحادثة
   const isReply = m.quoted && game.msg && (
     m.quoted.id === game.msg?.key?.id ||
     m.quoted.id === game.msg?.id
   )
-  if (!isReply) return
-
-  const rawText = (m.text || '').trim()
-  if (!rawText) return
-  if (/^[./#!]/.test(rawText)) return   // ignore command messages
+  if (!isReply && m.quoted) return   // إذا رد على رسالة أخرى غير السؤال، تجاهل
 
   if (rawText !== game.answer) {
     return this.reply(m.chat, `❌ غير صحيح، حاول مرة أخرى.`, m)

@@ -1103,10 +1103,31 @@ try {
         for (const p of participants) {
             const lid = p?.lid || p?.userJid?.split('@')[0]
             const phone = p?.id
-            if (lid && phone && lid.includes('@')) global.lidPhoneMap[lid] = phone
-            else if (lid && phone) global.lidPhoneMap[lid + '@lid'] = phone
+            if (lid && phone && lid !== phone) {
+                if (lid.includes('@')) global.lidPhoneMap[lid] = phone
+                else global.lidPhoneMap[lid + '@lid'] = phone
+            }
         }
-        // Resolve m.sender to phone JID if it's a LID
+
+        // ── Dynamic LID resolution from conn.contacts ────────────────────────
+        if (m.sender?.endsWith('@lid') && !global.lidPhoneMap[m.sender]) {
+            // Scan contacts for this LID
+            const contacts = conn.contacts || {}
+            for (const [cJid, cData] of Object.entries(contacts)) {
+                const cLid = cData?.lid
+                if (cLid && (cLid === m.sender || cLid + '@lid' === m.sender)) {
+                    global.lidPhoneMap[m.sender] = cJid?.endsWith('@s.whatsapp.net') ? cJid : (cData?.id || cJid)
+                    break
+                }
+                // Also if the key itself is the LID JID
+                if (cJid === m.sender && cData?.id && !cData.id.endsWith('@lid')) {
+                    global.lidPhoneMap[m.sender] = cData.id
+                    break
+                }
+            }
+        }
+
+        // ── Resolve sender to phone JID if it's a LID ───────────────────────
         const resolvedSender = (m.sender?.endsWith('@lid') && global.lidPhoneMap[m.sender])
             ? global.lidPhoneMap[m.sender]
             : m.sender

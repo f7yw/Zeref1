@@ -11,7 +11,7 @@
       "bow": 0,
       "cat": 0,
       "dog": 0,
-      "exp": 3,
+      "exp": null,
       "fox": 0,
       "hiu": 0,
       "job": "Pengangguran",
@@ -91,7 +91,7 @@
       "leleb": 0,
       "leleg": 0,
       "level": 0,
-      "limit": 20,
+      "limit": null,
       "lumba": 0,
       "money": 15,
       "ojekk": 0,
@@ -158,7 +158,7 @@
       "brokoli": 0,
       "centaur": 0,
       "crystal": 0,
-      "diamond": 18,
+      "diamond": 20,
       "emerald": 0,
       "enchant": 0,
       "exphero": 0,
@@ -228,8 +228,8 @@
       "lastturu": 0,
       "lastwork": 0,
       "messages": {
-        "last": 1776734649475,
-        "total": 21,
+        "last": 1776734811565,
+        "total": 24,
         "groups": {
           "120363422912330057@g.us": 10,
           "120363426033819775@g.us": 1
@@ -371,10 +371,22 @@
       "seedkangkung": 0,
       "transactions": [
         {
+          "time": 1776734811567,
           "type": "earn",
           "amount": 0,
-          "reason": "🆙 مكافأة المستوى 0",
-          "time": 1776734649479
+          "reason": "🆙 مكافأة المستوى 0"
+        },
+        {
+          "time": 1776734759987,
+          "type": "earn",
+          "amount": 0,
+          "reason": "🆙 مكافأة المستوى 0"
+        },
+        {
+          "time": 1776734649479,
+          "type": "earn",
+          "amount": 0,
+          "reason": "🆙 مكافأة المستوى 0"
         },
         {
           "time": 1776734368444,
@@ -637,7 +649,7 @@
       "emas": 0,
       "emerald": 0,
       "esteh": 0,
-      "exp": 62,
+      "exp": 27,
       "expg": 0,
       "exphero": 0,
       "expired": 0,
@@ -924,7 +936,7 @@
       "sworddurability": 0,
       "tigame": 50,
       "tiketcoin": 0,
-      "title": 0,
+      "title": "",
       "tomat": 0,
       "tprem": 0,
       "trash": 0,
@@ -959,49 +971,21 @@
         "soal": null
       },
       "messages": {
-        "total": 4,
+        "total": 1,
         "groups": {},
-        "last": 1776734649342
+        "last": 1776735035136
       },
-      "lastCommandTime": 1776734649343,
+      "lastCommandTime": 1776735035139,
       "commandCount": 1,
-      "energy": 100,
-      "lastEnergyRegen": 1776734613575,
-      "lastDaily": 0,
-      "lastWork": 0,
-      "totalEarned": 0,
-      "totalSpent": 0,
+      "energy": 30,
       "transactions": [
         {
           "type": "earn",
           "amount": 0,
           "reason": "🆙 مكافأة المستوى 0",
-          "time": 1776734615237
+          "time": 1776735035426
         }
-      ],
-      "premiumDate": -1,
-      "catexp": 0,
-      "enchant": 0,
-      "glimit": 20,
-      "glory": 0,
-      "healthmonster": 0,
-      "kyubiexp": 0,
-      "kyubilastfeed": 0,
-      "lastbansos": 0,
-      "lastcodereg": 0,
-      "lastgift": 0,
-      "lastIstigfar": 0,
-      "lastrampok": 0,
-      "lastsda": 0,
-      "lastwar": 0,
-      "pancing": 0,
-      "pertambangan": 0,
-      "pertanian": 0,
-      "petFood": 0,
-      "psenjata": 0,
-      "psepick": 0,
-      "robo": 0,
-      "roboxp": 0
+      ]
     }
   },
   "chats": {
@@ -1126,16 +1110,16 @@
       "lastSuccess": 1776729724421
     },
     "hd.js": {
-      "last": 1776734055855,
-      "total": 6,
-      "success": 6,
-      "lastSuccess": 1776734055855
+      "last": 1776734795609,
+      "total": 7,
+      "success": 7,
+      "lastSuccess": 1776734795609
     },
     "menu.js": {
-      "last": 1776734615237,
-      "total": 30,
-      "success": 30,
-      "lastSuccess": 1776734615237
+      "last": 1776734729157,
+      "total": 31,
+      "success": 31,
+      "lastSuccess": 1776734729157
     },
     "اكس.js": {
       "last": 1776733927162,
@@ -1154,6 +1138,12 @@
       "total": 3,
       "success": 3,
       "lastSuccess": 1776734062304
+    },
+    "علم.js": {
+      "last": 1776734809302,
+      "total": 2,
+      "success": 2,
+      "lastSuccess": 1776734809302
     },
     "لفل.js": {
       "last": 1776733874402,
@@ -1174,10 +1164,10 @@
       "lastSuccess": 1776726050857
     },
     "سوال.js": {
-      "last": 1776733316432,
-      "total": 2,
-      "success": 2,
-      "lastSuccess": 1776733316432
+      "last": 1776734964554,
+      "total": 3,
+      "success": 3,
+      "lastSuccess": 1776734964554
     },
     "ملصق.js": {
       "last": 1776733197017,
@@ -1190,6 +1180,12 @@
       "total": 2,
       "success": 2,
       "lastSuccess": 1776729622231
+    },
+    "owner-join.js": {
+      "last": 1776734765507,
+      "total": 3,
+      "success": 0,
+      "lastSuccess": 0
     },
     "البنك.js": {
       "last": 1776733877131,
@@ -1216,16 +1212,28 @@
       "lastSuccess": 1776725398150
     },
     "العاب3.js": {
-      "last": 1776734477788,
-      "total": 3,
-      "success": 3,
-      "lastSuccess": 1776734477788
+      "last": 1776734949736,
+      "total": 5,
+      "success": 5,
+      "lastSuccess": 1776734949736
+    },
+    "group-request.js": {
+      "last": 1776734777143,
+      "total": 2,
+      "success": 0,
+      "lastSuccess": 0
     },
     "owner-addprem.js": {
-      "last": 1776734649349,
-      "total": 11,
-      "success": 8,
-      "lastSuccess": 1776734649349
+      "last": 1776734811458,
+      "total": 12,
+      "success": 9,
+      "lastSuccess": 1776734811458
+    },
+    "advanced-stats.js": {
+      "last": 1776734642845,
+      "total": 2,
+      "success": 0,
+      "lastSuccess": 0
     },
     "owner-listprem.js": {
       "last": 1776734041709,
@@ -1233,11 +1241,11 @@
       "success": 6,
       "lastSuccess": 1776734041709
     },
-    "advanced-stats.js": {
+    "owner-setlid.js": {
       "total": 2,
-      "success": 0,
-      "last": 1776734642845,
-      "lastSuccess": 0
+      "success": 2,
+      "last": 1776735035426,
+      "lastSuccess": 1776735035426
     }
   },
   "msgs": {},
@@ -1252,5 +1260,7 @@
       "antiPrivate": false,
       "modejadibot": true
     }
-  }
+  },
+  "groupRequests": {},
+  "groupRequestCooldown": {}
 }
