@@ -153,6 +153,16 @@ All commands restricted to `rowner = true` (real owner only — 967778088098).
 - Startup log: sent to all developer-flagged owners (5s after connect)
 - Message tracking: `user.messages.total`, `user.messages.groups[chat]`, `chat.messageStats`
 
+## Role Recognition & Auto-Stamp (Apr 2026)
+On every incoming message, `handler.js` now:
+1. **Enforces "Infinite Developer"** — for any owner/rowner sender, sets `registered=true`, `premium=true`, `premiumTime=+50y`, `infiniteResources=true`, `energy=100`, raises `money/bank/diamond/limit` to 1B/1B/1M/999K, clears `banned`/`tempBannedUntil`, sets `role='👑 مطور'`. Applied per-message (cannot be depleted).
+2. **Bot-as-Merchant deepening** — for every JID variant the bot owns (via `botJidsOf`), enforces the same merchant identity (`name='زيريف ⚜️ التاجر'`, `bio`, infinite resources, level 999) every message — not just on connect.
+3. **m helper props** — attaches `m.tier` ('dev'|'vip'|'normal'), `m.tierBadge`, `m.isOwnerUser`, `m.isROwnerUser`, `m.isModsUser`, `m.isVipUser` so plugins can use them directly.
+4. **Auto badge stamp on ALL replies** — wraps `m.reply` and `conn.sendMessage` per-plugin-call to append role badge (`👑 مطور · ✓ مسجّل`, `💎 مميز · ...`, `👤 عادي · ...`) to text/caption when not already present. Restored in `finally` to avoid permanent mutation.
+5. **Owner bypass on `plugin.register`** — owners/VIPs no longer get blocked by `plugin.register == true` even before the auto-register step settles in DB.
+
+This means EVERY plugin (incl. obfuscated ones, owner panel, ai, شات, etc.) automatically tags its reply with the sender's tier — no per-plugin edits needed.
+
 ## Important Rules
 - Never duplicate economy logic outside `lib/economy.js` and `lib/userInit.js`
 - Every money/bank/energy/diamond change must call `logTransaction`

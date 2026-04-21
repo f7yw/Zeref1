@@ -1158,6 +1158,61 @@ try {
             (_senderUser.premiumTime > Date.now()) ||
             (_senderUser.premium === true) ||
             (global.prems || []).some(n => String(n).replace(/\D/g,'') === String(resolvedSender).replace(/@.*/,'').replace(/\D/g,''))
+
+        // ── إنفاذ "مطور لا نهائي": كل مالك يستلم تلقائياً موارد لا نهائية + تسجيل + تجاوز كل القيود ──
+        try {
+            if (isROwner || isOwner) {
+                const _ou = global.db.data.users[m.sender] || (global.db.data.users[m.sender] = {})
+                _ou.registered        = true
+                if (!_ou.regTime || _ou.regTime <= 0) _ou.regTime = Date.now()
+                if (!_ou.name) _ou.name = m.pushName || 'المطور'
+                _ou.premium           = true
+                _ou.premiumTime       = Math.max(_ou.premiumTime || 0, Date.now() + (50 * 365 * 24 * 60 * 60 * 1000))
+                _ou.infiniteResources = true
+                _ou.banned            = false
+                _ou.tempBannedUntil   = 0
+                _ou.energy            = 100
+                _ou.lastEnergyRegen   = Date.now()
+                _ou.money             = Math.max(_ou.money   || 0, 1_000_000_000)
+                _ou.bank              = Math.max(_ou.bank    || 0, 1_000_000_000)
+                _ou.diamond           = Math.max(_ou.diamond || 0, 1_000_000)
+                _ou.limit             = Math.max(_ou.limit   || 0, 999_999)
+                _ou.role              = '👑 مطور'
+            }
+            // ── البوت كـ "تاجر NPC": ضمان موارد لا نهائية في كل رسالة ──
+            try {
+                const botJidsArr = botJidsOf(this)
+                for (const bj of botJidsArr) {
+                    if (!bj) continue
+                    const bu = global.db.data.users[bj] || (global.db.data.users[bj] = {})
+                    bu.registered        = true
+                    if (!bu.regTime || bu.regTime <= 0) bu.regTime = Date.now()
+                    bu.name              = bu.name || (this?.user?.name || 'زيريف ⚜️ التاجر')
+                    bu.bio               = bu.bio  || '🤖 التاجر الرسمي للبوت — موارد لا نهائية'
+                    bu.premium           = true
+                    bu.premiumTime       = Math.max(bu.premiumTime || 0, Date.now() + (50 * 365 * 24 * 60 * 60 * 1000))
+                    bu.infiniteResources = true
+                    bu.energy            = 100
+                    bu.money             = Math.max(bu.money   || 0, 1_000_000_000)
+                    bu.bank              = Math.max(bu.bank    || 0, 1_000_000_000)
+                    bu.diamond           = Math.max(bu.diamond || 0, 1_000_000)
+                    bu.role              = '🤖 التاجر الرسمي'
+                    bu.banned            = false
+                }
+            } catch (_) {}
+        } catch (_) {}
+
+        // ── خصائص مساعدة للهوية على كائن الرسالة (m) ──
+        try {
+            m.isROwnerUser = isROwner
+            m.isOwnerUser  = isOwner
+            m.isModsUser   = isMods
+            m.isVipUser    = isPrems
+            m.tier         = isROwner || isOwner ? 'dev' : (isPrems ? 'vip' : 'normal')
+            m.tierBadge    = global.tierBadge ? global.tierBadge(m.sender) :
+                             (m.tier === 'dev' ? '👑 مطور' : m.tier === 'vip' ? '💎 مميز' : '👤 عادي')
+        } catch (_) {}
+
         if (global.db.data.chats[m.chat]?.botOff && m.text && global.prefix.test(m.text) && !(isROwner || isOwner)) return
 
         // ── Temp ban check (offensive words) ──
@@ -1420,7 +1475,7 @@ if (botSpam.antispam && m.text && user && user.lastCommandTime && (Date.now() - 
                     fail('private', m, this)
                     continue
                 }
-                if (plugin.register == true && _user.registered == false) { // Butuh daftar?
+                if (plugin.register == true && _user.registered == false && !(isROwner || isOwner || isPrems)) { // Butuh daftar?
                     fail('unreg', m, this)
                     continue
                 }
@@ -1461,35 +1516,39 @@ if (botSpam.antispam && m.text && user && user.lastCommandTime && (Date.now() - 
                     __dirname: ___dirname,
                     __filename
                 }
+                // ── ختم العضوية الموحَّد: يُضاف تلقائياً لكل ردود الأمر ──
+                let _restoreSendMessage = null
                 try {
-                    // ── ختم العضوية الموحَّد: يُضاف تلقائياً لكل ردود الأمر ──
-                    try {
-                        const _badge = global.tierBadge ? global.tierBadge(m.sender) : ''
-                        if (_badge && !m.__replyWrapped) {
-                            m.__replyWrapped = true
-                            const _stamp = `\n\n┄┄┄┄┄┄\n${_badge}`
-                            const _origReply = m.reply.bind(m)
-                            m.reply = function (text, chatId, options) {
-                                if (typeof text === 'string' && text.length && !text.includes(_badge.split(' · ')[0])) {
-                                    text = text + _stamp
-                                }
-                                return _origReply(text, chatId, options)
+                    const _badge = global.tierBadge ? global.tierBadge(m.sender) : (m.tierBadge || '')
+                    if (_badge && !m.__replyWrapped) {
+                        m.__replyWrapped = true
+                        const _tierTxt = _badge.split(' · ')[0]
+                        const _stamp = `\n\n┄┄┄┄┄┄\n${_badge}`
+                        const _origReply = m.reply.bind(m)
+                        m.reply = function (text, chatId, options) {
+                            if (typeof text === 'string' && text.length && !text.includes(_tierTxt)) {
+                                text = text + _stamp
                             }
-                            const _origSendMessage = this.sendMessage.bind(this)
-                            this.sendMessage = async function (jid, content, opts) {
-                                try {
-                                    if (content && typeof content === 'object') {
-                                        if (typeof content.text === 'string' && content.text.length && !content.text.includes(_badge.split(' · ')[0])) {
-                                            content = { ...content, text: content.text + _stamp }
-                                        } else if (typeof content.caption === 'string' && content.caption.length && !content.caption.includes(_badge.split(' · ')[0])) {
-                                            content = { ...content, caption: content.caption + _stamp }
-                                        }
-                                    }
-                                } catch (_) {}
-                                return _origSendMessage(jid, content, opts)
-                            }
+                            return _origReply(text, chatId, options)
                         }
-                    } catch (_) {}
+                        const _origSendMessage = this.sendMessage.bind(this)
+                        const _connRef = this
+                        _restoreSendMessage = () => { try { _connRef.sendMessage = _origSendMessage } catch (_) {} }
+                        this.sendMessage = async function (jid, content, opts) {
+                            try {
+                                if (content && typeof content === 'object') {
+                                    if (typeof content.text === 'string' && content.text.length && !content.text.includes(_tierTxt)) {
+                                        content = { ...content, text: content.text + _stamp }
+                                    } else if (typeof content.caption === 'string' && content.caption.length && !content.caption.includes(_tierTxt)) {
+                                        content = { ...content, caption: content.caption + _stamp }
+                                    }
+                                }
+                            } catch (_) {}
+                            return _origSendMessage(jid, content, opts)
+                        }
+                    }
+                } catch (_) {}
+                try {
                     await plugin.call(this, m, extra)
                     if (!isPrems)
                         m.limit = m.limit || plugin.limit || false
@@ -1522,6 +1581,7 @@ if (botSpam.antispam && m.text && user && user.lastCommandTime && (Date.now() - 
                     }
                     if (m.limit)
                         m.reply(+m.limit - ' 𝐃𝐈𝐀𝐌𝐀𝐍𝐓𝐄 💎 𝐔𝐒𝐀𝐃𝐎')
+                    if (typeof _restoreSendMessage === 'function') _restoreSendMessage()
                 }
                 break
             }
