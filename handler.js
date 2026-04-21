@@ -1462,6 +1462,34 @@ if (botSpam.antispam && m.text && user && user.lastCommandTime && (Date.now() - 
                     __filename
                 }
                 try {
+                    // ── ختم العضوية الموحَّد: يُضاف تلقائياً لكل ردود الأمر ──
+                    try {
+                        const _badge = global.tierBadge ? global.tierBadge(m.sender) : ''
+                        if (_badge && !m.__replyWrapped) {
+                            m.__replyWrapped = true
+                            const _stamp = `\n\n┄┄┄┄┄┄\n${_badge}`
+                            const _origReply = m.reply.bind(m)
+                            m.reply = function (text, chatId, options) {
+                                if (typeof text === 'string' && text.length && !text.includes(_badge.split(' · ')[0])) {
+                                    text = text + _stamp
+                                }
+                                return _origReply(text, chatId, options)
+                            }
+                            const _origSendMessage = this.sendMessage.bind(this)
+                            this.sendMessage = async function (jid, content, opts) {
+                                try {
+                                    if (content && typeof content === 'object') {
+                                        if (typeof content.text === 'string' && content.text.length && !content.text.includes(_badge.split(' · ')[0])) {
+                                            content = { ...content, text: content.text + _stamp }
+                                        } else if (typeof content.caption === 'string' && content.caption.length && !content.caption.includes(_badge.split(' · ')[0])) {
+                                            content = { ...content, caption: content.caption + _stamp }
+                                        }
+                                    }
+                                } catch (_) {}
+                                return _origSendMessage(jid, content, opts)
+                            }
+                        }
+                    } catch (_) {}
                     await plugin.call(this, m, extra)
                     if (!isPrems)
                         m.limit = m.limit || plugin.limit || false

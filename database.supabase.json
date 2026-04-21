@@ -347,7 +347,7 @@
       "lastnambang": 0,
       "makanannaga": 0,
       "premiumDate": -1,
-      "premiumTime": 3353558504119,
+      "premiumTime": 3353558664481,
       "seedbrokoli": 0,
       "seedkentang": 0,
       "totalEarned": 0,
@@ -587,7 +587,7 @@
       "kerjatujuhbelas": 0,
       "kucinglastclaim": 0,
       "lastCommandTime": 1776737154988,
-      "lastEnergyRegen": 1776758504119,
+      "lastEnergyRegen": 1776758664481,
       "lastmancingeasy": 0,
       "lastmancinghard": 0,
       "lastpotionclaim": 0,
@@ -714,7 +714,7 @@
       "emas": 0,
       "emerald": 0,
       "esteh": 0,
-      "exp": 47,
+      "exp": 33,
       "expg": 0,
       "exphero": 0,
       "expired": 0,
@@ -1036,26 +1036,28 @@
         "soal": null
       },
       "messages": {
-        "total": 3,
+        "total": 2,
         "groups": {
-          "120363422912330057@g.us": 3
+          "120363422912330057@g.us": 2
         },
-        "last": 1776758580759
+        "last": 1776758692929
       },
+      "lastCommandTime": 1776758683115,
+      "commandCount": 1,
       "energy": 100,
+      "lastEnergyRegen": 1776758692929,
+      "lastDaily": 0,
+      "lastWork": 0,
+      "totalEarned": 0,
+      "totalSpent": 0,
       "transactions": [
         {
           "type": "earn",
           "amount": 0,
           "reason": "🆙 مكافأة المستوى 0",
-          "time": 1776758558031
+          "time": 1776758685496
         }
       ],
-      "lastEnergyRegen": 1776758564545,
-      "lastDaily": 0,
-      "lastWork": 0,
-      "totalEarned": 0,
-      "totalSpent": 0,
       "premiumDate": -1,
       "catexp": 0,
       "enchant": 0,
@@ -1078,9 +1080,7 @@
       "psenjata": 0,
       "psepick": 0,
       "robo": 0,
-      "roboxp": 0,
-      "lastCommandTime": 1776758580760,
-      "commandCount": 1
+      "roboxp": 0
     }
   },
   "chats": {
@@ -1110,7 +1110,7 @@
       "autosticker": false,
       "antiviewonce": false,
       "messageStats": {
-        "28648019066900@lid": 27,
+        "28648019066900@lid": 35,
         "158884446605486@lid": 2,
         "967782114485@s.whatsapp.net": 13
       }
@@ -1226,10 +1226,10 @@
       "lastSuccess": 1776758487706
     },
     "menu.js": {
-      "last": 1776758566699,
-      "total": 43,
-      "success": 43,
-      "lastSuccess": 1776758566699
+      "last": 1776758685496,
+      "total": 46,
+      "success": 46,
+      "lastSuccess": 1776758685496
     },
     "اكس.js": {
       "last": 1776735452626,
@@ -1256,8 +1256,8 @@
       "lastSuccess": 1776734809302
     },
     "لفل.js": {
-      "last": 1776733874402,
-      "total": 2,
+      "last": 1776758629522,
+      "total": 3,
       "success": 0,
       "lastSuccess": 0
     },
@@ -1298,10 +1298,10 @@
       "lastSuccess": 0
     },
     "البنك.js": {
-      "last": 1776733877131,
-      "total": 2,
-      "success": 2,
-      "lastSuccess": 1776733877131
+      "last": 1776758641464,
+      "total": 4,
+      "success": 4,
+      "lastSuccess": 1776758641464
     },
     "تسجيل.js": {
       "last": 1776758473065,
