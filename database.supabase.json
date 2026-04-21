@@ -27,11 +27,11 @@
       "lastDaily": 0,
       "registered": true,
       "totalSpent": 0,
-      "premiumTime": 3353596222912,
+      "premiumTime": 3353596666264,
       "totalEarned": 0,
       "bannedReason": "",
       "transactions": [],
-      "lastEnergyRegen": 1776796222912,
+      "lastEnergyRegen": 1776796666264,
       "infiniteResources": true
     },
     "967782114485@s.whatsapp.net": {
@@ -381,7 +381,7 @@
       "lastnambang": 0,
       "makanannaga": 0,
       "premiumDate": -1,
-      "premiumTime": 3353596237964,
+      "premiumTime": 3353596666485,
       "seedbrokoli": 0,
       "seedkentang": 0,
       "totalEarned": 0,
@@ -639,7 +639,7 @@
       "kerjatujuhbelas": 0,
       "kucinglastclaim": 0,
       "lastCommandTime": 1776761763373,
-      "lastEnergyRegen": 1776796222912,
+      "lastEnergyRegen": 1776796666264,
       "lastmancingeasy": 0,
       "lastmancinghard": 0,
       "lastpotionclaim": 0,
@@ -674,6 +674,21 @@
       "rhinoceroslastfeed": 0,
       "magicwanddurability": 0,
       "fishingroddurability": 0
+    },
+    "137465276969165@s.whatsapp.net": {
+      "bio": "🤖 التاجر الرسمي للبوت — موارد لا نهائية",
+      "bank": 1000000000,
+      "name": "شادو",
+      "role": "🤖 التاجر الرسمي",
+      "money": 1000000000,
+      "banned": false,
+      "energy": 100,
+      "diamond": 1000000,
+      "premium": true,
+      "regTime": 1776796237964,
+      "registered": true,
+      "premiumTime": 3353596666485,
+      "infiniteResources": true
     },
     "204990769553546@s.whatsapp.net": {
       "bank": 10000,
@@ -740,7 +755,7 @@
       "premium": true,
       "regTime": 1776795449504,
       "registered": true,
-      "premiumTime": 3353596237964,
+      "premiumTime": 3353596666485,
       "infiniteResources": true
     },
     "28648019066900@lid": {
@@ -835,7 +850,7 @@
       "emas": 0,
       "emerald": 0,
       "esteh": 0,
-      "exp": 20,
+      "exp": 42,
       "expg": 0,
       "exphero": 0,
       "expired": 0,
@@ -1056,7 +1071,7 @@
       "pointxp": 0,
       "potion": 10,
       "premium": true,
-      "premiumTime": 3353596237964,
+      "premiumTime": 3353596666485,
       "ramuan": 0,
       "ramuancentaurlast": 0,
       "ramuangriffinlast": 0,
@@ -1070,7 +1085,7 @@
       "ramuanserigalalast": 0,
       "registered": true,
       "reglast": 0,
-      "regTime": 1776796237964,
+      "regTime": 1776796666485,
       "rendang": 0,
       "rhinoceros": 0,
       "rhinocerosexp": 0,
@@ -1122,7 +1137,7 @@
       "sworddurability": 0,
       "tigame": 50,
       "tiketcoin": 0,
-      "title": "",
+      "title": 0,
       "tomat": 0,
       "tprem": 0,
       "trash": 0,
@@ -1159,32 +1174,58 @@
       "infiniteResources": true,
       "tempBannedUntil": 0,
       "energy": 100,
-      "lastEnergyRegen": 1776796237964,
+      "lastEnergyRegen": 1776796703343,
       "messages": {
-        "total": 1,
+        "total": 4,
         "groups": {
-          "120363427285079878@g.us": 1
+          "120363427285079878@g.us": 4
         },
-        "last": 1776796238937
+        "last": 1776796703343
       },
-      "lastCommandTime": 1776796238942,
-      "commandCount": 1,
       "transactions": [
         {
           "type": "earn",
           "amount": 0,
           "reason": "🆙 مكافأة المستوى 0",
-          "time": 1776796243888
+          "time": 1776796667080
         }
-      ]
+      ],
+      "lastDaily": 0,
+      "lastWork": 0,
+      "totalEarned": 0,
+      "totalSpent": 0,
+      "catexp": 0,
+      "enchant": 0,
+      "glimit": 20,
+      "glory": 0,
+      "healthmonster": 0,
+      "kyubiexp": 0,
+      "kyubilastfeed": 0,
+      "lastbansos": 0,
+      "lastcodereg": 0,
+      "lastgift": 0,
+      "lastIstigfar": 0,
+      "lastrampok": 0,
+      "lastsda": 0,
+      "lastwar": 0,
+      "pancing": 0,
+      "pertambangan": 0,
+      "pertanian": 0,
+      "petFood": 0,
+      "psenjata": 0,
+      "psepick": 0,
+      "robo": 0,
+      "roboxp": 0,
+      "lastCommandTime": 1776796695100,
+      "commandCount": 1
     },
     "137465276969165:25@lid": {
       "registered": true,
-      "regTime": 1776796237964,
+      "regTime": 1776796666485,
       "name": "شادو",
       "bio": "🤖 التاجر الرسمي للبوت — موارد لا نهائية",
       "premium": true,
-      "premiumTime": 3353596237964,
+      "premiumTime": 3353596666485,
       "infiniteResources": true,
       "energy": 100,
       "money": 1000000000,
@@ -1195,26 +1236,11 @@
     },
     "137465276969165@lid": {
       "registered": true,
-      "regTime": 1776796237964,
+      "regTime": 1776796666485,
       "name": "شادو",
       "bio": "🤖 التاجر الرسمي للبوت — موارد لا نهائية",
       "premium": true,
-      "premiumTime": 3353596237964,
-      "infiniteResources": true,
-      "energy": 100,
-      "money": 1000000000,
-      "bank": 1000000000,
-      "diamond": 1000000,
-      "role": "🤖 التاجر الرسمي",
-      "banned": false
-    },
-    "137465276969165@s.whatsapp.net": {
-      "registered": true,
-      "regTime": 1776796237964,
-      "name": "شادو",
-      "bio": "🤖 التاجر الرسمي للبوت — موارد لا نهائية",
-      "premium": true,
-      "premiumTime": 3353596237964,
+      "premiumTime": 3353596666485,
       "infiniteResources": true,
       "energy": 100,
       "money": 1000000000,
@@ -1254,6 +1280,34 @@
         "28648019066900@lid": 21,
         "158884446605486@lid": 2,
         "967782114485@s.whatsapp.net": 11
+      }
+    },
+    "120363424316651795@g.us": {
+      "sBye": "",
+      "simi": false,
+      "audios": true,
+      "delete": true,
+      "detect": true,
+      "detect2": false,
+      "expired": 0,
+      "sDemote": "",
+      "welcome": true,
+      "antiArab": false,
+      "antiLink": false,
+      "isBanned": false,
+      "sPromote": "",
+      "sWelcome": "",
+      "antiArab2": false,
+      "antiLink2": false,
+      "antiToxic": false,
+      "antiTraba": false,
+      "antiporno": false,
+      "modoadmin": false,
+      "modohorny": true,
+      "autosticker": false,
+      "antiviewonce": false,
+      "messageStats": {
+        "28648019066900@lid": 1
       }
     },
     "120363426033819775@g.us": {
@@ -1310,7 +1364,7 @@
       "autosticker": false,
       "antiviewonce": false,
       "messageStats": {
-        "28648019066900@lid": 142,
+        "28648019066900@lid": 150,
         "204990769553546@lid": 29,
         "967782114485@s.whatsapp.net": 42
       }
@@ -1373,10 +1427,10 @@
       "lastSuccess": 1776788889406
     },
     "menu.js": {
-      "last": 1776795598579,
-      "total": 63,
-      "success": 63,
-      "lastSuccess": 1776795598579
+      "last": 1776796697410,
+      "total": 64,
+      "success": 64,
+      "lastSuccess": 1776796697410
     },
     "anime.js": {
       "last": 1776762332593,
@@ -1505,10 +1559,10 @@
       "lastSuccess": 1776786084692
     },
     "group-admin.js": {
-      "last": 1776795565595,
-      "total": 24,
-      "success": 23,
-      "lastSuccess": 1776795565595
+      "last": 1776796609616,
+      "total": 29,
+      "success": 28,
+      "lastSuccess": 1776796609616
     },
     "group-extra.js": {
       "last": 1776795614505,
@@ -1602,17 +1656,7 @@
       "modejadibot": true
     }
   },
-  "jadibot": {
-    "967781003633": {
-      "createdAt": 1776796239459,
-      "features": [
-        "islamic",
-        "main",
-        "profile"
-      ],
-      "owner": "28648019066900@lid"
-    }
-  },
+  "jadibot": {},
   "gameState": {
     "chess": {},
     "games3": {},
@@ -1627,13 +1671,6 @@
     "28648019066900@lid": "967778088098@s.whatsapp.net"
   },
   "groupRequests": {},
-  "jadibotSessions": {
-    "967781003633": {
-      "files": {
-        "creds.json": "eyJub2lzZUtleSI6eyJwcml2YXRlIjp7InR5cGUiOiJCdWZmZXIiLCJkYXRhIjoiSUtZWVFJSVRaOEt0ZlBxTUxkd3IxbXNZSXlvdDk5YmJkT0JJdkxaRDFWQT0ifSwicHVibGljIjp7InR5cGUiOiJCdWZmZXIiLCJkYXRhIjoiUVZEUHd0RXhHOWZSaUpRZWFKeENqdzR2anY0UUd0Ui80dkdvY2x4NzhVRT0ifX0sInBhaXJpbmdFcGhlbWVyYWxLZXlQYWlyIjp7InByaXZhdGUiOnsidHlwZSI6IkJ1ZmZlciIsImRhdGEiOiI4TGhmQTZyb3RjMW40K2t5Vnl3dGRYdFVnNUFQZGhhQVd5U1IxMjJ0NG1zPSJ9LCJwdWJsaWMiOnsidHlwZSI6IkJ1ZmZlciIsImRhdGEiOiJwSFNZREIxNDlsRFBoUkhPT2pFTWRjRE5oNGZjRTVrMjFHTWU4SzVGMTJrPSJ9fSwic2lnbmVkSWRlbnRpdHlLZXkiOnsicHJpdmF0ZSI6eyJ0eXBlIjoiQnVmZmVyIiwiZGF0YSI6InVNVlN5c09hOGVwbUt0YUkweElUZDZSVGt1WWFBMFJwKzFTVWRxZm9TM1k9In0sInB1YmxpYyI6eyJ0eXBlIjoiQnVmZmVyIiwiZGF0YSI6Ind5Nk55cGM3TXcxbmI2YytLU0U5M292V2RzR0U3VFZCODNsdG4wRTlUU3M9In19LCJzaWduZWRQcmVLZXkiOnsia2V5UGFpciI6eyJwcml2YXRlIjp7InR5cGUiOiJCdWZmZXIiLCJkYXRhIjoiY0o2c0lMOU9QMGtnQUVRTlRSdCt2MUdtb3VmbGdMTGJOTkxGcHRLL1hFQT0ifSwicHVibGljIjp7InR5cGUiOiJCdWZmZXIiLCJkYXRhIjoiOTF4MGh3NWU3NUE5eVZFTDBaOU9wV21nTFRUSVdndW9KajAvUjVXSWNXUT0ifX0sInNpZ25hdHVyZSI6eyJ0eXBlIjoiQnVmZmVyIiwiZGF0YSI6Imx4a0dQYllOVUZKazk3d2dZYU1ITjBuREZjY0FIbXlEVkR4MjJEZ2VvUmJsL1hQM1VEaW1DRWNVV1I0b2NPRStzcmRVaDhMQk05d3Q3QTVxd0NFVkRBPT0ifSwia2V5SWQiOjF9LCJyZWdpc3RyYXRpb25JZCI6MjE4LCJhZHZTZWNyZXRLZXkiOiJ0Q3hwNVZiZHZTTTRmUUdxMGZ2Vm9qVWNEcVVGOGE2VEV6Uml2TUtPM3VJPSIsInByb2Nlc3NlZEhpc3RvcnlNZXNzYWdlcyI6W10sIm5leHRQcmVLZXlJZCI6MSwiZmlyc3RVbnVwbG9hZGVkUHJlS2V5SWQiOjEsImFjY291bnRTeW5jQ291bnRlciI6MCwiYWNjb3VudFNldHRpbmdzIjp7InVuYXJjaGl2ZUNoYXRzIjpmYWxzZX0sInJlZ2lzdGVyZWQiOnRydWUsInBhaXJpbmdDb2RlIjoiSE0zUERQV0ciLCJtZSI6eyJpZCI6Ijk2Nzc4MTAwMzYzMzoyQHMud2hhdHNhcHAubmV0IiwibGlkIjoiMTU4ODg0NDQ2NjA1NDg2OjJAbGlkIn0sImFjY291bnQiOnsiZGV0YWlscyI6IkNNZW03cWtERU9pRW44OEdHQUVnQUNnQSIsImFjY291bnRTaWduYXR1cmVLZXkiOiJKMS9CR2wzZkdpYk9GOVJISC85Yy9xYkJ5a1QyWHFEU09pVXg0aExZNEhNPSIsImFjY291bnRTaWduYXR1cmUiOiJWR0E1eFpkdFA4NGZLSStocWgwZ1krQ05NNHl2bGYxUnVxd015alRCM3MyZ3l3L2xPQ2JlRWtRTlJ0SG5wQVFYRy9tUlhrSVhUdGs2VG5CNVJZNHZBQT09IiwiZGV2aWNlU2lnbmF0dXJlIjoiak4zMW1pNUVFYS94Yk9acUFLMzRMMXA0S3lyNURldktTNHNvRGIwL0h6Rm8zQldadEcvcldRYnJ3OHdSNHRJRExpdzZQaTRtOTBKT2ZEZHNJUlpBQkE9PSJ9LCJzaWduYWxJZGVudGl0aWVzIjpbeyJpZGVudGlmaWVyIjp7Im5hbWUiOiIxNTg4ODQ0NDY2MDU0ODY6MkBsaWQiLCJkZXZpY2VJZCI6MH0sImlkZW50aWZpZXJLZXkiOnsidHlwZSI6IkJ1ZmZlciIsImRhdGEiOiJCU2Rmd1JwZDN4b216aGZVUngvL1hQNm13Y3BFOWw2ZzBqb2xNZUlTMk9CeiJ9fV0sInBsYXRmb3JtIjoiYW5kcm9pZCJ9"
-      },
-      "savedAt": 1776796269155
-    }
-  },
+  "jadibotSessions": {},
   "groupRequestCooldown": {}
 }

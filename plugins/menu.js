@@ -1,6 +1,7 @@
 import { xpRange } from '../lib/levelling.js'
 import { syncEnergy, initEconomy, getRole, isVip, fmt, fmtEnergy } from '../lib/economy.js'
 import { typingDelay } from '../lib/presence.js'
+import { getSubBotFeatures } from '../lib/jadibot.js'
 
 function clockString(ms) {
   const h = isNaN(ms) ? '--' : Math.floor(ms / 3600000)
@@ -20,11 +21,15 @@ function normalizeChoice(text = '') {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// كل قسم يحمل featureTag يطابق وسوم (tags) البلجنز:
+//   profile, islamic, game, economy, ai, media, main, group, owner
+// عند استدعاء القائمة من بوت فرعي → تُعرض فقط الأقسام المسموح بها له.
 const sections = {
 
   1: {
     title: '👤 التسجيل والبروفايل',
     emoji: '👤',
+    featureTag: 'profile',
     commands: [
       'تسجيل          ← إنشاء حساب في البوت',
       'بروفايل         ← ملفك الشخصي الكامل',
@@ -40,6 +45,7 @@ const sections = {
   2: {
     title: '🕌 الديني والثقافي',
     emoji: '🕌',
+    featureTag: 'islamic',
     commands: [
       'قران            ← آية قرآنية عشوائية',
       'آية الكرسي      ← آية الكرسي',
@@ -59,6 +65,7 @@ const sections = {
   3: {
     title: '🎮 الألعاب والترفيه',
     emoji: '🎮',
+    featureTag: 'game',
     commands: [
       '─── ألعاب استراتيجية ───',
       'شطرنج          ← لعبة شطرنج',
@@ -97,6 +104,7 @@ const sections = {
   4: {
     title: '💰 الاقتصاد والمتجر',
     emoji: '💰',
+    featureTag: 'economy',
     commands: [
       '─── الرصيد ───',
       'البنك           ← رصيدك الكامل',
@@ -122,6 +130,7 @@ const sections = {
   5: {
     title: '🤖 الذكاء الاصطناعي والتعلم',
     emoji: '🤖',
+    featureTag: 'ai',
     commands: [
       '─── الذكاء الاصطناعي ───',
       'ai [سؤال]       ← نموذج AI عام',
@@ -143,6 +152,7 @@ const sections = {
   6: {
     title: '🎧 الوسائط والأدوات',
     emoji: '🎧',
+    featureTag: 'media',
     commands: [
       '─── الصوت والفيديو ───',
       'شغل [اسم]       ← تشغيل أغنية من يوتيوب',
@@ -177,6 +187,7 @@ const sections = {
   7: {
     title: '📋 الإنتاجية والأدوات',
     emoji: '📋',
+    featureTag: 'main',
     commands: [
       '─── المهام ───',
       'مهمة [نص]       ← إضافة مهمة',
@@ -214,6 +225,7 @@ const sections = {
   8: {
     title: '👥 إدارة المجموعات',
     emoji: '👥',
+    featureTag: 'group',
     commands: [
       '─── الأعضاء ───',
       'طرد @           ← طرد عضو',
@@ -273,6 +285,7 @@ const sections = {
   9: {
     title: '👑 أوامر المالك',
     emoji: '👑',
+    featureTag: 'owner',
     commands: [
       'لوحة_التحكم    ← لوحة كاملة للإدارة',
       '',
@@ -330,6 +343,7 @@ const sections = {
   10: {
     title: '🔧 تحكم البوت والحساب',
     emoji: '🔧',
+    featureTag: 'owner',
     commands: [
       'تحكم_البوت     ← لوحة شاملة للتحكم',
       '',
@@ -393,15 +407,47 @@ function buildHeader(m, user, level, role, max, uptime, vipStatus) {
 ╰──────────────────`).trim()
 }
 
-function buildIndex(header, vipStatus) {
-  const lines = Object.entries(sections)
-    .map(([k, s]) => `  *${k}.* ${s.emoji}  ${s.title.replace(/^[^ ]+ /, '')}`)
-    .join('\n')
-  return `${header}\n\n*📋 اختر قسماً — ردّ (Reply) على هذه الرسالة برقم القسم:*\n\n${lines}\n\n_↩️ ردّ على الرسالة باختيارك_`.trim()
+/**
+ * يعيد قائمة الأقسام المسموح بها للاتصال الحالي.
+ * البوت الرئيسي → كل الأقسام.
+ * البوت الفرعي  → فقط الأقسام التي تطابق وسوم مزاياه (features) + قسم البوتات الفرعية إن وُجد.
+ */
+function getAllowedSections(conn) {
+  const isSubBot = !!conn?.__subBotPhone
+  if (!isSubBot) return sections
+
+  let allowed = []
+  try { allowed = getSubBotFeatures(conn.__subBotPhone) || [] } catch (_) {}
+  // owner لا يُعطى تلقائياً لبوت فرعي إلا لو حدّده المطور
+  const allowSet = new Set(allowed.map(s => String(s).toLowerCase()))
+
+  const filtered = {}
+  let i = 1
+  for (const s of Object.values(sections)) {
+    const tag = String(s.featureTag || '').toLowerCase()
+    if (!tag) continue
+    if (!allowSet.has(tag)) continue
+    filtered[i++] = s
+  }
+  return filtered
 }
 
-function buildSection(id, header, vipStatus) {
-  const section = sections[id]
+function buildIndex(header, vipStatus, sectionsToShow, isSubBot, subPhone, allowedFeatures) {
+  const entries = Object.entries(sectionsToShow)
+  if (!entries.length) {
+    return `${header}\n\n📭 *لا توجد أقسام متاحة لهذا البوت الفرعي.*\n\nاطلب من المطور تفعيل المزايا عبر:\n*مزايا_البوت ${subPhone || '<رقم>'} <tags>*`
+  }
+  const lines = entries
+    .map(([k, s]) => `  *${k}.* ${s.emoji}  ${s.title.replace(/^[^ ]+ /, '')}`)
+    .join('\n')
+  const subLine = isSubBot
+    ? `\n\n🤖 *بوت فرعي:* +${subPhone}\n🧩 *المزايا المُفعَّلة:* ${(allowedFeatures || []).join(' • ') || '—'}`
+    : ''
+  return `${header}${subLine}\n\n*📋 اختر قسماً — ردّ (Reply) على هذه الرسالة برقم القسم:*\n\n${lines}\n\n_↩️ ردّ على الرسالة باختيارك_`.trim()
+}
+
+function buildSection(id, header, vipStatus, sectionsToShow = sections) {
+  const section = sectionsToShow[id]
   if (!section) return null
   const cmds = section.commands.map(c =>
     c.startsWith('─') || c === '' ? (c === '' ? '│' : `│\n│ ${c}`) : `│ • ${c}`
@@ -429,7 +475,12 @@ let handler = async (m, { conn, usedPrefix }) => {
   const { max } = xpRange(level, global.multiplier)
   const uptime = clockString(process.uptime() * 1000)
   const header = buildHeader(m, user, level, role, max, uptime, vipStatus)
-  const menu   = buildIndex(header, vipStatus)
+
+  const isSubBot = !!conn?.__subBotPhone
+  const subPhone = conn?.__subBotPhone || null
+  const allowedFeatures = isSubBot ? (getSubBotFeatures(subPhone) || []) : null
+  const sectionsToShow = getAllowedSections(conn)
+  const menu = buildIndex(header, vipStatus, sectionsToShow, isSubBot, subPhone, allowedFeatures)
 
   global.menuSessions ??= {}
 
@@ -440,7 +491,9 @@ let handler = async (m, { conn, usedPrefix }) => {
   global.menuSessions[m.sender] = {
     ts: Date.now(),
     msgId: sent?.key?.id || null,
-    chat: m.chat
+    chat: m.chat,
+    isSubBot,
+    subPhone
   }
 }
 
@@ -455,7 +508,8 @@ handler.all = async function (m) {
   if (!raw || /^[./#!\u0600-\u06FF]/.test(raw)) return
 
   const choice = normalizeChoice(raw)
-  if (!sections[choice]) return
+  const sectionsToShow = getAllowedSections(this)
+  if (!sectionsToShow[choice]) return
 
   if (Date.now() - session.ts > 5 * 60 * 1000) {
     delete global.menuSessions[m.sender]
@@ -478,7 +532,7 @@ handler.all = async function (m) {
   const uptime = clockString(process.uptime() * 1000)
   const header = buildHeader(m, user, level, role, max, uptime, vipStatus)
 
-  const text = buildSection(choice, header, vipStatus)
+  const text = buildSection(choice, header, vipStatus, sectionsToShow)
   if (text) {
     await this.reply(m.chat, text, m)
     delete global.menuSessions[m.sender]
