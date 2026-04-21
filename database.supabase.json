@@ -27,11 +27,11 @@
       "lastDaily": 0,
       "registered": true,
       "totalSpent": 0,
-      "premiumTime": 3353561418434,
+      "premiumTime": 3353561919618,
       "totalEarned": 0,
       "bannedReason": "",
       "transactions": [],
-      "lastEnergyRegen": 1776761418434,
+      "lastEnergyRegen": 1776761919618,
       "infiniteResources": true
     },
     "967782114485@s.whatsapp.net": {
@@ -128,7 +128,7 @@
       "level": 999,
       "limit": null,
       "lumba": 0,
-      "money": 1000000000,
+      "money": 1000000600,
       "ojekk": 0,
       "panda": 0,
       "roket": 0,
@@ -194,7 +194,7 @@
       "brokoli": 0,
       "centaur": 0,
       "crystal": 0,
-      "diamond": 1000004,
+      "diamond": 1000006,
       "emerald": 0,
       "enchant": 0,
       "exphero": 0,
@@ -264,12 +264,12 @@
       "lastturu": 0,
       "lastwork": 0,
       "messages": {
-        "last": 1776761210864,
-        "total": 40,
+        "last": 1776761763709,
+        "total": 76,
         "groups": {
           "120363422912330057@g.us": 11,
           "120363426033819775@g.us": 1,
-          "120363427285079878@g.us": 7
+          "120363427285079878@g.us": 42
         }
       },
       "oporayam": 0,
@@ -381,7 +381,7 @@
       "lastnambang": 0,
       "makanannaga": 0,
       "premiumDate": -1,
-      "premiumTime": 3353561418434,
+      "premiumTime": 3353561919618,
       "seedbrokoli": 0,
       "seedkentang": 0,
       "totalEarned": 0,
@@ -408,6 +408,30 @@
       "pertambangan": 0,
       "seedkangkung": 0,
       "transactions": [
+        {
+          "time": 1776761621073,
+          "type": "earn",
+          "amount": 400,
+          "reason": "🆙 مكافأة المستوى 2"
+        },
+        {
+          "time": 1776761612467,
+          "type": "earn",
+          "amount": 200,
+          "reason": "🆙 مكافأة المستوى 1"
+        },
+        {
+          "time": 1776761611336,
+          "type": "earn",
+          "amount": 0,
+          "reason": "🆙 مكافأة المستوى 0"
+        },
+        {
+          "time": 1776761517077,
+          "type": "earn",
+          "amount": 0,
+          "reason": "🆙 مكافأة المستوى 0"
+        },
         {
           "time": 1776761210869,
           "type": "earn",
@@ -563,30 +587,6 @@
           "type": "earn",
           "amount": 0,
           "reason": "🆙 مكافأة المستوى 0"
-        },
-        {
-          "time": 1776726290302,
-          "type": "earn",
-          "amount": 0,
-          "reason": "🆙 مكافأة المستوى 0"
-        },
-        {
-          "time": 1776725398150,
-          "type": "earn",
-          "amount": 0,
-          "reason": "🆙 مكافأة المستوى 0"
-        },
-        {
-          "time": 1776723853218,
-          "type": "earn",
-          "amount": 0,
-          "reason": "🆙 مكافأة المستوى 0"
-        },
-        {
-          "time": 1776722557162,
-          "type": "earn",
-          "amount": 0,
-          "reason": "🆙 مكافأة المستوى 0"
         }
       ],
       "wolflastfeed": 0,
@@ -638,8 +638,8 @@
       "kerjaempatbelas": 0,
       "kerjatujuhbelas": 0,
       "kucinglastclaim": 0,
-      "lastCommandTime": 1776737154988,
-      "lastEnergyRegen": 1776761418434,
+      "lastCommandTime": 1776761763373,
+      "lastEnergyRegen": 1776761919618,
       "lastmancingeasy": 0,
       "lastmancinghard": 0,
       "lastpotionclaim": 0,
@@ -687,7 +687,7 @@
       "premium": true,
       "regTime": 1776761136586,
       "registered": true,
-      "premiumTime": 3353561377787,
+      "premiumTime": 3353561763708,
       "infiniteResources": true
     }
   },
@@ -777,9 +777,9 @@
       "autosticker": false,
       "antiviewonce": false,
       "messageStats": {
-        "28648019066900@lid": 72,
+        "28648019066900@lid": 77,
         "204990769553546@lid": 2,
-        "967782114485@s.whatsapp.net": 7
+        "967782114485@s.whatsapp.net": 42
       }
     },
     "967778088098@s.whatsapp.net": {
@@ -832,6 +832,12 @@
       "total": 44,
       "success": 44,
       "lastSuccess": 1776761370666
+    },
+    "study.js": {
+      "last": 1776761622672,
+      "total": 36,
+      "success": 35,
+      "lastSuccess": 1776761622125
     },
     "اكس.js": {
       "last": 1776735452626,
@@ -912,10 +918,10 @@
       "lastSuccess": 1776733886357
     },
     "تنظيف.js": {
-      "last": 1776761210761,
-      "total": 7,
-      "success": 7,
-      "lastSuccess": 1776761210761
+      "last": 1776761452106,
+      "total": 8,
+      "success": 8,
+      "lastSuccess": 1776761452106
     },
     "bot-control.js": {
       "last": 1776737001003,
@@ -924,10 +930,10 @@
       "lastSuccess": 1776736990143
     },
     "group-admin.js": {
-      "last": 1776737155791,
-      "total": 13,
-      "success": 12,
-      "lastSuccess": 1776736811544
+      "last": 1776761763615,
+      "total": 15,
+      "success": 14,
+      "lastSuccess": 1776761763615
     },
     "العاب3.js": {
       "last": 1776734949736,

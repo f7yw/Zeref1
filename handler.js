@@ -113,8 +113,9 @@ try {
     const ts = Number(m?.messageTimestamp || 0) * 1000
     if (ts && ts < global.BOT_START - 5000) return
 
-    if ((m.fromMe || isBotOwnMessage(m, this)) && !global.prefix.test(m.text))
-        return
+    // ── حماية ضد اللوب: لا نعالج رسائل البوت نفسه أبداً ──
+    // (الردود قد تبدأ بـ * أو ـ Markdown وهي بادئات صالحة في prefix → تسبب لوب لا نهائي)
+    if (m.fromMe || isBotOwnMessage(m, this)) return
     m.exp = 0
     m.money = false
     m.limit = false

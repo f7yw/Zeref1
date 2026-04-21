@@ -153,6 +153,12 @@ All commands restricted to `rowner = true` (real owner only — 967778088098).
 - Startup log: sent to all developer-flagged owners (5s after connect)
 - Message tracking: `user.messages.total`, `user.messages.groups[chat]`, `chat.messageStats`
 
+## Loop Protection (Apr 2026 — critical fix)
+- `handler.js` now **unconditionally drops** any message where `m.fromMe || isBotOwnMessage(m, this)` is true.
+- Reason: bot replies often start with markdown chars like `*` or `-`, which are valid prefix chars in `global.prefix`. The previous guard `(fromMe||botOwn) && !prefix.test(text)` allowed bot's own bold replies (`*بطاقات مراجعة:*`) to re-trigger commands → infinite loop until WhatsApp rate-limit (`rate-overlimit` 429).
+- Symptom that surfaced: the badge showed `💎 مميز · ✓ مسجّل` on every echo — because the bot's own user record is `premium=true` (merchant), so `tierBadge(botJid)` returns VIP. Once the loop is closed, the badge always reflects the real human sender.
+- All 13 plugins using `handler.all` (`شات.js`, `سوال.js`, `العاب3.js`, `study-games.js`, `trivia.js`, `لو2.js`, `تحدي.js`, `فزوره.js`, `منطق.js`, `برمجه.js`, `علم.js`, `تقرير.js`, `menu.js`) are now safe — the central guard runs before any plugin.
+
 ## Role Recognition & Auto-Stamp (Apr 2026)
 On every incoming message, `handler.js` now:
 1. **Enforces "Infinite Developer"** — for any owner/rowner sender, sets `registered=true`, `premium=true`, `premiumTime=+50y`, `infiniteResources=true`, `energy=100`, raises `money/bank/diamond/limit` to 1B/1B/1M/999K, clears `banned`/`tempBannedUntil`, sets `role='👑 مطور'`. Applied per-message (cannot be depleted).
