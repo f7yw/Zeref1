@@ -288,11 +288,47 @@ ${bar} ${pct}%
   // ─── الأجهزة المرتبطة ────────────────────────────────────────────────────
 
   if (/^(الاجهزة|الأجهزة_المرتبطة|linked_devices|اجهزتي)$/i.test(command)) {
-    const devices = await conn.getLinkedDevices(conn.user.id).catch(() => [])
-    if (!devices?.length) return m.reply('📱 لا توجد أجهزة مرتبطة حالياً.')
-    const lines = devices.map((d, i) =>
-      `${i + 1}. 📱 *${d.platform || 'جهاز'}*\n   ID: \`${d.id || d.jid || 'غير معروف'}\``
-    ).join('\n')
+    // Baileys لا يوفّر API مباشر لسرد كل الأجهزة المرتبطة — نجلب من user.devices إن وُجد
+    // ومن authState كاحتياط، ونعرض على الأقل الجهاز الحالي
+    let devices = []
+    try {
+      // طريقة 1: بعض إصدارات Baileys تعرّض user.devices
+      if (Array.isArray(conn.user?.devices) && conn.user.devices.length) {
+        devices = conn.user.devices
+      }
+      // طريقة 2: استعلام USync لأجهزة الرقم نفسه
+      if (!devices.length && typeof conn.getUSyncDevices === 'function') {
+        const me = conn.user?.id?.split(':')[0]?.split('@')[0]
+        if (me) {
+          const list = await conn.getUSyncDevices([me + '@s.whatsapp.net'], true, false).catch(() => [])
+          devices = (list || []).map(j => ({ id: j }))
+        }
+      }
+    } catch {}
+
+    const meId   = conn.user?.id || conn.user?.lid || 'غير معروف'
+    const meName = conn.user?.name || conn.user?.verifiedName || 'البوت'
+    const platform = conn.authState?.creds?.platform || 'غير معروف'
+
+    if (!devices.length) {
+      return m.reply(
+`📱 *الأجهزة المرتبطة*
+
+🤖 الجهاز الحالي (البوت):
+   • الاسم: *${meName}*
+   • المعرّف: \`${meId}\`
+   • المنصّة: *${platform}*
+
+⚠️ Baileys لا يوفّر سرداً كاملاً لكل الأجهزة المرتبطة بالحساب.
+لرؤية كل الأجهزة افتح: واتساب → الأجهزة المرتبطة على هاتفك.`
+      )
+    }
+
+    const lines = devices.map((d, i) => {
+      const id = typeof d === 'string' ? d : (d.id || d.jid || 'غير معروف')
+      const plat = (typeof d === 'object' && (d.platform || d.device)) || ''
+      return `${i + 1}. 📱 ${plat ? `*${plat}*\n   ` : ''}ID: \`${id}\``
+    }).join('\n')
     return m.reply(`📱 *الأجهزة المرتبطة (${devices.length})*\n\n${lines}`)
   }
 
