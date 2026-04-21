@@ -548,6 +548,14 @@ async function connectionUpdate(update) {
       } catch (e) { console.error('[JADIBOT-RESTORE]', e?.message) }
     }, 6000)
 
+    // ── جدولة المحاضرات/الاختبارات المخزّنة ──
+    setTimeout(async () => {
+      try {
+        const mod = await import('./plugins/schedule.js')
+        if (typeof mod.loadAndScheduleAll === 'function') mod.loadAndScheduleAll(conn)
+      } catch (e) { console.error('[SCHEDULE-LOAD]', e?.message) }
+    }, 7000)
+
     // ── استعادة حالة الألعاب من DB ──
     try {
       const gs = global.db?.data?.gameState || {}
