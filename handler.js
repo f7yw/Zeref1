@@ -1098,8 +1098,12 @@ try {
         const participants = (m.isGroup ? groupMetadata.participants : []) || []
         const sameJid = (a, b) => sameJidLoose(a, b, conn)
 
-        // ── LID→Phone mapping: store whenever we see both id and lid for a participant ──
+        // ── LID→Phone mapping: restore from persistent DB first, then update from participants ──
         global.lidPhoneMap ??= {}
+        // Restore persisted LID map on every message (covers bot restarts)
+        if (global.db?.data?.lidPhoneMap) {
+            Object.assign(global.lidPhoneMap, global.db.data.lidPhoneMap)
+        }
         for (const p of participants) {
             const lid = p?.lid || p?.userJid?.split('@')[0]
             const phone = p?.id
@@ -1149,7 +1153,11 @@ try {
         const isMods = isOwner || (global.mods || []).map(v => `${String(v).replace(/[^0-9]/g, '')}@s.whatsapp.net`).some(jid =>
             sameJid(m.sender, jid) || sameJid(resolvedSender, jid) || sameJid(user, jid)
         )
-        const isPrems = isROwner || isOwner || isMods || global.db.data.users[m.sender].premiumTime > 0 //|| global.db.data.users[m.sender].premium = 'true'
+        const _senderUser = global.db.data.users[m.sender] || {}
+        const isPrems = isROwner || isOwner || isMods ||
+            (_senderUser.premiumTime > Date.now()) ||
+            (_senderUser.premium === true) ||
+            (global.prems || []).some(n => String(n).replace(/\D/g,'') === String(resolvedSender).replace(/@.*/,'').replace(/\D/g,''))
         if (global.db.data.chats[m.chat]?.botOff && m.text && global.prefix.test(m.text) && !(isROwner || isOwner)) return
 
         // ── Temp ban check (offensive words) ──
@@ -1200,7 +1208,8 @@ try {
         let usedPrefix
         let _user = global.db.data && global.db.data.users && global.db.data.users[m.sender]
         const isRAdmin = user?.admin == 'superadmin' || false
-        const isAdmin = isRAdmin || user?.admin == 'admin' || false // Is User Admin?
+        // Owner + VIP (isPrems) bypass admin requirement — same privilege tier as group admin
+        const isAdmin = isRAdmin || user?.admin == 'admin' || isROwner || isOwner || isPrems || false
         const isBotAdmin = bot?.admin == 'admin' || bot?.admin == 'superadmin' || false // Are you Admin?
 
         const ___dirname = path.join(path.dirname(fileURLToPath(import.meta.url)), './plugins')
