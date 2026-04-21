@@ -435,11 +435,6 @@ handler.all = async function (m) {
   const session = global.menuSessions?.[m.sender]
   if (!session) return
 
-  if (Date.now() - session.ts > 5 * 60 * 1000) {
-    delete global.menuSessions[m.sender]
-    return
-  }
-
   const quotedId = m.quoted?.id || m.message?.extendedTextMessage?.contextInfo?.stanzaId
   if (!quotedId || quotedId !== session.msgId) return
 
@@ -448,6 +443,16 @@ handler.all = async function (m) {
 
   const choice = normalizeChoice(raw)
   if (!sections[choice]) return
+
+  if (Date.now() - session.ts > 5 * 60 * 1000) {
+    delete global.menuSessions[m.sender]
+    await this.reply(
+      m.chat,
+      `⏰ *انتهت صلاحية القائمة!*\n\nلقد مضى أكثر من 5 دقائق على إرسال القائمة.\nأرسل الأمر مجدداً للحصول على قائمة جديدة 🔄`,
+      m
+    )
+    return
+  }
 
   const user = global.db.data.users[m.sender] || {}
   initEconomy(user, m.sender)
