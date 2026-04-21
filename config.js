@@ -23,12 +23,6 @@ global.wm = '𝐒𝐇𝐀𝐃𝐎𝐖 - Bot'
 global.igfg = '𝐒𝐇𝐀𝐃𝐎𝐖 - Bot'
 global.wait = '> *يرجى الأنتظار لحظه*\n> 🔗 *https://github.com/Farisatif*'
 
-// صور البوت - تأكد من وجود هذه الملفات فعليًا
-global.imagen1 = fs.readFileSync('./Menu2.jpg')
-global.imagen2 = fs.readFileSync('./src/nuevobot.jpg')
-global.imagen3 = fs.readFileSync('./src/Pre Bot Publi.png')
-global.imagen4 = fs.readFileSync('./Menu.png')
-
 // مشرفين البوت
 global.mods = ['967778088098']
 
