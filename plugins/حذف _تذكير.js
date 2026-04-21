@@ -5,7 +5,7 @@ import path from 'path'
 const remindersFile = path.resolve('./reminders.json')
 
 let handler = async (m, { args, usedPrefix, command }) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const getName = async (jid) => { try { return await conn.getName(jid) } catch { return jid.split('@')[0] } }
     let data = JSON.parse(fs.readFileSync(remindersFile))
     let userReminders = data.filter(r => r.chat === m.chat)

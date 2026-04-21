@@ -8,7 +8,7 @@ const XP_BONUS       = 200
 const DIAMOND_CHANCE = 0.10  // 10% chance to get a diamond
 
 let handler = async (m) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const user = global.db.data.users[m.sender]
   if (!user) return m.reply('❌ سجّل أولاً باستخدام أي أمر.\n👤 العضوية: ' + vipStatus)
   initEconomy(user)

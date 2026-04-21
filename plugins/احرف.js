@@ -1,6 +1,6 @@
 import { isVip } from '../lib/economy.js'
 let handler  = async (m, { conn }) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const getName = async (jid) => { try { return await conn.getName(jid) } catch { return jid.split('@')[0] } }
 conn.reply(m.chat,`*♚  مرحبا بك في قسم لعبة الحروف ♚*\n          ꔹ━━━━━━━━━━━ꔹ\n*『${pickRandom(global.kshisydsi)}』*\n◎ ─━──━─𝑺𝒉𝒂𝒅𝒐𝒘─━──━─ ◎\n👤 العضوية: ${vipStatus}`, m)
 }

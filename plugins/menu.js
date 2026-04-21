@@ -396,7 +396,7 @@ let handler = async (m, { conn, usedPrefix }) => {
   initEconomy(user, m.sender)
   syncEnergy(user, m.sender)
 
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const level  = user.level || 0
   const role   = getRole(level)
   const { max } = xpRange(level, global.multiplier)
@@ -431,7 +431,7 @@ handler.all = async function (m) {
   initEconomy(user, m.sender)
   syncEnergy(user, m.sender)
 
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const level  = user.level || 0
   const role   = getRole(level)
   const { max } = xpRange(level, global.multiplier)

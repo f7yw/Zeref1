@@ -2,7 +2,7 @@ import { isVip } from '../lib/economy.js'
 let linkRegex = /chat.whatsapp.com\/([0-9A-Za-z]{20,24})/i
 
 let handler = async (m, { conn, text, isMods, isOwner, isPrems }) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const getName = async (jid) => { try { return await conn.getName(jid) } catch { return jid.split('@')[0] } }
   let link = (m.quoted ? m.quoted.text ? m.quoted.text : text : text) || text
   let [_, code] = link.match(linkRegex) || []

@@ -1,6 +1,6 @@
 import fetch from 'node-fetch' 
  let handler  = async (m, { conn, text }) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي' 
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي') 
  try { 
  let res = await fetch('https://cataas.com/cat') 
  let img = await res.buffer() 

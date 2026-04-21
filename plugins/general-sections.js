@@ -9,7 +9,7 @@ const ensureUser = jid => {
 }
 
 let handler = async (m, { conn, text, command, usedPrefix, participants }) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const getName = async (jid) => { try { return await conn.getName(jid) } catch { return jid.split('@')[0] } }
   const user = ensureUser(m.sender)
   const now = new Date().toLocaleString('ar')

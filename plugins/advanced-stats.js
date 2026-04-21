@@ -15,7 +15,7 @@ const msToStr = ms => {
 
 let handler = async (m, { conn, usedPrefix, command, isOwner, participants }) => {
   const getName = async (jid) => { try { return await conn.getName(jid) } catch { return jid.split('@')[0] } }
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const user = global.db.data.users[m.sender]
 
   // ── تقرير_المال / balance_report ──────────────────────────────────────────

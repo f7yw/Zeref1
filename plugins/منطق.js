@@ -126,7 +126,7 @@ function normalize(s) {
 }
 
 let handler = async (m, { conn, args, command, usedPrefix }) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   conn.logicGame = conn.logicGame || {}
 
   if (conn.logicGame[m.chat]) {

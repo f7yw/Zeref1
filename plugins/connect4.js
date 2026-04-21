@@ -73,7 +73,7 @@ ${renderBoard(room.board)}
 }
 
 let handler = async (m, { conn, usedPrefix, command, text }) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   conn.c4 = conn.c4 || {}
 
   const getName = async (jid) => {
@@ -160,7 +160,7 @@ handler.before = async function (m) {
   )
   if (!room) return true
 
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const getName = async (jid) => {
     try { return await this.getName(jid) } catch { return jid.split('@')[0] }
   }

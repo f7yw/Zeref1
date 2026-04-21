@@ -30,7 +30,7 @@ function applyReward(m) {
 
 let handler = async (m, { conn, command }) => {
   const getName = async (jid) => { try { return await conn.getName(jid) } catch { return jid.split('@')[0] } }
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   conn.studyGames = conn.studyGames || {}
 
   // ── كلمة / رتب ─────────────────────────────────────────────────────────────

@@ -60,7 +60,7 @@ export async function before(m, { conn }) {
 
 let handler = async (m, { conn, args, command, isOwner }) => {
   const getName = async (jid) => { try { return await conn.getName(jid) } catch { return jid.split('@')[0] } }
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const chat = global.db.data.chats[m.chat] || (global.db.data.chats[m.chat] = {})
 
   if (/^(حماية_الكلام|antioffensive)$/i.test(command)) {

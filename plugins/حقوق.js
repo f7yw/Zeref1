@@ -1,7 +1,7 @@
 import { isVip } from '../lib/economy.js'
 import { addExif } from '../lib/sticker.js'
 let handler = async (m, { conn, text }) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const getName = async (jid) => { try { return await conn.getName(jid) } catch { return jid.split('@')[0] } }
 if (!m.quoted) throw '*قم بالرد على الملصق الذي تريد إضافة حزمة إليه*'
 let stiker = false

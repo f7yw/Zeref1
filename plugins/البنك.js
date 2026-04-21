@@ -10,7 +10,7 @@ function timeLeft(last, cooldown) {
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   const getName = async (jid) => { try { return await conn.getName(jid) } catch { return jid.split('@')[0] } }
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const user = global.db.data.users[m.sender] || (global.db.data.users[m.sender] = {})
   initUser(user, m.pushName, m.sender)
 

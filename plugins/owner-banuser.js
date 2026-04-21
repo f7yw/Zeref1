@@ -3,7 +3,7 @@ import { initUser } from '../lib/userInit.js'
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
   const getName = async (jid) => { try { return await conn.getName(jid) } catch { return jid.split('@')[0] } }
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   let who
   if (m.isGroup) who = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : false
   else who = m.chat

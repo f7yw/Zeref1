@@ -5,7 +5,7 @@ import PhoneNum from 'awesome-phonenumber'
 const regionNames = new Intl.DisplayNames(['ar'], { type: 'region' })
 
 let handler = async (m, { conn, text, usedPrefix, command: cmd }) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const getName = async (jid) => { try { return await conn.getName(jid) } catch { return jid.split('@')[0] } }
   let input = (m.quoted?.sender || m.mentionedJid?.[0] || text || '').trim()
 

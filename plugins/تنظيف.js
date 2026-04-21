@@ -3,7 +3,7 @@ import fs from 'fs'
 import path from 'path'
 
 let handler = async (m, { conn }) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const getName = async (jid) => { try { return await conn.getName(jid) } catch { return jid.split('@')[0] } }
   // Owner check
   const isOwner = global.owner.some(entry => {

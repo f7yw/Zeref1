@@ -1,6 +1,6 @@
 import { isVip } from '../lib/economy.js'
 let handler = async (m, { conn, isOwner }) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const getName = async (jid) => { try { return await conn.getName(jid) } catch { return jid.split('@')[0] } }
 let chats = Object.entries(global.db.data.chats).filter(chat => chat[1].isBanned)
 let users = Object.entries(global.db.data.users).filter(user => user[1].banned)

@@ -126,6 +126,16 @@ try {
   }
 } catch (_) {}
 
+// ====== إتاحة دوال المستويات بشكل عام ======
+try {
+  const econ = await import('./lib/economy.js')
+  global.tierBadge   = econ.tierBadge
+  global.getTier     = econ.getTier
+  global.isOwner     = econ.isOwner
+  global.isRegistered = econ.isRegistered
+  global.isVip       = econ.isVip
+} catch (e) { console.error('[TIER]', e?.message) }
+
 // ====== إعادة بناء قائمة المميزين من قاعدة البيانات ======
 try {
   global.prems = global.prems || []
@@ -335,6 +345,36 @@ async function connectionUpdate(update) {
   if (connection === 'open') {
     console.log(chalk.green.bold('\n✅ Connected to WhatsApp successfully!'))
     console.log(chalk.green(`  ➤ Bot is active and listening for messages.`))
+
+    // ── تسجيل البوت كـ "تاجر NPC" تلقائياً ─────────────────────────────────
+    try {
+      const botJid = (conn.user?.id || '').replace(/:\d+@/, '@')
+      if (botJid && global.db?.data?.users) {
+        global.db.data.users[botJid] ??= {}
+        const bu = global.db.data.users[botJid]
+        const { initUser } = await import('./lib/userInit.js')
+        initUser(bu, conn.user?.name || 'زيريف التاجر', botJid)
+        bu.registered     = true
+        if (!bu.regTime || bu.regTime <= 0) bu.regTime = Date.now()
+        bu.name           = bu.name           || 'زيريف ⚜️ التاجر'
+        bu.age            = bu.age            || 999
+        bu.gender         = bu.gender         || 'بوت'
+        bu.bio            = bu.bio            || '🤖 التاجر الرسمي للبوت — موارد لا نهائية'
+        bu.premium        = true
+        bu.premiumTime    = Date.now() + (50 * 365 * 24 * 60 * 60 * 1000)
+        bu.infiniteResources = true
+        bu.money          = Math.max(bu.money || 0, 1_000_000_000)
+        bu.bank           = Math.max(bu.bank  || 0, 1_000_000_000)
+        bu.diamond        = Math.max(bu.diamond || 0, 1_000_000)
+        bu.energy         = 100
+        bu.level          = Math.max(bu.level || 0, 999)
+        bu.exp            = Math.max(bu.exp   || 0, 999_999)
+        bu.role           = '🤖 التاجر الرسمي'
+        await global.db.write().catch(() => {})
+        console.log(chalk.cyan(`[BOT-REG] تم تسجيل البوت كتاجر: ${botJid}`))
+      }
+    } catch (e) { console.error('[BOT-REG]', e?.message) }
+
 
     // ── بناء جدول LID→Phone من جهات الاتصال ──────────────────────────────
     setTimeout(() => {

@@ -5,7 +5,7 @@ import { downloadAudio, searchYouTube } from '../lib/ytdlp.js'
 import { recordingDelay } from '../lib/presence.js'
 
 let handler = async (m, { conn, args, command, usedPrefix, text }) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   if (!text) throw `*مثال:* ${usedPrefix}${command} اية الكرسي\n👤 العضوية: ${vipStatus}`
 
   await m.reply(global.wait || '⏳ جاري التحميل...')

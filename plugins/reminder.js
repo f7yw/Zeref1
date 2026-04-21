@@ -52,7 +52,7 @@ export function loadAndScheduleReminders(conn) {
 
 // ⚙️ أمر البوت
 let handler = async (m, { args, command, usedPrefix, conn }) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const getName = async (jid) => { try { return await conn.getName(jid) } catch { return jid.split('@')[0] } }
   let example = `${usedPrefix + command} 18:30 اشرب دواء يومي`
   if (args.length < 3)

@@ -55,7 +55,7 @@ async function sendToRoom(conn, room, text, m) {
 }
 
 let handler = async (m, { conn, usedPrefix, command, text }) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   conn.game = conn.game || {}
 
   const getName = async (jid) => {

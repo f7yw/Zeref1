@@ -4,7 +4,7 @@ import { initUser } from '../lib/userInit.js'
 import { typingDelay } from '../lib/presence.js'
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const getName = async (jid) => { try { return await conn.getName(jid) } catch { return jid.split('@')[0] } }
   if (!text) throw `*يرجى إدخال نص*\n\n*مثال: ${usedPrefix + command} كيف حالك؟*`
 

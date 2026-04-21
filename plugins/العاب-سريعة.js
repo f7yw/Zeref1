@@ -6,7 +6,7 @@ function pick(list) {
 }
 
 let handler = async (m, { args, command, usedPrefix }) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const getName = async (jid) => { try { return await conn.getName(jid) } catch { return jid.split('@')[0] } }
   if (/^(نرد|dice)$/i.test(command)) {
     const a = Math.floor(Math.random() * 6) + 1

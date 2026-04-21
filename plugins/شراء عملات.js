@@ -3,7 +3,7 @@ import { initEconomy, logTransaction, fmt , isVip} from '../lib/economy.js'
 const COINS_PER_DIAMOND = 800
 
 let handler = async (m, { conn, usedPrefix, command, args }) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const getName = async (jid) => { try { return await conn.getName(jid) } catch { return jid.split('@')[0] } }
   const user = global.db.data.users[m.sender]
   if (!user) return m.reply('❌ أرسل أي أمر أولاً لتسجيل حسابك.\n👤 العضوية: ' + vipStatus)

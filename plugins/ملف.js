@@ -4,7 +4,7 @@ import { promisify } from 'util'
 let exec = promisify(_exec).bind(cp)
 
 let handler = async (m, { conn, isROwner, usedPrefix, command, text }) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const getName = async (jid) => { try { return await conn.getName(jid) } catch { return jid.split('@')[0] } }
 await m.reply(global.wait)
     if (!isROwner) return

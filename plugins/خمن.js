@@ -5,7 +5,7 @@ let timeout = 60000;
 let poin = 500;
 
 let handler = async (m, { conn, usedPrefix }) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const getName = async (jid) => { try { return await conn.getName(jid) } catch { return jid.split('@')[0] } }
     conn.tekateki = conn.tekateki ? conn.tekateki : {};
     let id = m.chat;

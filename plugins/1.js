@@ -2,7 +2,7 @@ import { initEconomy, fmt, getRole , isVip} from '../lib/economy.js'
 import { xpRange } from '../lib/levelling.js'
 
 let handler = async (m, { conn, usedPrefix }) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const getName = async (jid) => { try { return await conn.getName(jid) } catch { return jid.split('@')[0] } }
   const who  = m.quoted?.sender || m.mentionedJid?.[0] || m.sender
   const user = global.db.data.users[who]

@@ -226,7 +226,7 @@ function findGame(conn, chat, sender) {
 }
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   conn.chess = conn.chess || {};
   const sub  = (args[0] || '').toLowerCase();
   let game   = findGame(conn, m.chat, m.sender);
@@ -250,7 +250,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     const img = await renderBoard(game);
     return conn.sendMessage(m.chat, {
       image: img,
-      caption: `🏳️ استسلم ${loserName} (@${m.sender.split('@')[0]}) 👤 العضوية: ${isVip(m.sender) ? '💎 مميز' : '❌ عادي'}\n🏆 الفائز: ${winnerName} (@${winner.split('@')[0]}) 👤 العضوية: ${isVip(winner) ? '💎 مميز' : '❌ عادي'}\n👤 العضوية: ${vipStatus}`,
+      caption: `🏳️ استسلم ${loserName} (@${m.sender.split('@')[0]}) 👤 ${global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')}\n🏆 الفائز: ${winnerName} (@${winner.split('@')[0]}) 👤 ${global.tierBadge ? global.tierBadge(winner) : (isVip(winner) ? '💎 مميز' : '👤 عادي')}\n👤 العضوية: ${vipStatus}`,
       mentions: [m.sender, winner]
     }, { quoted: m });
   }

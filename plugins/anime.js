@@ -3,7 +3,7 @@ import translate from '@vitalets/google-translate-api'
 import { Anime } from "@shineiichijo/marika"
 const client = new Anime();
 let handler = async(m, { conn, text, usedPrefix }) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
 if (!text) return m.reply(`*[❗] حط اسم الانمي ال انت تبغا تبحث عنه*\n👤 العضوية: ${vipStatus}`)
 try {  
 let anime = await client.searchAnime(text)

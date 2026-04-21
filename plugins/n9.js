@@ -1,7 +1,7 @@
 import { isVip } from '../lib/economy.js'
 const handler = async (m, {conn, args, groupMetadata, participants, usedPrefix, command, isBotAdmin, isSuperAdmin}) => {
   const getName = async (jid) => { try { return await conn.getName(jid) } catch { return jid.split('@')[0] } }
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   if (!args[0]) return m.reply(`*[❗] ادخل رمز الدوله للبحث عن الارقام في هذه المجموعه من تلك الدوله، مثال: ${usedPrefix + command} 20*\n👤 العضوية: ${vipStatus}`);
   if (isNaN(args[0])) return m.reply(`*[❗] ادخل رمز الدوله للبحث عن الارقام في هذه المجموعه من تلك الدوله، مثال: ${usedPrefix + command} 20*\n👤 العضوية: ${vipStatus}`);
   const lol = args[0].replace(/[+]/g, '');

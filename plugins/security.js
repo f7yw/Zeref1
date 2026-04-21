@@ -5,7 +5,7 @@ function hasLink(text = '') {
 
 let handler = async (m, { args, command }) => {
   const getName = async (jid) => { try { return await conn.getName(jid) } catch { return jid.split('@')[0] } }
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const chat = global.db.data.chats[m.chat] || (global.db.data.chats[m.chat] = {})
   const sub = (args[0] || '').toLowerCase()
   if (/^(تشغيل|on)$/i.test(sub)) {

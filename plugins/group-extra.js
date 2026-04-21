@@ -28,7 +28,7 @@ function isAdmin(jid, participants) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 let handler = async (m, { conn, args, text, command, participants, groupMetadata, usedPrefix, isAdmin: callerIsAdmin, isBotAdmin }) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const members   = pJids(participants)
   const admins    = participants.filter(p => p.admin).map(p => p.id || p.jid)
 

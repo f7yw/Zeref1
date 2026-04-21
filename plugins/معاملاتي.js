@@ -2,7 +2,7 @@ import { fmt , isVip} from '../lib/economy.js'
 import { typingDelay } from '../lib/presence.js'
 
 let handler = async (m, { conn, usedPrefix }) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const getName = async (jid) => { try { return await conn.getName(jid) } catch { return jid.split('@')[0] } }
   const user = global.db.data.users[m.sender]
   if (!user) return m.reply(`❌ استخدم *${usedPrefix}تسجيل* أولاً\n👤 العضوية: ${vipStatus}`)

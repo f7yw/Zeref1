@@ -1,7 +1,7 @@
 import { isVip } from '../lib/economy.js'
 global.math = global.math ? global.math : {};
 const handler = async (m, {conn, args, usedPrefix, command}) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const getName = async (jid) => { try { return await conn.getName(jid) } catch { return jid.split('@')[0] } }
   const mat =`
 *[❗ خطأ ❗] تستخدم الأمر بطريقة غير صحيحة*

@@ -4,7 +4,7 @@ const SLOT_COOLDOWN = 15 * 1000  // 15 seconds
 const MIN_BET       = 50
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-  const vipStatus = isVip(m.sender) ? '💎 مميز' : '❌ عادي'
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
   const getName = async (jid) => { try { return await conn.getName(jid) } catch { return jid.split('@')[0] } }
   const user = global.db.data.users[m.sender]
   if (!user) return m.reply('❌ أرسل أي أمر أولاً لتسجيل حسابك.\n👤 العضوية: ' + vipStatus)
