@@ -2,9 +2,6 @@ import { watchFile, unwatchFile } from 'fs'
 import chalk from 'chalk'
 import { fileURLToPath } from 'url'
 import fs from 'fs'
-import * as cheerio from 'cheerio'
-import fetch from 'node-fetch'
-import axios from 'axios'
 import moment from 'moment-timezone'
 
 // معلومات المالكين
@@ -35,15 +32,11 @@ global.mes = d.toLocaleDateString('es', { month: 'long' })
 global.año = d.toLocaleDateString('es', { year: 'numeric' })
 global.tiempo = d.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', second: 'numeric', hour12: true })
 
-// توقيعات وخصائص إضافية
-global.wm2 = `▸ ${dia} ${fecha}\n▸ aima - 𝙱𝚘𝚝`
-global.gt = '★𝐒𝐇𝐀𝐃𝐎𝐖 - 𝙱𝚘𝚝★'
+// روابط ومعلومات ثابتة
 global.md = 'https://github.com/farisatif'
-global.waitt = '*[❗] Ƈᴀʀɢᴀɴᴅᴏ, ᴀɢᴜᴀʀᴅᴇ ᴜɴ ᴍᴏᴍᴇɴᴛᴏ...*'
-global.waittt = global.waitt
-global.waitttt = global.waitt
 global.nomorown = '967778088098'
 global.ownerLink = 'https://wa.me/967778088098'
+
 global.pdoc = [
   'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -53,42 +46,6 @@ global.pdoc = [
   'application/pdf',
   'text/rtf'
 ]
-
-// أنماط القوائم
-global.cmenut = '❖––––––『'
-global.cmenub = '┊✦ '
-global.cmenuf = '╰━═┅═━––––––๑\n'
-global.cmenua = '\n⌕ ❙❘❙❙❘❙❚❙❘❙❙❚❙❘❙❘❙❚❙❘❙❙❚❙❘❙❙❘❙❚❙❘ ⌕\n     '
-global.dmenut = '*❖─┅──┅〈*'
-global.dmenub = '*┊»*'
-global.dmenub2 = '*┊*'
-global.dmenuf = '*╰┅────────┅✦*'
-
-// زخارف وروابط
-global.htjava = '⫹⫺'
-global.htki = '*⭑•̩̩͙⊱•••• ☪*'
-global.htka = '*☪ ••••̩̩͙⊰•⭑*'
-global.comienzo = '• • ◕◕════'
-global.fin = '════◕◕ • •'
-
-// التاريخ والوقت حسب منطقة محددة
-global.botdate = `⫹⫺ Date :  ${moment.tz('America/Los_Angeles').format('DD/MM/YY')}`
-global.bottime = `𝗧 𝗜 𝗠 𝗘 : ${moment.tz('America/Los_Angeles').format('HH:mm:ss')}`
-
-// إعداد رسالة GIF وهمية
-global.fgif = {
-  key: { participant: '0@s.whatsapp.net' },
-  message: {
-    videoMessage: {
-      title: wm,
-      h: `Hmm`,
-      seconds: 999999999,
-      gifPlayback: true,
-      caption: bottime,
-      jpegThumbnail: fs.readFileSync('./Menu.png')
-    }
-  }
-}
 
 // إعدادات مضاعف اللعبة أو نقاط الترتيب
 global.multiplier = 99

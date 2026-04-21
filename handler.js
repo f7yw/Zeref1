@@ -1,4 +1,3 @@
-import { generateWAMessageFromContent } from "@whiskeysockets/baileys"
 import { smsg } from './lib/simple.js'
 import { format } from 'util'
 import { fileURLToPath } from 'url'
@@ -10,158 +9,6 @@ import { findLevel } from './lib/levelling.js'
 import { getRole, logTransaction, MAX_ENERGY } from './lib/economy.js'
 import { handleConfirmReply } from './lib/confirm.js'
 
-/**
- * @type {import('@whiskeysockets/baileys')}
- */
-const { proto } = (await import('@whiskeysockets/baileys')).default
-const isNumber = x => typeof x === 'number' && !isNaN(x)
-const jidOf = x => {
-    if (typeof x === 'string') {
-        if (x.trim().startsWith('{')) {
-            try {
-                const parsed = JSON.parse(x)
-                return parsed.phoneNumber || parsed.jid || parsed.id || parsed.lid || ''
-            } catch (_) {}
-        }
-        return x
-    }
-    return x?.phoneNumber || x?.id || x?.jid || x?.lid || x?.participant || ''
-}
-const jidCandidates = x => {
-    if (!x) return []
-    if (typeof x === 'string') {
-        if (x.trim().startsWith('{')) {
-            try {
-                const parsed = JSON.parse(x)
-                return jidCandidates(parsed)
-            } catch (_) {}
-        }
-        return [x]
-    }
-    return [x.id, x.jid, x.lid, x.participant, x.phoneNumber, x.phoneNumber?.replace?.(/:\d+@/, '@')]
-        .filter(Boolean)
-}
-const jidNumber = jid => String(jid || '').split('@')[0].split(':')[0].replace(/[^0-9]/g, '')
-const sameJidLoose = (a, b, conn) => {
-    const listA = jidCandidates(a)
-    const listB = jidCandidates(b)
-    for (const rawA of listA) {
-        for (const rawB of listB) {
-            const decA = conn?.decodeJid ? conn.decodeJid(rawA || '') : rawA
-            const decB = conn?.decodeJid ? conn.decodeJid(rawB || '') : rawB
-            const numA = jidNumber(decA || rawA)
-            const numB = jidNumber(decB || rawB)
-            if (rawA && rawB && (rawA === rawB || decA === decB || (numA && numB && numA === numB))) return true
-        }
-    }
-    return false
-}
-/**
- * يُحوّل ردود الأزرار/القوائم/التفاعلية إلى m.text (كأمر عادي) ليعمل التوجيه.
- * يستخرج المعرّف من:
- *   - buttonsResponseMessage.selectedButtonId
- *   - listResponseMessage.singleSelectReply.selectedRowId
- *   - templateButtonReplyMessage.selectedId
- *   - interactiveResponseMessage.nativeFlowResponseMessage.paramsJson / name
- * ويضع m.selectedId و m.selectedDisplayText و m.isInteractive.
- * إذا كان المعرّف لا يبدأ ببادئة، نُضيف '.' افتراضياً ليُعامل كأمر.
- */
-function parseInteractiveResponse(m) {
-    if (!m || !m.message) return
-    const msg = m.message
-    let selectedId = ''
-    let displayText = ''
-    let kind = ''
-
-    // 1) أزرار Quick Reply (Baileys buttonsResponseMessage)
-    if (msg.buttonsResponseMessage) {
-        selectedId  = msg.buttonsResponseMessage.selectedButtonId
-                   || msg.buttonsResponseMessage.selectedId
-                   || ''
-        displayText = msg.buttonsResponseMessage.selectedDisplayText || ''
-        kind = 'button'
-    }
-    // 2) قائمة اختيار (List)
-    else if (msg.listResponseMessage) {
-        const sel = msg.listResponseMessage.singleSelectReply || {}
-        selectedId  = sel.selectedRowId || msg.listResponseMessage.selectedRowId || ''
-        displayText = msg.listResponseMessage.title
-                   || msg.listResponseMessage.description
-                   || sel.selectedRowId || ''
-        kind = 'list'
-    }
-    // 3) Template Button Reply
-    else if (msg.templateButtonReplyMessage) {
-        selectedId  = msg.templateButtonReplyMessage.selectedId || ''
-        displayText = msg.templateButtonReplyMessage.selectedDisplayText || ''
-        kind = 'template'
-    }
-    // 4) Native Flow / Interactive Response (واتساب الأحدث)
-    else if (msg.interactiveResponseMessage) {
-        const ir = msg.interactiveResponseMessage
-        const nf = ir.nativeFlowResponseMessage || {}
-
-        // محاولة قراءة paramsJson
-        let paramsJson = nf.paramsJson || ''
-        if (typeof paramsJson === 'string' && paramsJson.trim().startsWith('{')) {
-            try {
-                const parsed = JSON.parse(paramsJson)
-                selectedId  = parsed.id
-                           || parsed.selectedId
-                           || parsed.button_id
-                           || parsed.row_id
-                           || parsed.id_flow
-                           || ''
-                displayText = parsed.title
-                           || parsed.display_text
-                           || parsed.text
-                           || ''
-            } catch (_) {}
-        }
-        // Fallback: اسم الـ flow مباشرة
-        if (!selectedId) selectedId = nf.name || ''
-        // Fallback: نص الجسم
-        if (!displayText) {
-            displayText = ir.body?.text
-                       || ir.header?.text
-                       || ir.footer?.text
-                       || ''
-        }
-        kind = 'interactive'
-    }
-    // 5) pollUpdateMessage (التصويت — استخرج عنوان الخيار)
-    else if (msg.pollUpdateMessage) {
-        const votes = msg.pollUpdateMessage.vote?.selectedOptions || []
-        if (votes.length) {
-            selectedId  = votes[0]
-            displayText = votes[0]
-            kind = 'poll'
-        }
-    }
-
-    // سجّل كل أنواع الرسائل الواردة للتشخيص (تُزال عند الإنتاج)
-    const allTypes = Object.keys(msg).filter(k => !['messageContextInfo','deviceListMetadataVersion'].includes(k))
-    if (allTypes.length && !selectedId) {
-        // رسالة غير تفاعلية — تجاهل بصمت
-    } else if (allTypes.length) {
-        console.log('[INTERACTIVE]', kind.toUpperCase(), '→ selectedId:', selectedId, '| types:', allTypes.join(','))
-    }
-
-    if (!selectedId) return
-
-    m.selectedId          = selectedId
-    m.selectedDisplayText = displayText
-    m.isInteractive       = true
-    m.interactiveType     = kind
-
-    // ضع m.text كأمر قابل للتوجيه — أَضِف بادئة افتراضية إن لم تكن موجودة
-    const looksLikeCommand = global.prefix?.test?.(selectedId)
-    const commandText = looksLikeCommand
-        ? selectedId
-        : ('.' + String(selectedId).replace(/^[./\s]+/, ''))
-    console.log('[INTERACTIVE] → routing as command:', commandText)
-    m.text = commandText
-}
 
 const botJidsOf = conn => [
     conn?.user?.jid,
@@ -207,11 +54,6 @@ try {
     if (!m) return
     if (typeof m.text !== 'string')
         m.text = ''
-
-    // ── معالجة الردود التفاعلية (أزرار/قوائم/Native Flow) ──
-    // نحوّل selectedButtonId / selectedRowId / interactive id إلى m.text كأمر عادي
-    // كي تعمل كل الإضافات بدون تعديل
-    parseInteractiveResponse(m)
 
     const msgId = `${m?.key?.remoteJid || ''}:${m?.key?.id || ''}:${m?.key?.participant || ''}`
     if (global.seenMessages.has(msgId)) return
