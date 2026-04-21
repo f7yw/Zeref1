@@ -391,7 +391,7 @@ ${bar} ${pct}%
 
   // ─── لوحة تحكم البوت الكاملة ────────────────────────────────────────────
 
-  if (/^(تحكم_البوت|bot_panel|لوحة_البوت)$/i.test(command)) {
+  if (/^(تحكم_البوت|bot_panel|لوحة_البوت|لوحة|لوحه|panel|اعدادات|إعدادات|settings)$/i.test(command)) {
     const mem  = memMB()
     const sets = global.db.data.botSettings || {}
     const users = Object.keys(global.db.data.users || {}).length
@@ -455,5 +455,5 @@ handler.help = [
 ]
 handler.tags  = ['owner']
 handler.rowner = true
-handler.command = /^(تحكم_البوت|bot_panel|لوحة_البوت|وقت_التشغيل|uptime|وقت_التشغيل_البوت|رام|ram|ذاكرة|memory|تقرير_البوت|bot_report|تقرير_مفصل|تفعيل_الكل|enable_all|ايقاف_الكل|إيقاف_الكل|disable_all|تغيير_البادئة|setprefix|بادئة|مسح_الذاكرة|clearcache|clear_cache|إعادة_تشغيل|restart|اعادة_تشغيل|قائمة_القروبات|list_groups|القروبات|بث_للقروبات|broadcast_groups|بث_قروبات|بث_للكل|broadcast_all|بث_عام|اسم_البوت|setbotname|غير_اسم_البوت|وصف_البوت|setbotbio|نبذة_البوت|غير_الوصف|صورة_البوت|setbotpic|غير_صورة_البوت|حذف_صورة_البوت|removebotpic|صورة_الحساب_الحالية|botpic|صورتي|خصوصية_المشاهدة|last_seen|آخر_ظهور|خصوصية_الصورة|pp_privacy|خصوصية_صورة_البوت|خصوصية_الحالة|status_privacy|خصوصية_المجموعات|group_privacy|من_يضيفني|جميع_الخصوصية|privacy_all|كل_الخصوصية|الاجهزة|الأجهزة_المرتبطة|linked_devices|اجهزتي|رفض_المكالمات|reject_calls|حجب_مكالمات|قبول_المكالمات|allow_calls|تعطيل_رفض_مكالمات|حضور_دائم|always_online|متاح_دائم|حضور_إيقاف|حضور_ايقاف|offline_presence|نشر_حالة|post_status|حالة_واتساب|رد_تلقائي|auto_reply|autoreply)$/i
+handler.command = /^(تحكم_البوت|bot_panel|لوحة_البوت|لوحة|لوحه|panel|اعدادات|إعدادات|settings|وقت_التشغيل|uptime|وقت_التشغيل_البوت|رام|ram|ذاكرة|memory|تقرير_البوت|bot_report|تقرير_مفصل|تفعيل_الكل|enable_all|ايقاف_الكل|إيقاف_الكل|disable_all|تغيير_البادئة|setprefix|بادئة|مسح_الذاكرة|clearcache|clear_cache|إعادة_تشغيل|restart|اعادة_تشغيل|قائمة_القروبات|list_groups|القروبات|بث_للقروبات|broadcast_groups|بث_قروبات|بث_للكل|broadcast_all|بث_عام|اسم_البوت|setbotname|غير_اسم_البوت|وصف_البوت|setbotbio|نبذة_البوت|غير_الوصف|صورة_البوت|setbotpic|غير_صورة_البوت|حذف_صورة_البوت|removebotpic|صورة_الحساب_الحالية|botpic|صورتي|خصوصية_المشاهدة|last_seen|آخر_ظهور|خصوصية_الصورة|pp_privacy|خصوصية_صورة_البوت|خصوصية_الحالة|status_privacy|خصوصية_المجموعات|group_privacy|من_يضيفني|جميع_الخصوصية|privacy_all|كل_الخصوصية|الاجهزة|الأجهزة_المرتبطة|linked_devices|اجهزتي|رفض_المكالمات|reject_calls|حجب_مكالمات|قبول_المكالمات|allow_calls|تعطيل_رفض_مكالمات|حضور_دائم|always_online|متاح_دائم|حضور_إيقاف|حضور_ايقاف|offline_presence|نشر_حالة|post_status|حالة_واتساب|رد_تلقائي|auto_reply|autoreply)$/i
 export default handler

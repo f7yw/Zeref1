@@ -5,7 +5,7 @@ let handler = async (m, { command, args }) => {
   const chat = global.db.data.chats[m.chat] || (global.db.data.chats[m.chat] = {})
   const sub = (args[0] || '').toLowerCase()
 
-  if (/^(حالة_البوت|حالة-البوت|botstatus)$/i.test(command)) {
+  if (/^(حالة_البوت|حالة-البوت|الحالة|الحاله|حالة|حاله|botstatus|status)$/i.test(command)) {
     return m.reply(`
 ╭────『 ⚙️ حالة البوت 』────
 │ وضع المحادثة: *${chat.botOff ? 'متوقف' : 'شغال'}*
@@ -67,8 +67,8 @@ let handler = async (m, { command, args }) => {
   }
 }
 
-handler.help = ['حالة_البوت', 'تشغيل', 'ايقاف', 'عام', 'خاص', 'قراءة']
+handler.help = ['الحالة', 'حالة_البوت', 'تشغيل', 'ايقاف', 'عام', 'خاص', 'قراءة']
 handler.tags = ['owner']
-handler.command = /^(حالة_البوت|حالة-البوت|botstatus|ايقاف|إيقاف|botoff|تشغيل|boton|خاص|self|عام|public|قراءة|read)$/i
+handler.command = /^(حالة_البوت|حالة-البوت|الحالة|الحاله|حالة|حاله|botstatus|status|ايقاف|إيقاف|botoff|تشغيل|boton|خاص|self|عام|public|قراءة|read)$/i
 handler.owner = true
 export default handler
