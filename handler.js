@@ -1097,6 +1097,20 @@ try {
         const groupMetadata = (m.isGroup ? ((conn.chats[m.chat] || {}).metadata || await this.groupMetadata(m.chat).catch(_ => null)) : {}) || {}
         const participants = (m.isGroup ? groupMetadata.participants : []) || []
         const sameJid = (a, b) => sameJidLoose(a, b, conn)
+
+        // ── LID→Phone mapping: store whenever we see both id and lid for a participant ──
+        global.lidPhoneMap ??= {}
+        for (const p of participants) {
+            const lid = p?.lid || p?.userJid?.split('@')[0]
+            const phone = p?.id
+            if (lid && phone && lid.includes('@')) global.lidPhoneMap[lid] = phone
+            else if (lid && phone) global.lidPhoneMap[lid + '@lid'] = phone
+        }
+        // Resolve m.sender to phone JID if it's a LID
+        const resolvedSender = (m.sender?.endsWith('@lid') && global.lidPhoneMap[m.sender])
+            ? global.lidPhoneMap[m.sender]
+            : m.sender
+
         const user = (m.isGroup ? participants.find(u => sameJid(u, m.sender)) : {}) || {}
         const botJids = botJidsOf(this)
         const bot = (m.isGroup ? participants.find(u => botJids.some(j => sameJid(u, j))) : {}) || {}
@@ -1105,9 +1119,15 @@ try {
             ...(global.suittag || []).map(number => `${String(number).replace(/[^0-9]/g, '')}@s.whatsapp.net`),
             ...(global.prems || []).map(number => `${String(number).replace(/[^0-9]/g, '')}@s.whatsapp.net`)
         ].filter(Boolean)
-        const isROwner = ownerJids.some(jid => sameJid(m.sender, jid) || sameJid(user, jid))
+        const isROwner = ownerJids.some(jid =>
+            sameJid(m.sender, jid) ||
+            sameJid(resolvedSender, jid) ||
+            sameJid(user, jid)
+        )
         const isOwner = isROwner || m.fromMe
-        const isMods = isOwner || (global.mods || []).map(v => `${String(v).replace(/[^0-9]/g, '')}@s.whatsapp.net`).some(jid => sameJid(m.sender, jid) || sameJid(user, jid))
+        const isMods = isOwner || (global.mods || []).map(v => `${String(v).replace(/[^0-9]/g, '')}@s.whatsapp.net`).some(jid =>
+            sameJid(m.sender, jid) || sameJid(resolvedSender, jid) || sameJid(user, jid)
+        )
         const isPrems = isROwner || isOwner || isMods || global.db.data.users[m.sender].premiumTime > 0 //|| global.db.data.users[m.sender].premium = 'true'
         if (global.db.data.chats[m.chat]?.botOff && m.text && global.prefix.test(m.text) && !(isROwner || isOwner)) return
 

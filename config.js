@@ -30,7 +30,7 @@ global.imagen3 = fs.readFileSync('./src/Pre Bot Publi.png')
 global.imagen4 = fs.readFileSync('./Menu.png')
 
 // مشرفين البوت
-global.mods = ['967778088098', '28648019066900']
+global.mods = ['967778088098']
 
 // إعدادات الوقت والتاريخ
 global.d = new Date(Date.now() + 3600000)

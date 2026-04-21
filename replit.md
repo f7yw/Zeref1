@@ -111,8 +111,39 @@ Arabic WhatsApp bot built with Node.js and Baileys. Focused on: study support, e
 - **Media:** اغنيه, بنترست, تحميل, mp3, hd, media-tools
 - **Islamic:** قران, آية الكرسي, اذكار الصباح, اذكار المساء, حديث
 - **Group:** group-admin, group-request, ايقافوتشغيل, فتح_اغلاق, صورة-القروب
-- **Owner:** owner-addprem, owner-banlist, owner-banuser, owner-block-unblock, owner-blocklist, owner-join, owner-listprem, db-clear, مغادرة
+- **Owner:** owner-addprem, owner-banlist, owner-banuser, owner-block-unblock, owner-blocklist, owner-join, owner-listprem, db-clear, owner-panel, مغادرة
 - **Utility:** global-translator, tr/tr2, general-sections, advanced-stats, reminder, منبه, study, study-games, offensive-words, security, bot-status, شات, profile, تسجيل, بلاغ, menu
+
+## LID JID Handling (Multi-Device WhatsApp)
+- `global.lidPhoneMap` is populated in `handler.js` on every group message
+- LID JIDs (`158884446605486@lid`) are resolved to phone JIDs before owner/VIP checks
+- `isVip()` in `economy.js` resolves LID → phone via `global.lidPhoneMap` before comparing
+- Owner (`967778088098`) is correctly recognized even when sending from LID JID
+- `global.mods` only contains `967778088098` (removed stale LID entry)
+
+## Owner Admin Panel (`plugins/owner-panel.js`)
+All commands restricted to `rowner = true` (real owner only — 967778088098).
+- `.لوحة_التحكم` — full help for all admin commands
+- `.عرض_مستخدم @` — view full user data (level, XP, money, bank, diamonds, VIP, banned)
+- `.قائمة_المستخدمين` — list all users in DB (up to 30)
+- `.اضافة_مال @ 1000` — add coins to wallet
+- `.اضافة_بنك @ 1000` — add coins to bank
+- `.اضافة_ماس @ 10` — add diamonds
+- `.تعديل_مال @ 5000` — set wallet to exact amount
+- `.تعديل_مستوى @ 5` — set level
+- `.اعادة_ضبط @` — reset all user data to defaults
+- `.حذف_مستخدم @` — permanently delete user from DB
+- `.حذف_بريم @` — revoke VIP membership
+- `.حالة_السحاب` — Supabase connection status, memory, LID map count
+- `.مزامنة_السحاب` — force immediate sync to Supabase
+- `.تعطيل_بوت` / `.تفعيل_بوت` — toggle bot in a specific group
+
+## Supabase DB (`lib/supabaseDB.js`)
+- Writes to cloud + local JSON simultaneously on every `write()` call
+- Auto-sync every 2 minutes via `_startAutoSync()` (only if `_dirty = true`)
+- `markDirty()` method to flag pending changes
+- `status` getter returns cloud state, last sync time, error count, user/chat counts
+- Console logs: `[DB] ☁️ Data loaded from Supabase ✅` on successful read
 
 ## Handler Features
 - Level-up: silent in DB, shown on `.لفل`; bonuses granted automatically
