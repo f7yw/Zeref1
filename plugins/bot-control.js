@@ -332,42 +332,70 @@ ${bar} ${pct}%
 
   // ─── نشر حالة واتساب ────────────────────────────────────────────────────
 
-  if (/^(نشر_حالة|post_status|حالة_واتساب)$/i.test(command)) {
-    if (!text && !m.quoted) return m.reply(`استخدام:\n${usedPrefix}${command} نص الحالة\nأو رُدّ على صورة/فيديو لنشره`)
-    try {
-      // اجمع جهات الاتصال لرؤية الحالة (وإلا لن يراها أحد)
-      const audience = []
-      const seen = new Set()
-      for (const jid of Object.keys(conn.contacts || {})) {
-        if (jid?.endsWith?.('@s.whatsapp.net') && !seen.has(jid)) {
-          audience.push(jid); seen.add(jid)
-        }
-      }
-      for (const u of Object.keys(global.db?.data?.users || {})) {
-        if (u?.endsWith?.('@s.whatsapp.net') && !seen.has(u)) {
-          audience.push(u); seen.add(u)
-        }
-      }
-      const opts = { statusJidList: audience.length ? audience : [conn.user?.id?.split(':')[0] + '@s.whatsapp.net'] }
+  if (/^(نشر_حالة|post_status|حالة_واتساب|status_post)$/i.test(command)) {
+    const isQuotedImg   = m.quoted && (m.quoted.mtype === 'imageMessage'   || m.quoted.mimetype?.startsWith?.('image'))
+    const isQuotedVideo = m.quoted && (m.quoted.mtype === 'videoMessage'   || m.quoted.mimetype?.startsWith?.('video'))
+    const isQuotedAudio = m.quoted && (m.quoted.mtype === 'audioMessage'   || m.quoted.mimetype?.startsWith?.('audio'))
+    const hasText  = !!(text && text.trim())
+    const hasMedia = isQuotedImg || isQuotedVideo || isQuotedAudio
 
-      const isQuotedImg   = m.quoted && (m.quoted.mtype === 'imageMessage' || m.quoted.mimetype?.startsWith?.('image'))
-      const isQuotedVideo = m.quoted && (m.quoted.mtype === 'videoMessage' || m.quoted.mimetype?.startsWith?.('video'))
+    if (!hasText && !hasMedia) {
+      return m.reply(
+`📤 *نشر حالة واتساب*
+
+الاستخدام:
+• ${usedPrefix}${command} نص الحالة
+• رُدّ على صورة/فيديو/صوت بـ ${usedPrefix}${command} [تعليق]
+
+ملاحظة: تُنشر الحالة لجهات الاتصال المحفوظة فقط.`)
+    }
+
+    try {
+      // اجمع جهات الاتصال الصحيحة (تنسيق @s.whatsapp.net فقط، وأرقام صحيحة)
+      const audienceSet = new Set()
+      const addJid = (jid) => {
+        if (typeof jid !== 'string') return
+        if (!jid.endsWith('@s.whatsapp.net')) return
+        const num = jid.split('@')[0].replace(/\D/g, '')
+        if (num.length < 6 || num.length > 16) return
+        audienceSet.add(`${num}@s.whatsapp.net`)
+      }
+      for (const jid of Object.keys(conn.contacts || {})) addJid(jid)
+      for (const u of Object.keys(global.db?.data?.users || {})) addJid(u)
+      // أزل البوت نفسه من الجمهور
+      const botNum = String(conn.user?.id || '').split(/[:@]/)[0].replace(/\D/g, '')
+      if (botNum) audienceSet.delete(`${botNum}@s.whatsapp.net`)
+
+      const audience = [...audienceSet]
+      if (!audience.length) {
+        return m.reply('❌ لا توجد جهات اتصال صالحة لنشر الحالة لها.\nأضف جهات اتصال على واتساب أولاً.')
+      }
+
+      const sendOpts = { backgroundColor: '#128C7E', font: 1, statusJidList: audience }
 
       if (isQuotedImg) {
         const img = await m.quoted.download()
+        if (!img?.length) throw new Error('فشل تحميل الصورة')
         await conn.sendMessage('status@broadcast',
-          { image: img, caption: text || m.quoted.caption || '' }, opts)
+          { image: img, caption: text || m.quoted.caption || '' }, sendOpts)
       } else if (isQuotedVideo) {
         const vid = await m.quoted.download()
+        if (!vid?.length) throw new Error('فشل تحميل الفيديو')
         await conn.sendMessage('status@broadcast',
-          { video: vid, caption: text || m.quoted.caption || '' }, opts)
+          { video: vid, caption: text || m.quoted.caption || '' }, sendOpts)
+      } else if (isQuotedAudio) {
+        const aud = await m.quoted.download()
+        if (!aud?.length) throw new Error('فشل تحميل الملف الصوتي')
+        await conn.sendMessage('status@broadcast',
+          { audio: aud, mimetype: 'audio/mp4', ptt: true }, sendOpts)
       } else {
         await conn.sendMessage('status@broadcast',
-          { text: text || m.quoted?.text || '', backgroundColor: '#128C7E', font: 4 }, opts)
+          { text: text.trim() }, sendOpts)
       }
-      return m.reply(`✅ تم نشر الحالة بنجاح إلى ${audience.length} جهة.`)
+      return m.reply(`✅ تم نشر الحالة بنجاح إلى *${audience.length}* جهة اتصال.`)
     } catch (e) {
-      return m.reply(`❌ فشل نشر الحالة: ${e?.message || 'خطأ غير معروف'}`)
+      console.error('[STATUS]', e)
+      return m.reply(`❌ فشل نشر الحالة: ${e?.message || 'خطأ غير معروف'}\n\n💡 تأكد من:\n• وجود جهات اتصال محفوظة\n• صحة الملف المُرفق`)
     }
   }
 

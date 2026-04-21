@@ -742,7 +742,7 @@
       "emas": 0,
       "emerald": 0,
       "esteh": 0,
-      "exp": 46,
+      "exp": 72,
       "expg": 0,
       "exphero": 0,
       "expired": 0,
@@ -962,8 +962,8 @@
       "pisang": 0,
       "pointxp": 0,
       "potion": 10,
-      "premium": false,
-      "premiumTime": 0,
+      "premium": true,
+      "premiumTime": 2092119183025,
       "ramuan": 0,
       "ramuancentaurlast": 0,
       "ramuangriffinlast": 0,
@@ -977,7 +977,7 @@
       "ramuanserigalalast": 0,
       "registered": false,
       "reglast": 0,
-      "regTime": -1,
+      "regTime": 0,
       "rendang": 0,
       "rhinoceros": 0,
       "rhinocerosexp": 0,
@@ -1064,16 +1064,16 @@
         "soal": null
       },
       "messages": {
-        "total": 2,
+        "total": 3,
         "groups": {
-          "120363422912330057@g.us": 2
+          "120363422912330057@g.us": 3
         },
-        "last": 1776759064526
+        "last": 1776759183019
       },
-      "lastCommandTime": 1776759064528,
+      "lastCommandTime": 1776759183024,
       "commandCount": 1,
       "energy": 100,
-      "lastEnergyRegen": 1776759054333,
+      "lastEnergyRegen": 1776759183025,
       "lastDaily": 0,
       "lastWork": 0,
       "totalEarned": 0,
@@ -1108,7 +1108,9 @@
       "psenjata": 0,
       "psepick": 0,
       "robo": 0,
-      "roboxp": 0
+      "roboxp": 0,
+      "bannedReason": "",
+      "infiniteResources": true
     }
   },
   "chats": {
@@ -1138,7 +1140,7 @@
       "autosticker": false,
       "antiviewonce": false,
       "messageStats": {
-        "28648019066900@lid": 23,
+        "28648019066900@lid": 24,
         "158884446605486@lid": 2,
         "967782114485@s.whatsapp.net": 11
       }
@@ -1390,6 +1392,12 @@
       "total": 2,
       "success": 2,
       "lastSuccess": 1776736640473
+    },
+    "ذكاء.js": {
+      "total": 2,
+      "success": 2,
+      "last": 1776759185669,
+      "lastSuccess": 1776759185669
     }
   },
   "msgs": {},
