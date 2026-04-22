@@ -190,3 +190,17 @@ This means EVERY plugin (incl. obfuscated ones, owner panel, ai, شات, etc.) a
 - **Role-based menu filtering**: each section in `plugins/menu.js` now has an `audience` field (`owner` | `admin` | `all`). Owner-only sections appear only for the developer; group sections appear only for group admins/developer. Logic centralized in `getAllowedSections(conn, { isOwner, isAdmin })`.
 - **Student Mediator** (`plugins/student-mediator.js`, dev-only): registry of university students/groups, indirect messaging via the bot's identity, broadcasts, inbox capture of replies with owner DM notifications, optional auto-signature. All mutations call `global.db.markDirty()`.
 - **ZerefGuard** (`lib/zerefguard.js` + `plugins/zerefguard.js`): SHA-256 manifest of core files (lib/*, critical plugins, main.js), HMAC-signed using owner number + REPL_ID + `ZEREFGUARD_SECRET`. Stored in `.zerefguard/manifest.sig`. Boot check runs 8s after main connects and DMs the owner if any tracked file changed. Commands: `.guard`, `.guard_seal`, `.guard_check`, `.guard_unseal تأكيد`.
+- **Group welcome system** (`plugins/ترحيب_القروب.js`): per-group welcome/goodbye with member profile picture, mentions, and variables `{user}/{name}/{number}/{group}/{desc}/{count}/{bot}`. Subcommands: `.ترحيب|.وداع تشغيل|ايقاف|نص|افتراضي|تجربة`. Wired through `global.fireGroupWelcome` in `main.js` participants handler.
+- **Startup flood guard**: 25s quiet window in `main.js` blocks Baileys' initial sync events (`groups.update`, `contacts.update`, `groups.upsert`, `group-participants.update`) from spamming groups on reconnect.
+- **Removed بريم plugins**: `owner-addprem.js` and `owner-listprem.js` deleted; all references cleaned in `menu.js`, `owner-panel.js`, `advanced-stats.js`. Plugin count: **135**.
+- **Group picture change** now sends the actual new image (via `conn.profilePictureUrl` + `sendMessage` with `{image}`).
+- **Promote/demote `@undefined` fix**: filter empty/invalid participants before building mentions array.
+- **Mafia join command** (`plugins/مافيا.js`): internal command check now accepts `انضم_مافيا|join_mafia|join_mafia|انضم لعبه` to match the registered handler regex (avoids conflict with `.انضم <link>` in `owner-join.js`).
+- **Buttons/list command** (`plugins/زر_تجربة.js`): switched from `interactiveMessage` to `listMessage` for broader client compatibility, with text fallback when the client doesn't render lists.
+
+## Deployment (Railway)
+- `nixpacks.toml` pins **Node 20** (`nodejs_20` + `pnpm-9_x`) and uses `pnpm install --frozen-lockfile`.
+- `package.json` `engines.node = ">=20.0.0"` enforces the Baileys 7.x requirement (Baileys' `preinstall` rejects Node < 20).
+- `railway.toml` sets `NIXPACKS_NODE_VERSION = "20"` and `restartPolicyType = "ON_FAILURE"` (max 10 retries).
+- `.nvmrc` and `.node-version` both pinned to `20` for any builder that reads them.
+- Start command: `node index.js` (also in `Procfile`).

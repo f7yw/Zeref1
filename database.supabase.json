@@ -1337,7 +1337,7 @@
       "emas": 0,
       "emerald": 0,
       "esteh": 0,
-      "exp": 93,
+      "exp": 119,
       "expg": 0,
       "exphero": 0,
       "expired": 0,
@@ -1505,7 +1505,7 @@
       "leleb": 0,
       "lelebakar": 0,
       "leleg": 0,
-      "level": 0,
+      "level": 1,
       "limit": 999999,
       "limitjoinfree": 1,
       "lion": 0,
@@ -1526,7 +1526,7 @@
       "mana": 20,
       "mangga": 0,
       "misi": "",
-      "money": 1000000000,
+      "money": 1000000200,
       "monyet": 0,
       "mythic": 0,
       "naga": 0,
@@ -1663,15 +1663,21 @@
       "energy": 100,
       "lastEnergyRegen": 1776828416817,
       "messages": {
-        "total": 5,
+        "total": 7,
         "groups": {
-          "120363427285079878@g.us": 5
+          "120363427285079878@g.us": 7
         },
-        "last": 1776828416815
+        "last": 1776828539957
       },
-      "lastCommandTime": 1776828416815,
+      "lastCommandTime": 1776828533046,
       "commandCount": 1,
       "transactions": [
+        {
+          "type": "earn",
+          "amount": 200,
+          "reason": "🆙 مكافأة المستوى 1",
+          "time": 1776828533341
+        },
         {
           "type": "earn",
           "amount": 0,
@@ -1852,7 +1858,7 @@
       "autosticker": false,
       "antiviewonce": false,
       "messageStats": {
-        "28648019066900@lid": 323,
+        "28648019066900@lid": 325,
         "137465276969165@lid": 6,
         "204990769553546@lid": 119,
         "967782114485@s.whatsapp.net": 42
@@ -2163,10 +2169,10 @@
       "lastSuccess": 1776785824624
     },
     "زر_تجربة.js": {
-      "last": 1776828363255,
-      "total": 9,
-      "success": 8,
-      "lastSuccess": 1776828363255
+      "last": 1776828533341,
+      "total": 10,
+      "success": 9,
+      "lastSuccess": 1776828533341
     },
     "test-interactive.js": {
       "last": 1776784447576,
@@ -2271,9 +2277,9 @@
   },
   "gameState": {
     "chess": {},
-    "games3": {},
+    "tictactoe": {},
     "connect4": {},
-    "tictactoe": {}
+    "games3": {}
   },
   "botSettings": {
     "rejectCalls": true,
