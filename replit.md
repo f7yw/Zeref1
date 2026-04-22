@@ -121,7 +121,70 @@ Arabic WhatsApp bot built with Node.js and Baileys. Focused on: study support, e
 15. `tr.js` — fixed redirect when Arabic translator command used instead of مترجم
 16. Menu — shop descriptions updated to match new شراء_الماس / شراء_عملات logic
 
-## Plugins (127 total, as of last audit)
+## Level 2.5 / 3 Upgrade (Apr 22, 2026)
+### Dedup pass — 18 command conflicts resolved, 4 duplicate plugins deleted
+- Deleted: `احذفو.js`, `كودد.js`, `رياضيات.js`, `حجره.js` (all duplicated existing plugins)
+- Resolved overlapping commands across: `group-admin`, `owner-panel`, `bot-control`, `group-extra`, `بلاك`, `extras-admin`, `media-tools`, `study-games`, `ayat-alkursi`, `صراحه`, `احذف`
+- Plugin count: 132 → **130** (after additions); **0 conflicts remaining**
+
+### Console spam suppression (`lib/silence-spam.js`)
+- Imported FIRST in `main.js` (before any Baileys/libsignal load) — patches `console.log/info/warn/error`
+- Filters libsignal's `Closing session`, `Removing old closed session`, `SessionEntry` dumps that polluted logs on every contact key change
+
+### Word-Race Games (`plugins/word-race.js`)
+- Commands: `فكك` (unscramble from hint) and `رتب` (arrange letters)
+- 3 levels: سهل / متوسط / صعب — 90s timeout, first-to-answer wins XP+money
+- Arabic text normalization (hamzas/taa marbuta) for fair matching
+- Uses `handler.before` for real-time detection; per-chat state in `global.wordRaces`
+
+### Bot State Control + Typo Suggestion
+- `plugins/bot-state.js` — `.حالة_البوت` shows uptime, RAM, plugin count, DB stats, sub-bot health
+- `handler.js` typo suggestion — when an unknown command is sent with prefix, suggests nearest valid command (Levenshtein distance ≤ 2)
+- Notice flags: `global.__maintNotice`, `global.__privNotice`, `global.__suggestNotice`
+
+### Interactive Reminder Wizard (`plugins/ذكرني.js`)
+- `.ذكرني` opens a multi-step wizard: text → time → repeat (مرة/يومي/أسبوعي/شهري)
+- Per-user session in `global.reminderSessions`
+- Persisted to Supabase, survives restart
+
+### Auto-Typing Indicator Toggle (`plugins/auto-chat-toggle.js`)
+- `.كتابة_البوت [تشغيل|ايقاف]` — controls the 5-second "...يكتب" presence indicator
+- Per-bot setting (rئيسي/فرعي): `db.data.settings[botJid].showTyping`
+- Default: enabled. When off, `handler.js` skips `sendPresenceUpdate('composing')`
+- For developer only (`owner: true`); cloud-synced via Supabase
+
+### Sub-Bot Advanced Controls (`plugins/jadibot-control.js`)
+All commands `rowner: true`. All data persisted to Supabase (`jadibot`, `jadibotSessions`).
+- `.معلومات_فرعي [رقم]` — full info: status, owner, features, disk session, cloud backup, group count, JID
+- `.اعادة_تشغيل_فرعي [رقم]` — disconnect + recreate one sub-bot
+- `.مزامنة_سحابية [رقم|الكل]` — force-push session(s) to Supabase with `db.write()`
+- `.حالة_البوتات` — quick summary: connected/disconnected/in-cloud counts
+- `.بث_فرعي [رقم] [نص]` — broadcast a message from a specific sub-bot to all its groups (800ms throttle)
+- `.تجديد_كود [رقم]` — wipe broken session + regenerate pairing code
+
+### Cloud Sync Verification
+- ✅ Sub-bot sessions: auto-saved to `db.data.jadibotSessions[phone].files` (base64) on every `saveCreds`
+- ✅ Sub-bot metadata: `db.data.jadibot[phone]` (features, owner, createdAt)
+- ✅ Bot settings: `db.data.settings[botJid]` (showTyping, autoChatGlobal, etc.)
+- ✅ On boot: `restoreAllSubBots()` restores from cloud → disk → reconnects sub-bots
+- ✅ Forced sync available via `.مزامنة_سحابية الكل`
+
+### Security Fixes
+- `plugins/تحدي.js:23` — replaced `eval(\`${a} ${op} ${b}\`)` with safe arithmetic switch (no injection surface)
+
+### Classic Style Adopted
+All new/edited plugins use:
+```
+╭────『 العنوان 』────
+│
+│ 🔵 سطر بإيموجي وظيفي واحد
+│ 🔵 سطر آخر
+│
+╰──────────────────
+```
+Applied to: فكك, رتب, ذكرني, قائمة, حالة_البوت, كتابة_البوت, jadibot-control. Older files migrate on-edit.
+
+## Plugins (130 total, as of Apr 22, 2026)
 - **Games:** شطرنج, اكس/اكس1, سوال, تحدي, رهان, فزوره, خمن, تخمين, حجره, لو, لو2, حظ, رياضيات, جواب, علم/علم1/علم2, العاب3, العاب-سريعة
 - **Economy:** البنك, عمل, يومي, طاقة, معاملاتي, شراء الماس, شراء عملات, لفل
 - **Media:** اغنيه, بنترست, تحميل, mp3, hd, media-tools
@@ -213,6 +276,14 @@ This means EVERY plugin (incl. obfuscated ones, owner panel, ai, شات, etc.) a
 - **Promote/demote `@undefined` fix**: filter empty/invalid participants before building mentions array.
 - **Mafia join command** (`plugins/مافيا.js`): internal command check now accepts `انضم_مافيا|join_mafia|join_mafia|انضم لعبه` to match the registered handler regex (avoids conflict with `.انضم <link>` in `owner-join.js`).
 - **Buttons/list command** (`plugins/زر_تجربة.js`): switched from `interactiveMessage` to `listMessage` for broader client compatibility, with text fallback when the client doesn't render lists.
+
+## Known Pending (Level 3 — backlog)
+- Welcome `.ترحيب` not responding investigation — needs Supabase query when revisited (suspect botOff flag, settings keying mismatch, or sub-bot routing)
+- ~80 empty `catch (_) {}` blocks across plugins — most intentional, but worth a targeted audit
+- Split `lib/simple.js` (1420 lines) and `lib/webp.js` (1497 lines) into smaller modules
+- Move handler.js inline default-user initialization block to `lib/userInit.js`
+- Audit & remove unused npm dependencies
+- Replace `Math.random()` in any remaining gambling plugin with `crypto.randomInt` for cryptographic fairness
 
 ## Deployment (Railway)
 - `nixpacks.toml` pins **Node 20** (`nodejs_20` + `pnpm-9_x`) and uses `pnpm install --frozen-lockfile`.

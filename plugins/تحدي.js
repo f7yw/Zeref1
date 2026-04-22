@@ -20,7 +20,9 @@ function buildQ(lvl) {
     a = b * (Math.floor(Math.random() * 10) + 2)
   }
   if (op === '-' && b > a) [a, b] = [b, a]
-  const answer = eval(`${a} ${op} ${b}`)
+  // حساب آمن بدون eval — يمنع أي حقن
+  const compute = (x, y, o) => o === '+' ? x + y : o === '-' ? x - y : o === '*' ? x * y : x / y
+  const answer = compute(a, b, op)
   return { expr: `${a} ${op} ${b}`, answer: String(answer) }
 }
 
