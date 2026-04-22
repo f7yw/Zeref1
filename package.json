@@ -16,21 +16,21 @@
     "node": ">=20.0.0",
     "npm": ">=10.0.0"
   },
-  "homepage": "https://github.com/Farisatif/Zeref",
+  "homepage": "https://github.com/Farisatif/Zeref-Bot",
   "author": {
     "name": "Farisatif"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Farisatif/Zeref"
+    "url": "git+https://github.com/Farisatif/Zeref-Bot"
   },
   "bugs": {
-    "url": "https://github.com/Farisatif/Zeref/issues"
+    "url": "https://github.com/Farisatif/Zeref-Bot/issues"
   },
   "license": "GPL-3.0-or-later",
   "dependencies": {
     "ytdl-core": "^4.11.5",
-    "sharp": "^0.33.0"
+    "sharp": "^0.33.0",
     "@adiwajshing/keyed-db": "0.2.4",
     "@bochilteam/scraper": "^4.2.4",
     "@brandond/findthelyrics": "^2.0.5",
