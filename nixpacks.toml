@@ -4,7 +4,7 @@ providers = ["node"]
 NIXPACKS_NODE_VERSION = "20"
 
 [phases.setup]
-nixPkgs = ["nodejs_20","python3", "ffmpeg","pnpm-9_x","libvips","gcc", "pkg-config"]
+nixPkgs = ["...", "python3", "ffmpeg"]
 
 [phases.install]
 cmds = ["pnpm install --frozen-lockfile --prod=false","pip3 install yt-dlp"]
