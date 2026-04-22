@@ -6,7 +6,7 @@ import { recordingDelay } from '../lib/presence.js'
 
 let handler = async (m, { conn, args, command, usedPrefix, text }) => {
   const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
-  if (!text) throw `*مثال:* ${usedPrefix}${command} اية الكرسي\n👤 العضوية: ${vipStatus}`
+  if (!text) throw `*مثال:* ${usedPrefix}${command} بيلي\n👤 العضوية: ${vipStatus}`
 
   await m.reply(global.wait || '⏳ جاري التحميل...')
   await recordingDelay(conn, m.chat, 1500)
