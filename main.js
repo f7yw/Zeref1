@@ -706,7 +706,12 @@ conn.ev.on('creds.update', saveCreds)
       try {
         if (isInStartupWindow()) return  // تجاهل ضوضاء المزامنة الأولى
         const me = botJids()
-        const involvesBot = (ev.participants || []).some(p => me.has(conn.decodeJid?.(p) || p))
+        // نظّف قائمة المشاركين من أي قيم فارغة/غير معرَّفة
+        const parts = (ev.participants || [])
+          .filter(p => p && typeof p === 'string' && p.includes('@'))
+        if (!parts.length) return  // حدث بدون بيانات قابلة للاستخدام (نحاول تجنّب @undefined)
+
+        const involvesBot = parts.some(p => me.has(conn.decodeJid?.(p) || p))
         const action = ev.action
         const labels = {
           add:     { emoji: '➕', verb: 'انضم'        },
@@ -725,18 +730,19 @@ conn.ev.on('creds.update', saveCreds)
           return
         }
 
-        const dKey = `grp-act:${ev.id}:${action}:${(ev.participants || []).join(',')}`
+        const dKey = `grp-act:${ev.id}:${action}:${parts.join(',')}`
         if (grpDedupe(dKey)) return
 
         // 🔔 رسائل الترحيب/الوداع لكل عضو على حدة (إعدادات لكل قروب)
         if (action === 'add' || action === 'remove') {
-          for (const p of (ev.participants || [])) {
+          for (const p of parts) {
             try { await global.fireGroupWelcome?.(conn, ev.id, p, action) } catch (_) {}
           }
         }
 
-        const who = (ev.participants || []).map(p => '@' + String(p).split('@')[0]).join(' ')
-        const by  = ev.author ? `@${String(ev.author).split('@')[0]}` : '—'
+        const who = parts.map(p => '@' + String(p).split('@')[0]).join(' ')
+        const author = (ev.author && typeof ev.author === 'string' && ev.author.includes('@')) ? ev.author : null
+        const by = author ? `@${String(author).split('@')[0]}` : '—'
         const text =
 `╭───『 ${meta.emoji} *${meta.verb}* 』
 │
@@ -745,10 +751,7 @@ conn.ev.on('creds.update', saveCreds)
 │ 🕐 ${new Date().toLocaleString('ar-EG', { hour12: false })}
 ╰────────`
 
-        const mentions = [
-          ...(ev.participants || []).map(p => String(p)),
-          ev.author ? String(ev.author) : null
-        ]
+        const mentions = [...parts.map(p => String(p)), author].filter(Boolean)
         await sendToGroup(ev.id, text, mentions)
       } catch (e) { console.error('[GRP-EV]', e?.message) }
     })

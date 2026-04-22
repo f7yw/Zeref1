@@ -47,33 +47,6 @@ ${txnLines}
 ╰──────────────────`.trim())
   }
 
-  // ── مراجعة_البريم / premium_review ──────────────────────────────────────
-  if (/^(مراجعة_البريم|مراجعة-البريم|premium_review|بريم_معلومات)$/i.test(command)) {
-    if (!user) return m.reply('❌ سجّل أولاً.')
-    initEconomy(user)
-
-    const vip    = isVip(m.sender)
-    const exp    = user.premiumTime || 0
-    const now    = Date.now()
-    const left   = exp - now
-    const expStr = exp > 0 ? (left > 0 ? `✅ ينتهي بعد ${msToStr(left)}` : '❌ منتهي') : '—'
-
-    return m.reply(`
-╭────『 👑 مراجعة البريم 』────
-│
-│ 🏷️ الحالة:      ${vip ? '✅ مميز (VIP)' : '❌ عادي'}
-│ ⏳ الانتهاء:    ${expStr}
-│ ♾️ موارد مفتوحة: ${user.infiniteResources ? 'نعم — يتخطى حدود الطاقة' : 'لا'}
-│
-│ 💰 المحفظة:    ${fmt(user.money)}
-│ 🏦 البنك:      ${fmt(user.bank)}
-│ 💎 الماس:      ${user.diamond || 0}
-│ ⚡ الطاقة:     ${user.energy || 0}/100
-│
-│ 💡 للترقية تواصل مع المالك.
-╰──────────────────`.trim())
-  }
-
   // ── احصائيات_القروب / group_stats ────────────────────────────────────────
   if (/^(احصائيات_القروب|احصائيات-القروب|group_stats|نشاط_القروب2)$/i.test(command)) {
     if (!m.isGroup) return m.reply('❌ هذا الأمر للقروبات فقط.')
@@ -189,8 +162,8 @@ ${topLines}
   }
 }
 
-handler.help    = ['تقرير_المال', 'مراجعة_البريم', 'احصائيات_القروب', 'احصائياتي_مفصل', 'اخطاء', 'نسخة_احتياطية']
+handler.help    = ['تقرير_المال', 'احصائيات_القروب', 'احصائياتي_مفصل', 'اخطاء', 'نسخة_احتياطية']
 handler.tags    = ['tools']
-handler.command = /^(تقرير_المال|تقرير-المال|balance_report|مراجعة_البريم|مراجعة-البريم|premium_review|بريم_معلومات|احصائيات_القروب|احصائيات-القروب|group_stats|نشاط_القروب2|احصائياتي_مفصل|احصائياتي-مفصل|user_stats|إحصائياتي_مفصل|اخطاء|سجل_اخطاء|error_log|نسخة_احتياطية|نسخ_احتياطي|backup_copy)$/i
+handler.command = /^(تقرير_المال|تقرير-المال|balance_report|احصائيات_القروب|احصائيات-القروب|group_stats|نشاط_القروب2|احصائياتي_مفصل|احصائياتي-مفصل|user_stats|إحصائياتي_مفصل|اخطاء|سجل_اخطاء|error_log|نسخة_احتياطية|نسخ_احتياطي|backup_copy)$/i
 
 export default handler
