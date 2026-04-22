@@ -4,10 +4,14 @@ providers = ["node"]
 NIXPACKS_NODE_VERSION = "20"
 
 [phases.setup]
-nixPkgs = ["nodejs_20", "pnpm-9_x"]
+nixPkgs = ["nodejs_20","python3", "ffmpeg", "gcc", "pkg-config", "libvips", "pnpm-9_x"]
 
 [phases.install]
-cmds = ["pnpm install --frozen-lockfile --prod=false"]
+cmds = [
+  "pnpm install --frozen-lockfile --prod=false",
+  "pnpm add sharp",
+  "pip install yt-dlp"
+]
 
 [start]
 cmd = "node index.js"

@@ -327,7 +327,7 @@
       "lastmonthly": 0,
       "lastnambang": 0,
       "makanannaga": 0,
-      "premiumTime": 3353643133790,
+      "premiumTime": 3353643873852,
       "seedbrokoli": 0,
       "seedkentang": 0,
       "totalEarned": 0,
@@ -408,7 +408,7 @@
       "kerjaempatbelas": 0,
       "kerjatujuhbelas": 0,
       "kucinglastclaim": 0,
-      "lastEnergyRegen": 1776843133790,
+      "lastEnergyRegen": 1776843873852,
       "lastmancingeasy": 0,
       "lastmancinghard": 0,
       "lastpotionclaim": 0,
@@ -468,7 +468,7 @@
       "bow": 0,
       "cat": 0,
       "dog": 0,
-      "exp": 999999,
+      "exp": null,
       "fox": 0,
       "hiu": 0,
       "job": "Pengangguran",
@@ -548,7 +548,7 @@
       "leleb": 0,
       "leleg": 0,
       "level": 999,
-      "limit": 0,
+      "limit": null,
       "lumba": 0,
       "money": 1000000600,
       "ojekk": 0,
@@ -803,7 +803,7 @@
       "lastnambang": 0,
       "makanannaga": 0,
       "premiumDate": -1,
-      "premiumTime": 3353643133790,
+      "premiumTime": 3353643898357,
       "seedbrokoli": 0,
       "seedkentang": 0,
       "totalEarned": 0,
@@ -1061,7 +1061,7 @@
       "kerjatujuhbelas": 0,
       "kucinglastclaim": 0,
       "lastCommandTime": 1776761763373,
-      "lastEnergyRegen": 1776843133790,
+      "lastEnergyRegen": 1776843873852,
       "lastmancingeasy": 0,
       "lastmancinghard": 0,
       "lastpotionclaim": 0,
@@ -1139,7 +1139,7 @@
       "premium": true,
       "regTime": 1776796237964,
       "registered": true,
-      "premiumTime": 3353642824793,
+      "premiumTime": 3353643898357,
       "infiniteResources": true
     },
     "158884446605486@s.whatsapp.net": {
@@ -1238,6 +1238,21 @@
       "regTime": 1776795449504,
       "registered": true,
       "premiumTime": 3353642824793,
+      "infiniteResources": true
+    },
+    "967782114485:26@s.whatsapp.net": {
+      "bio": "🤖 التاجر الرسمي للبوت — موارد لا نهائية",
+      "bank": 1000000000,
+      "name": "شادو",
+      "role": "🤖 التاجر الرسمي",
+      "money": 1000000000,
+      "banned": false,
+      "energy": 100,
+      "diamond": 1000000,
+      "premium": true,
+      "regTime": 1776843898357,
+      "registered": true,
+      "premiumTime": 3353643898357,
       "infiniteResources": true
     }
   },
@@ -1359,7 +1374,7 @@
       "welcomeText": "╭───『 🎉 *أهلاً بك في {group}* 』\n│\n│ 👤 *العضو:* {user}\n│ 🪪 *الاسم:* {name}\n│ 📱 *الرقم:* +{number}\n│ #️⃣ *رقم العضوية:* {count}\n│\n│ 📜 {desc}\n│\n│ 🤖 لاستخدام البوت أرسل: *.اوامر*\n╰────────",
       "antiviewonce": false,
       "messageStats": {
-        "28648019066900@lid": 514,
+        "28648019066900@lid": 516,
         "137465276969165@lid": 10,
         "158884446605486@lid": 3,
         "204990769553546@lid": 165,
@@ -1485,10 +1500,10 @@
       "lastSuccess": 1776828838268
     },
     "شغل.js": {
-      "last": 1776838597222,
-      "total": 5,
-      "success": 5,
-      "lastSuccess": 1776838597222
+      "last": 1776843998599,
+      "total": 6,
+      "success": 6,
+      "lastSuccess": 1776843998599
     },
     "علم.js": {
       "last": 1776734809302,
