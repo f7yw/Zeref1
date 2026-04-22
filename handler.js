@@ -1441,6 +1441,44 @@ try {
 
                 if (!isAccept)
                     continue
+
+                // ── فحص حالة البوت (تعطيل أمر / صيانة / وضع خاص) ──
+                try {
+                    const { isCommandDisabled, isMaintenance, isPrivateMode } = await import('./lib/botControl.js')
+                    const botJid = this?.user?.jid || this?.user?.id || 'main'
+
+                    // وضع الصيانة → فقط المطور
+                    if (isMaintenance(botJid) && !isROwner && !isOwner) {
+                        // كتم لمنع الإغراق: ردّ مرة كل دقيقتين لكل مستخدم
+                        global.__maintNotice = global.__maintNotice || {}
+                        const last = global.__maintNotice[m.sender] || 0
+                        if (Date.now() - last > 2 * 60 * 1000) {
+                            global.__maintNotice[m.sender] = Date.now()
+                            await m.reply('🛠️ *البوت في وضع الصيانة حالياً*\nسنعود قريباً — شكراً لصبرك 🌷')
+                        }
+                        return
+                    }
+
+                    // الوضع الخاص → المطور والمميزون فقط
+                    if (isPrivateMode(botJid) && !isROwner && !isOwner && !isPrems) {
+                        global.__privNotice = global.__privNotice || {}
+                        const last = global.__privNotice[m.sender] || 0
+                        if (Date.now() - last > 2 * 60 * 1000) {
+                            global.__privNotice[m.sender] = Date.now()
+                            await m.reply('🔐 *البوت في الوضع الخاص*\nهذه الفترة الأوامر للمميزين والمطور فقط.')
+                        }
+                        return
+                    }
+
+                    // أمر معطّل بشكل فردي → فقط المطور يتجاوز
+                    if (!isROwner && !isOwner && isCommandDisabled(command, botJid)) {
+                        await m.reply(`🚫 *الأمر مُعطَّل من قِبل المطور حالياً.*\n\nالأمر: *${command}*\nجرّب لاحقاً أو استخدم *.قائمة* لرؤية البدائل.`)
+                        return
+                    }
+                } catch (e) {
+                    console.error('[BOT-STATE]', e?.message)
+                }
+
                 // ── فلترة المزايا للبوتات الفرعية (Jadibot) ──
                 if (this.__isSubBot) {
                     try {
@@ -1681,6 +1719,51 @@ if (botSpam.antispam && m.text && user && user.lastCommandTime && (Date.now() - 
                 }
                 break
             }
+        }
+
+        // ── اقتراح أوامر ذكي عند الكتابة الخاطئة ─────────────────
+        // إذا لم يُطابَق أي أمر، والنص يبدأ ببادئة، نقترح الأقرب.
+        try {
+            if (!m.isCommand && m.text && typeof m.text === 'string') {
+                const prefixMatch = m.text.match(global.prefix)
+                if (prefixMatch) {
+                    const usedPfx = prefixMatch[0]
+                    const noPfx = m.text.slice(usedPfx.length).trim()
+                    const attempted = (noPfx.split(/\s+/)[0] || '').toLowerCase()
+                    // شروط: ليس قصيراً جداً، حروف عربية/إنجليزية فقط، ليس رقماً
+                    if (attempted.length >= 2 && attempted.length <= 25 &&
+                        /^[\u0600-\u06FFa-z0-9_]+$/i.test(attempted) &&
+                        !/^\d+$/.test(attempted)) {
+                        const { isSuggestEnabled, suggestCommands } = await import('./lib/botControl.js')
+                        const botJid = this?.user?.jid || this?.user?.id || 'main'
+                        if (isSuggestEnabled(botJid)) {
+                            // كتم لمنع الإغراق: مرة كل 30 ثانية لكل مستخدم
+                            global.__suggestNotice = global.__suggestNotice || {}
+                            const last = global.__suggestNotice[m.sender] || 0
+                            if (Date.now() - last > 30 * 1000) {
+                                const sugg = suggestCommands(attempted, 3)
+                                if (sugg.length) {
+                                    global.__suggestNotice[m.sender] = Date.now()
+                                    const lines = sugg.map((s, i) => `  ${i + 1}. *${usedPfx}${s}*`).join('\n')
+                                    await m.reply(
+`╭────『 ❓ هل تقصد؟ 』────
+│
+│ لا يوجد أمر باسم: *${attempted}*
+│
+│ 💡 *اقتراحات قريبة:*
+${lines.split('\n').map(l => `│ ${l.trim()}`).join('\n')}
+│
+│ 📋 للقائمة الكاملة: *${usedPfx}قائمة*
+│
+╰──────────────────`)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('[CMD-SUGGEST]', e?.message)
         }
     } catch (e) {
         console.error(e)
