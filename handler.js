@@ -627,8 +627,8 @@ try {
                 if (!isNumber(user.wortel)) user.wortel = 0
                 if (!user.lbars) user.lbars = '[▒▒▒▒▒▒▒▒▒]'
                 if (!user.job) user.job = 'Desempleo'
-                if (!user.premium) user.premium = false
-                if (!user.premium) user.premiumTime = 0
+                if (!('premium' in user)) user.premium = false
+                if (!isNumber(user.premiumTime)) user.premiumTime = 0
                 if (!user.wait) user.wait = 0    
                 if (!user.rtrofi) user.rtrofi = 'Bronce'
             } else

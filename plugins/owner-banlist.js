@@ -16,6 +16,6 @@ let caption = `
 └────
 `.trim()
 m.reply(caption, null, {mentions: conn.parseMention(caption)})}
-handler.command = /^المحضور|المحظورين?|ban(ned)?list|daftarban(ned)?$/i
+handler.command = /^(المحظور|المحظورين|banlist|bannedlist|daftarban|daftarbanned)$/i
 handler.rowner = true
 export default handler

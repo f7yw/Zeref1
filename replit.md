@@ -24,6 +24,22 @@ Arabic WhatsApp bot built with Node.js and Baileys. Focused on: study support, e
 - `plugins/advanced-stats.js` — new: balance report, VIP review, group/user stats, error log, backup
 - `plugins/media-tools.js` — new: link info, audio/video extract, OCR, format convert, image search
 
+## Level 2 Upgrade (آخر تحديث)
+- **حذف ملفات مكسورة/مكرّرة:** `حظر.js`, `الغاء_حظر.js`, `رفع-البان.js`, `صورة-القروب.js`, `mipilot-jadibot-parar.js`, `mipilot-serbot-info.js`, `اغنيه.js` (كان يحوي وظيفة مغادرة قروب)
+- **إعادة تسمية ملفات بمسافات:** → `ayat-alkursi.js`, `azkar-sabah.js`, `azkar-masaa.js`, `reminder-delete-one.js`, `buy-diamond.js`, `buy-coins.js`, `leave-group.js`
+- **إصلاحات حرجة:**
+  - `handler.js:631` صار `if (!isNumber(user.premiumTime)) user.premiumTime = 0` — لم يعد يُصفّر VIP
+  - `extras-owner.js` حُذف فرع `eval` نهائياً (RCE)
+  - `owner-banlist.js` regex صار `/^(المحظور|المحظورين|banlist|...)$/i`
+  - `main.js` كل `db.write` صار مع `await` ولوغ في حال الفشل
+- **توحيد الأوامر:**
+  - `owner-banuser.js` يتولى الآن: حظر/فك حظر مستخدم + شات (يحلّ محل 3 ملفات محذوفة)
+  - `bot-control.js` أُزيلت منه: `لوحة|لوحه|panel|قاعدة_البيانات` (في `owner-panel.js`)
+  - `owner-panel.js` أُضيف له: `لوحه|لوحة_المطور`
+  - `trivia.js` أُزيل `معلومة` (في `extras-user.js`)
+  - `schedule.js` أُزيل `بث_للقروبات` (في `bot-control.js`)
+  - `extras-owner.js` أُزيلت أوامر eval
+
 ## Economy System (Single Source of Truth)
 - **`lib/economy.js`** — `initEconomy()`, `isVip()`, `logTransaction()`, `syncVipResources()`, `fmt()`, `fmtEnergy()`, `syncEnergy()`, `deductEnergy()`, `getRole()`, `MAX_ENERGY`, `FEES`
 - **`lib/userInit.js`** — `initUser(user, name, jid?)` — calls `initEconomy` + optional VIP sync

@@ -189,5 +189,5 @@ handler.all = async function (m) {
 
 handler.help = ['سؤال_وجواب', 'trivia']
 handler.tags = ['game']
-handler.command = /^(سؤال_وجواب|trivia|سؤال2|معلومة)$/i
+handler.command = /^(سؤال_وجواب|trivia|سؤال2)$/i
 export default handler

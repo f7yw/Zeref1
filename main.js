@@ -472,13 +472,13 @@ async function connectionUpdate(update) {
         }
         if (ownerCount) console.log(chalk.cyan(`[OWNER-REG] تم تسجيل ${ownerCount} مالك تلقائياً`))
 
-        await global.db.write().catch(() => {})
+        await global.db.write().catch((e) => console.warn('[BOT-REG] db.write:', e?.message))
       }
     } catch (e) { console.error('[BOT-REG]', e?.message) }
 
 
     // ── بناء جدول LID→Phone من جهات الاتصال ──────────────────────────────
-    setTimeout(() => {
+    setTimeout(async () => {
       try {
         global.lidPhoneMap ??= {}
         // Load persisted map from DB
@@ -515,7 +515,7 @@ async function connectionUpdate(update) {
         // Persist map to DB
         if (mapped > 0) {
           global.db.data.lidPhoneMap = global.lidPhoneMap
-          global.db.write().catch(() => {})
+          await global.db.write().catch((e) => console.warn('[LID] db.write:', e?.message))
           console.log(chalk.cyan(`[LID] Built ${mapped} LID→Phone mappings from contacts.`))
         } else {
           console.log(chalk.gray('[LID] No LID mappings found in contacts yet.'))

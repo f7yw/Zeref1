@@ -105,24 +105,13 @@ ${blocked.slice(0,30).map((j,i)=>`${i+1}. ${String(j).split('@')[0]}`).join('\n'
 ${blocked.length>30?`\n...و ${blocked.length-30} آخر`:''}`)
   }
 
-  // ───── eval (تنفيذ JS) ─────
-  if (/^(تنفيذ_جس|تنفيذ-جس|eval|exec_js)$/i.test(c)) {
-    const code = String(text || '').trim()
-    if (!code) return m.reply('📌 *الاستخدام:* `.تنفيذ_جس <كود JS>`')
-    try {
-      let res = await eval(`(async () => { ${code} })()`)
-      if (typeof res !== 'string') res = JSON.stringify(res, null, 2)
-      m.reply(`✅ *النتيجة:*\n\`\`\`\n${String(res).slice(0, 3000)}\n\`\`\``)
-    } catch (e) {
-      m.reply(`❌ *خطأ:*\n\`\`\`\n${e?.message || e}\n\`\`\``)
-    }
-    return
-  }
+  // ───── eval تم إزالته أمنياً (Level 2) ─────
+  // كان يسمح بتنفيذ JS عشوائي على الخادم. أُزيل لمنع أي مخاطر RCE.
 }
 
-handler.help    = ['بنق','احصائيات_شاملة','مغادرة_قروب [jid]','قائمة_المحظورين_عام','تنفيذ_جس <code>']
+handler.help    = ['بنق','احصائيات_شاملة','مغادرة_قروب [jid]','قائمة_المحظورين_عام']
 handler.tags    = ['owner']
-handler.command = /^(بنق|بنج|ping|سرعة_البوت|احصائيات_شاملة|إحصائيات_شاملة|تقرير_شامل|botreport|fullstats|مغادرة_قروب|leavegroup|leave_chat|اخرج_من_قروب|قائمة_المحظورين_عام|كل_المحظورين|allbans|fullbans|تنفيذ_جس|تنفيذ-جس|eval|exec_js)$/i
+handler.command = /^(بنق|بنج|ping|سرعة_البوت|احصائيات_شاملة|إحصائيات_شاملة|تقرير_شامل|botreport|fullstats|مغادرة_قروب|leavegroup|leave_chat|اخرج_من_قروب|قائمة_المحظورين_عام|كل_المحظورين|allbans|fullbans)$/i
 handler.owner   = true
 
 export default handler
