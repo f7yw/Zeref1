@@ -558,7 +558,9 @@ let handler = async (m, { conn, usedPrefix, isOwner, isAdmin, isROwner }) => {
     msgId: sent?.key?.id || null,
     chat: m.chat,
     isSubBot,
-    subPhone
+    subPhone,
+    isOwner: !!(isOwner || isROwner),
+    isAdmin: !!isAdmin,
   }
 }
 
@@ -573,18 +575,11 @@ handler.all = async function (m) {
   if (!raw || /^[./#!\u0600-\u06FF]/.test(raw)) return
 
   const choice = normalizeChoice(raw)
-  // إعادة احتساب الصلاحيات هنا (handler.all لا يستلم isOwner/isAdmin)
-  const senderNum = (m.sender || '').replace(/\D/g, '')
-  const isOwner = (global.owner || []).some(o => Array.isArray(o) ? String(o[0]).replace(/\D/g, '') === senderNum : String(o).replace(/\D/g, '') === senderNum)
-  let isAdmin = false
-  try {
-    if (m.isGroup) {
-      const meta = await this.groupMetadata(m.chat).catch(() => null)
-      const p = meta?.participants?.find(x => (x.id === m.sender) || (x.lid && x.lid === m.sender))
-      isAdmin = !!(p && (p.admin === 'admin' || p.admin === 'superadmin'))
-    }
-  } catch (_) {}
-  const sectionsToShow = getAllowedSections(this, { isOwner, isAdmin })
+  // نستخدم الصلاحيات المحفوظة في الجلسة (handler.before احتسبها بطريقة موثوقة تتعامل مع LID)
+  const sectionsToShow = getAllowedSections(this, {
+    isOwner: !!session.isOwner,
+    isAdmin: !!session.isAdmin
+  })
   if (!sectionsToShow[choice]) return
 
   if (Date.now() - session.ts > 5 * 60 * 1000) {

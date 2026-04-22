@@ -651,6 +651,51 @@ async function connectionUpdate(update) {
 conn.ev.on('connection.update', connectionUpdate)
 conn.ev.on('creds.update', saveCreds)
 
+// ====== GROUP EVENTS → OWNER NOTIFICATIONS ======
+;(async () => {
+  try {
+    const { notifyGroupEvent } = await import('./lib/notify.js')
+
+    const botJids = () => {
+      const ids = new Set()
+      try {
+        const u = conn.user || {}
+        if (u.id) ids.add(conn.decodeJid?.(u.id) || u.id)
+        if (u.lid) ids.add(conn.decodeJid?.(u.lid) || u.lid)
+      } catch (_) {}
+      try {
+        for (const o of (global.botJids || [])) ids.add(o)
+      } catch (_) {}
+      return ids
+    }
+
+    // انضمام/مغادرة/طرد
+    conn.ev.on('group-participants.update', async (ev) => {
+      try {
+        const me = botJids()
+        const involves = (ev.participants || []).some(p => me.has(conn.decodeJid?.(p) || p))
+        if (!involves) return
+        const action = ev.action
+        const map = { add: 'joined', remove: 'left', promote: 'promoted', demote: 'demoted' }
+        const event = map[action]
+        if (!event) return
+        await notifyGroupEvent(conn, ev.id, event, { byJid: ev.author })
+      } catch (e) { console.error('[GRP-EV]', e?.message) }
+    })
+
+    // اكتشاف انضمام للمجموعة عبر تحديثات groups (حالة: تمت الإضافة بدون event صريح)
+    conn.ev.on('groups.upsert', async (groups) => {
+      try {
+        for (const g of (groups || [])) {
+          await notifyGroupEvent(conn, g.id, 'joined', { note: 'مجموعة جديدة أُضيف إليها البوت' })
+        }
+      } catch (e) { console.error('[GRP-UPSERT]', e?.message) }
+    })
+  } catch (e) {
+    console.error('[GRP-LISTENERS]', e?.message)
+  }
+})()
+
 // ====== DIRTY FLAG + ACTIVITY TRACKING FOR SMART DB SAVES ======
 global.db.__dirty = false
 global.__lastActivity = Date.now()
