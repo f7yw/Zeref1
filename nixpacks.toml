@@ -4,10 +4,13 @@ providers = ["node"]
 NIXPACKS_NODE_VERSION = "20"
 
 [phases.setup]
-nixPkgs = ["...", "python3", "ffmpeg"]
+nixPkgs = ["...", "python3", "ffmpeg", "yt-dlp"]
 
 [phases.install]
-cmds = ["pnpm install --frozen-lockfile --prod=false","python3 -m pip install yt-dlp"]
+cmds = [
+  "corepack enable",
+  "pnpm install --no-frozen-lockfile"
+]
 
 [start]
 cmd = "node index.js"
