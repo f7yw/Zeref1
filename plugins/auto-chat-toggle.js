@@ -1,104 +1,54 @@
-// ─── إعدادات الكتابة التلقائية للبوت ─────────────────────────────────────────
-// يتحكّم بالردود التلقائية في شات.js (التي تنطلق على كلمات مثل "بوت"، "تحبني"، إلخ).
-// يدعم وضعين:
-//   • مستوى المحادثة: chat.autoReply  (افتراضي مفعّل)
-//   • مستوى البوت كله: settings[botJid].autoChatGlobal  (افتراضي مفعّل)
-// إذا أُوقف العام → يتوقّف في كل المحادثات حتى لو كانت مفعّلة محلياً.
+// ─── التحكّم بمؤشّر "جاري الكتابة..." ───────────────────────────────────────
+// يضبط ظهور إشعار "...يكتب" لمدة 5 ثوانٍ الذي يُرسله البوت لكل رسالة واردة.
+// هذا المؤشر كان يضايق بعض الأعضاء، لذا أصبح قابلاً للإطفاء.
+// الإعداد لكل بوت (رئيسي/فرعي) ويُحفظ في Supabase.
+//   • settings[botJid].showTyping  (افتراضياً true)
 // ─────────────────────────────────────────────────────────────────────────────
 
-let handler = async (m, { conn, args, command, isAdmin, isOwner, isROwner }) => {
+let handler = async (m, { conn, args, command, isROwner, isOwner }) => {
   const sub = (args[0] || '').toLowerCase().trim()
   const botJid = conn?.user?.jid || conn?.user?.id || 'main'
 
   global.db.data.settings = global.db.data.settings || {}
   const s = global.db.data.settings[botJid] = global.db.data.settings[botJid] || {}
-  if (typeof s.autoChatGlobal !== 'boolean') s.autoChatGlobal = true
+  if (typeof s.showTyping !== 'boolean') s.showTyping = true
 
-  const chat = global.db.data.chats[m.chat] = global.db.data.chats[m.chat] || {}
-  if (typeof chat.autoReply !== 'boolean') chat.autoReply = true
-
-  const isGlobalSub = /^(عام|all|كل|global)$/i.test(sub)
-  const action = isGlobalSub ? (args[1] || '').toLowerCase().trim() : sub
-
-  // ── تبديل عام (للمطور فقط) ──
-  if (isGlobalSub) {
-    if (!isROwner && !isOwner) {
-      return m.reply(
-`╭────『 🛡️ صلاحيات غير كافية 』────
-│
-│ التبديل العام يخصّ المطور فقط.
-│ يمكنك التحكّم بمحادثتك الحالية:
-│ • .${command} تشغيل
-│ • .${command} ايقاف
-│
-╰──────────────────`)
-    }
-    if (/^(تشغيل|on|نعم|فعل)$/i.test(action)) {
-      s.autoChatGlobal = true
-      global.markDirty?.()
-      return m.reply(box('🔊 تشغيل الكتابة عاماً', [
-        '✅ تم تفعيل الردود التلقائية على مستوى البوت كله.',
-        'كل محادثة تتحكم بنفسها بشكل منفصل.',
-      ]))
-    }
-    if (/^(ايقاف|إيقاف|off|تعطيل|اطفاء)$/i.test(action)) {
-      s.autoChatGlobal = false
-      global.markDirty?.()
-      return m.reply(box('🔇 إيقاف الكتابة عاماً', [
-        '⛔ توقّفت الردود التلقائية في *جميع* المحادثات.',
-        'لن يكتب البوت من نفسه حتى لو كانت المحادثة مفعّلة.',
-      ]))
-    }
-    return m.reply(box('⚙️ التبديل العام', [
-      `🔘 الحالة العامة: *${s.autoChatGlobal ? '✅ مفعَّلة' : '⛔ متوقفة'}*`,
-      '',
-      'الاستخدام:',
-      `• .${command} عام تشغيل`,
-      `• .${command} عام ايقاف`,
+  if (!isROwner && !isOwner) {
+    return m.reply(box('🛡️ صلاحيات غير كافية', [
+      'هذا الإعداد يخصّ المطور فقط.',
+      `الحالة الحالية: *${s.showTyping ? '✅ يظهر "يكتب..."' : '⛔ صامت'}*`,
     ]))
   }
 
-  // ── تبديل المحادثة (للمشرف/المطور) ──
-  if (m.isGroup && !isAdmin && !isROwner && !isOwner) {
-    return m.reply(
-`╭────『 🛡️ صلاحيات غير كافية 』────
-│
-│ تغيير إعداد المحادثة للمشرفين فقط.
-│ استخدم: .${command} حالة لرؤية الإعداد.
-│
-╰──────────────────`)
-  }
-
-  if (/^(تشغيل|on|نعم|فعل)$/i.test(action)) {
-    chat.autoReply = true
+  if (/^(تشغيل|on|نعم|فعل|اظهار|إظهار)$/i.test(sub)) {
+    s.showTyping = true
     global.markDirty?.()
-    return m.reply(box('🔊 تشغيل في هذه المحادثة', [
-      '✅ سيردّ البوت تلقائياً على بعض الكلمات هنا.',
-      s.autoChatGlobal ? '' : '⚠️ التبديل العام متوقّف — لن يعمل حتى يُفعَّل عاماً.',
-    ].filter(Boolean)))
-  }
-
-  if (/^(ايقاف|إيقاف|off|تعطيل|اطفاء|اخرس)$/i.test(action)) {
-    chat.autoReply = false
-    global.markDirty?.()
-    return m.reply(box('🔇 إيقاف في هذه المحادثة', [
-      '⛔ لن يكتب البوت تلقائياً في هذه المحادثة.',
-      'الأوامر العادية تعمل كالمعتاد.',
+    return m.reply(box('⌨️ تشغيل مؤشّر الكتابة', [
+      '✅ سيظهر إشعار "...يكتب" قبل كل ردّ (5 ثوانٍ).',
+      '💾 الإعداد محفوظ في السحاب.',
     ]))
   }
 
-  // ── عرض الحالة (افتراضي) ──
-  return m.reply(box('💬 إعدادات كتابة البوت', [
-    `🌐 الحالة العامة:    *${s.autoChatGlobal ? '✅ مفعَّلة' : '⛔ متوقفة'}*`,
-    `💭 هذه المحادثة:     *${chat.autoReply ? '✅ مفعَّلة' : '⛔ متوقفة'}*`,
-    '',
-    `🔎 النتيجة الفعلية: *${(s.autoChatGlobal && chat.autoReply) ? '✅ يكتب' : '⛔ صامت'}*`,
+  if (/^(ايقاف|إيقاف|off|تعطيل|اطفاء|اخفاء|إخفاء)$/i.test(sub)) {
+    s.showTyping = false
+    global.markDirty?.()
+    return m.reply(box('🤐 إيقاف مؤشّر الكتابة', [
+      '⛔ لن يظهر "...يكتب" بعد الآن.',
+      'الردود نفسها تعمل كالمعتاد — فقط المؤشّر أُخفي.',
+      '💾 الإعداد محفوظ في السحاب.',
+    ]))
+  }
+
+  return m.reply(box('⌨️ مؤشّر "جاري الكتابة..."', [
+    `🔘 الحالة: *${s.showTyping ? '✅ يظهر للأعضاء' : '⛔ مخفي'}*`,
+    `⏱️ المدّة: 5 ثوانٍ بعد كل رسالة واردة`,
+    `🤖 البوت: ${botJid.split('@')[0] || 'الرئيسي'}`,
     '',
     '⚙️ التحكّم:',
-    `• .${command} تشغيل           — لهذه المحادثة`,
-    `• .${command} ايقاف           — لهذه المحادثة`,
-    `• .${command} عام تشغيل       — للبوت كله (مطور)`,
-    `• .${command} عام ايقاف       — للبوت كله (مطور)`,
+    `• .${command} تشغيل   — إظهار المؤشّر`,
+    `• .${command} ايقاف   — إخفاء المؤشّر`,
+    '',
+    '💡 يطبَّق على هذا البوت فقط (رئيسي أو فرعي).',
   ]))
 }
 
@@ -106,8 +56,10 @@ function box(title, lines) {
   return `╭────『 ${title} 』────\n│\n│ ${lines.join('\n│ ')}\n│\n╰──────────────────`
 }
 
-handler.help    = ['كتابة_البوت [تشغيل|ايقاف|عام تشغيل|عام ايقاف]']
-handler.tags    = ['owner', 'group']
-handler.command = /^(كتابة_البوت|كتابه_البوت|الكتابة|الكتابه|كتابة|كتابه|ردود_تلقائية|ردود_تلقائيه|الردود_التلقائية|الردود_التلقائيه|auto_chat|autochat|silent_bot)$/i
+handler.help    = ['كتابة_البوت [تشغيل|ايقاف]']
+handler.tags    = ['owner']
+handler.command = /^(كتابة_البوت|كتابه_البوت|مؤشر_الكتابة|مؤشر_الكتابه|اظهار_الكتابة|إظهار_الكتابة|typing|show_typing)$/i
+handler.rowner  = false
+handler.owner   = true
 
 export default handler

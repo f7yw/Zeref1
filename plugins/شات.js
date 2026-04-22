@@ -2,16 +2,10 @@ let handler = m => m;
 
 handler.all = async function (m) {
     if (m.fromMe) return
-    let chat = global.db.data.chats[m.chat] = global.db.data.chats[m.chat] || {};
-
-    // ── فحص التبديل العام للبوت (.كتابة_البوت عام ايقاف) ──
-    try {
-        const botJid = this?.user?.jid || this?.user?.id || 'main'
-        const s = global.db.data.settings?.[botJid]
-        if (s && s.autoChatGlobal === false) return;
-    } catch (_) {}
-
-    // إذا الردود معطلة لهذه المحادثة، لا ينفذ شيء
+    let chat = global.db.data.chats[m.chat];
+    // أوامر تشغيل/إيقاف الردود التلقائية بنقطة في البداية
+ 
+    // إذا الردود معطلة، لا ينفذ شيء
     if (chat.autoReply === false) return;
 
      if (m.key.fromMe) {

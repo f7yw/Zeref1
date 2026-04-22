@@ -77,12 +77,18 @@ export async function handler(chatUpdate) {
     if (m.key.remoteJid === 'status@broadcast') return
 
     // 🔵 إظهار "يكتب..." لمدة 5 ثوانٍ على كل رسالة واردة (تفاعل بصري)
+    // قابل للإيقاف عبر: .كتابة_البوت ايقاف  (لكل بوت — يُحفظ في السحاب)
     try {
       if (!m.key?.fromMe && m.key?.remoteJid) {
-        this.sendPresenceUpdate?.('composing', m.key.remoteJid).catch(() => {})
-        setTimeout(() => {
-          try { this.sendPresenceUpdate?.('paused', m.key.remoteJid).catch(() => {}) } catch (_) {}
-        }, 5000)
+        const botJid = this?.user?.jid || this?.user?.id || 'main'
+        const s = global.db?.data?.settings?.[botJid]
+        const showTyping = (s?.showTyping !== false) // افتراضياً مفعَّل
+        if (showTyping) {
+          this.sendPresenceUpdate?.('composing', m.key.remoteJid).catch(() => {})
+          setTimeout(() => {
+            try { this.sendPresenceUpdate?.('paused', m.key.remoteJid).catch(() => {}) } catch (_) {}
+          }, 5000)
+        }
       }
     } catch (_) {}
 
