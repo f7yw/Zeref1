@@ -1337,7 +1337,7 @@
       "emas": 0,
       "emerald": 0,
       "esteh": 0,
-      "exp": 27,
+      "exp": 93,
       "expg": 0,
       "exphero": 0,
       "expired": 0,
@@ -1624,7 +1624,7 @@
       "sworddurability": 0,
       "tigame": 50,
       "tiketcoin": 0,
-      "title": "",
+      "title": 0,
       "tomat": 0,
       "tprem": 0,
       "trash": 0,
@@ -1661,15 +1661,15 @@
       "infiniteResources": true,
       "tempBannedUntil": 0,
       "energy": 100,
-      "lastEnergyRegen": 1776828362103,
+      "lastEnergyRegen": 1776828416817,
       "messages": {
-        "total": 1,
+        "total": 5,
         "groups": {
-          "120363427285079878@g.us": 1
+          "120363427285079878@g.us": 5
         },
-        "last": 1776828362636
+        "last": 1776828416815
       },
-      "lastCommandTime": 1776828362646,
+      "lastCommandTime": 1776828416815,
       "commandCount": 1,
       "transactions": [
         {
@@ -1678,7 +1678,33 @@
           "reason": "🆙 مكافأة المستوى 0",
           "time": 1776828363255
         }
-      ]
+      ],
+      "lastDaily": 0,
+      "lastWork": 0,
+      "totalEarned": 0,
+      "totalSpent": 0,
+      "catexp": 0,
+      "enchant": 0,
+      "glimit": 20,
+      "glory": 0,
+      "healthmonster": 0,
+      "kyubiexp": 0,
+      "kyubilastfeed": 0,
+      "lastbansos": 0,
+      "lastcodereg": 0,
+      "lastgift": 0,
+      "lastIstigfar": 0,
+      "lastrampok": 0,
+      "lastsda": 0,
+      "lastwar": 0,
+      "pancing": 0,
+      "pertambangan": 0,
+      "pertanian": 0,
+      "petFood": 0,
+      "psenjata": 0,
+      "psepick": 0,
+      "robo": 0,
+      "roboxp": 0
     },
     "137465276969165:25@lid": {
       "registered": true,
@@ -1826,7 +1852,7 @@
       "autosticker": false,
       "antiviewonce": false,
       "messageStats": {
-        "28648019066900@lid": 319,
+        "28648019066900@lid": 323,
         "137465276969165@lid": 6,
         "204990769553546@lid": 119,
         "967782114485@s.whatsapp.net": 42
@@ -1915,10 +1941,10 @@
       "lastSuccess": 1776788889406
     },
     "menu.js": {
-      "last": 1776828089894,
-      "total": 121,
-      "success": 121,
-      "lastSuccess": 1776828089894
+      "last": 1776828418541,
+      "total": 122,
+      "success": 122,
+      "lastSuccess": 1776828418541
     },
     "anime.js": {
       "last": 1776762332593,
@@ -2023,8 +2049,8 @@
       "lastSuccess": 1776735115889
     },
     "owner-join.js": {
-      "last": 1776827785096,
-      "total": 6,
+      "last": 1776828404323,
+      "total": 7,
       "success": 0,
       "lastSuccess": 0
     },
@@ -2065,10 +2091,10 @@
       "lastSuccess": 1776762542219
     },
     "مافيا.js": {
-      "last": 1776828254957,
-      "total": 12,
-      "success": 12,
-      "lastSuccess": 1776828254957
+      "last": 1776828408915,
+      "total": 13,
+      "success": 13,
+      "lastSuccess": 1776828408915
     },
     "bot-control.js": {
       "last": 1776786084692,

@@ -1,0 +1,13 @@
+providers = ["node"]
+
+[variables]
+NIXPACKS_NODE_VERSION = "20"
+
+[phases.setup]
+nixPkgs = ["nodejs_20", "pnpm-9_x"]
+
+[phases.install]
+cmds = ["pnpm install --frozen-lockfile --prod=false"]
+
+[start]
+cmd = "node index.js"
