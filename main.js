@@ -737,6 +737,9 @@ conn.ev.on('creds.update', saveCreds)
         if (action === 'add' || action === 'remove') {
           for (const p of parts) {
             try { await global.fireGroupWelcome?.(conn, ev.id, p, action) } catch (_) {}
+            if (action === 'add') {
+              try { await global.fireGroupForm?.(conn, ev.id, p) } catch (_) {}
+            }
           }
         }
 

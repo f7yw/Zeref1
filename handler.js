@@ -76,6 +76,16 @@ export async function handler(chatUpdate) {
 
     if (m.key.remoteJid === 'status@broadcast') return
 
+    // 🔵 إظهار "يكتب..." لمدة 5 ثوانٍ على كل رسالة واردة (تفاعل بصري)
+    try {
+      if (!m.key?.fromMe && m.key?.remoteJid) {
+        this.sendPresenceUpdate?.('composing', m.key.remoteJid).catch(() => {})
+        setTimeout(() => {
+          try { this.sendPresenceUpdate?.('paused', m.key.remoteJid).catch(() => {}) } catch (_) {}
+        }, 5000)
+      }
+    } catch (_) {}
+
     global.BOT_START ||= Date.now()
     global.seenMessages ||= new Set()
 
