@@ -728,6 +728,13 @@ conn.ev.on('creds.update', saveCreds)
         const dKey = `grp-act:${ev.id}:${action}:${(ev.participants || []).join(',')}`
         if (grpDedupe(dKey)) return
 
+        // 🔔 رسائل الترحيب/الوداع لكل عضو على حدة (إعدادات لكل قروب)
+        if (action === 'add' || action === 'remove') {
+          for (const p of (ev.participants || [])) {
+            try { await global.fireGroupWelcome?.(conn, ev.id, p, action) } catch (_) {}
+          }
+        }
+
         const who = (ev.participants || []).map(p => '@' + String(p).split('@')[0]).join(' ')
         const by  = ev.author ? `@${String(ev.author).split('@')[0]}` : '—'
         const text =
@@ -793,11 +800,22 @@ ${fields.map(f => `│ ${f}`).join('\n')}
           if (u.imgUrl === undefined && u.imageUrl === undefined) continue
           const dKey = `grp-pic:${jid}:${u.imgUrl || u.imageUrl || 'changed'}`
           if (grpDedupe(dKey, 30_000)) continue
-          const text =
+
+          const caption =
 `╭───『 🖼️ *تم تغيير صورة المجموعة* 』
 │ 🕐 ${new Date().toLocaleString('ar-EG', { hour12: false })}
 ╰────────`
-          await sendToGroup(jid, text, [])
+
+          // حاول تحميل الصورة الجديدة وإرسالها كصورة فعلية
+          let imgUrl = null
+          try { imgUrl = await conn.profilePictureUrl(jid, 'image').catch(() => null) } catch (_) {}
+          if (imgUrl) {
+            try {
+              await conn.sendMessage(jid, { image: { url: imgUrl }, caption })
+              continue
+            } catch (_) { /* fallback to text */ }
+          }
+          await sendToGroup(jid, caption, [])
         }
       } catch (e) { console.error('[GRP-PIC]', e?.message) }
     })
