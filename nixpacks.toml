@@ -7,7 +7,7 @@ NIXPACKS_NODE_VERSION = "20"
 nixPkgs = ["...", "python3", "ffmpeg"]
 
 [phases.install]
-cmds = ["pnpm install --frozen-lockfile --prod=false","pip3 install yt-dlp"]
+cmds = ["pnpm install --frozen-lockfile --prod=false","python3 -m pip install yt-dlp"]
 
 [start]
 cmd = "node index.js"
