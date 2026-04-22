@@ -326,7 +326,7 @@ handler.help = [
   'عدد_الاعضاء', 'ارقام_الاعضاء', 'مغادرة_البوت'
 ]
 handler.tags = ['group']
-handler.command = /^(رابط|دعوة|invitelink|link|تجديد_الرابط|رابط_جديد|revoke|اعضاء|أعضاء|قائمة_الأعضاء|members|المشرفين|مشرفين|admins|احصائيات|إحصائيات|groupinfo|معلومات_القروب|طرد_الجميع|kickall|طرد_كل_الاعضاء|طرد_متعدد|kickmulti|ترقية_متعددة|promotemulti|خفض_متعدد|demotemulti|صورة_القروب|صوره_القروب|seticon|غير_صورة|حذف_صورة_القروب|removeicon|قفل_الإعدادات|قفل_اعدادات|locksettings|فتح_الإعدادات|فتح_اعدادات|unlocksettings|منشن_مشرفين|tagadmins|رسالة_خاصة|dm|message|رسالة_جماعية|broadcast|رسالة_ترحيب|setwelcome|رسالة_وداع|setgoodbye|تفعيل_ترحيب|تشغيل_ترحيب|إيقاف_ترحيب|تعطيل_ترحيب|تثبيت|pin|الغاء_تثبيت|unpin|عدد_الاعضاء|count|كم_عضو|ارقام_الاعضاء|exportnumbers|مغادرة_البوت|leavegc|botleave|طلبات_انضمام|joinapproval)$/i
+handler.command = /^(رابط|invitelink|link|تجديد_الرابط|رابط_جديد|revoke|اعضاء|أعضاء|قائمة_الأعضاء|members|المشرفين|مشرفين|admins|احصائيات|إحصائيات|groupinfo|معلومات_القروب|طرد_الجميع|kickall|طرد_كل_الاعضاء|طرد_متعدد|kickmulti|ترقية_متعددة|promotemulti|خفض_متعدد|demotemulti|صورة_القروب|صوره_القروب|seticon|غير_صورة|حذف_صورة_القروب|removeicon|قفل_الإعدادات|قفل_اعدادات|locksettings|فتح_الإعدادات|فتح_اعدادات|unlocksettings|منشن_مشرفين|tagadmins|رسالة_خاصة|dm|message|رسالة_جماعية|broadcast|رسالة_ترحيب|setwelcome|رسالة_وداع|setgoodbye|تفعيل_ترحيب|تشغيل_ترحيب|إيقاف_ترحيب|تعطيل_ترحيب|تثبيت|pin|الغاء_تثبيت|unpin|عدد_الاعضاء|count|كم_عضو|ارقام_الاعضاء|exportnumbers|مغادرة_البوت|botleave|طلبات_انضمام|joinapproval)$/i
 handler.group  = true
 handler.admin  = true
 handler.botAdmin = true

@@ -203,8 +203,8 @@ let handler = async (m, { conn, usedPrefix, command, text, args }) => {
   }
 }
 
-handler.help    = ['معلومات_رابط', 'تحميل_صوت', 'تحميل_فيديو', 'ocr', 'تحويل_صيغة', 'بحث_صورة']
+handler.help    = ['معلومات_رابط', 'تحميل_فيديو', 'ocr', 'تحويل_صيغة', 'بحث_صورة']
 handler.tags    = ['media']
-handler.command = /^(معلومات_رابط|معلومات-رابط|link_info|info_link|تحميل_صوت|استخراج_صوت|extract_audio|تحميل_فيديو|استخراج_فيديو|extract_video|extract_image|ocr|نص_صورة|استخراج_نص|copy_text|تحويل_صيغة|تحويل-صيغة|convert_format|بحث_صورة|search_image|صورة_بحث)$/i
+handler.command = /^(معلومات_رابط|معلومات-رابط|link_info|info_link|تحميل_فيديو|استخراج_فيديو|extract_video|extract_image|ocr|نص_صورة|استخراج_نص|copy_text|تحويل_صيغة|تحويل-صيغة|convert_format|بحث_صورة|search_image|صورة_بحث)$/i
 
 export default handler

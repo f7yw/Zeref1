@@ -377,6 +377,6 @@ handler.help = [
 ]
 handler.tags   = ['owner']
 handler.rowner = true
-handler.command = /^(لوحة_التحكم|لوحة_المطور|panel|لوحة|لوحه|عرض_مستخدم|userinfo|يوزر|تعديل_مال|setmoney|اضافة_مال|addmoney|اضافة_بنك|addbank|اضافة_ماس|adddiamond|تعديل_مستوى|setlevel|اعادة_ضبط|resetuser|حذف_مستخدم|deleteuser|مسح_المستخدمين|clearusers|قائمة_المستخدمين|allusers|حالة_السحاب|cloudstatus|سحاب|مزامنة_السحاب|synccloud|sync|قاعدة_البيانات|dbstats|احصاء|تعطيل_بوت|botoff|تفعيل_بوت|boton)$/i
+handler.command = /^(لوحة_التحكم|لوحة_المطور|panel|لوحة|لوحه|عرض_مستخدم|userinfo|يوزر|تعديل_مال|setmoney|اضافة_مال|addmoney|اضافة_بنك|addbank|اضافة_ماس|adddiamond|تعديل_مستوى|setlevel|اعادة_ضبط|resetuser|حذف_مستخدم|deleteuser|قائمة_المستخدمين|allusers|حالة_السحاب|cloudstatus|سحاب|مزامنة_السحاب|synccloud|sync|احصاء_البيانات|dbstats)$/i
 
 export default handler

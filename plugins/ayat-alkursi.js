@@ -12,7 +12,7 @@ let handler = async (m, { conn }) => {
 }
 handler.help = ['ayatkursi']
 handler.tags = ['quran']
-handler.command = /^(ايه|اية|آية|اية)$/i
+handler.command = /^(ايه|اية|آية|آيه)$/i
 
 
 export default handler

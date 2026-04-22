@@ -312,6 +312,6 @@ let handler = async (m, { conn, command }) => {
 
 handler.help    = ['بلاك — لعبة البلاك جاك ضد البوت']
 handler.tags    = ['game']
-handler.command = /^(بلاك|blackjack|اوراق|21|سحب|hit|سحب_ورقة|وقف|stand|وقوف|انسحاب|انسحب|quit_bj|قواعد_بلاك|rules_bj|قواعد_اوراق)$/i
+handler.command = /^(بلاك|blackjack|اوراق|21|سحب_ورقة|hit|hit_bj|وقف|stand|وقوف|انسحاب_بلاك|quit_bj|قواعد_بلاك|rules_bj|قواعد_اوراق)$/i
 
 export default handler

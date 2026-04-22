@@ -5,7 +5,7 @@ conn.reply(m.chat,`*♚  مرحبا بك في قسم لعبة صراحه ♚*\n 
 }
 handler.help = ['uwvssj']
 handler.tags = ['fun']
-handler.command = /صراحه|صراحه|الصراحه/i
+handler.command = /^(صراحه|صراحة|الصراحه|الصراحة)$/i
 export default handler
 
 function pickRandom(list) {
