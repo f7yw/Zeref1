@@ -2,17 +2,20 @@ import { isVip } from '../lib/economy.js'
 import fs from 'fs'
 import path from 'path'
 import schedule from 'node-schedule'
-import { DateTime, Duration } from 'luxon' // ✅ استيراد Duration من luxon
+import { DateTime } from 'luxon'
 
 const remindersFile = path.resolve('./reminders.json')
 if (!fs.existsSync(remindersFile)) fs.writeFileSync(remindersFile, '[]')
 
-// ⚠️ غيّر المنطقة الزمنية حسب موقعك
 const TIMEZONE = 'Asia/Riyadh'
+const SESSION_TIMEOUT = 5 * 60 * 1000 // 5 دقائق
+const REPEAT_OPTIONS  = ['مرة', 'يومي', 'اسبوعي', 'شهري']
 
-// 🔁 دالة لجدولة التذكير
+// ─────────────────────────────────────────────────────────────────────────────
+// جدولة وتحميل
+// ─────────────────────────────────────────────────────────────────────────────
 function scheduleReminder(reminder, conn) {
-  let [hour, minute] = reminder.time.split(':').map(Number)
+  const [hour, minute] = reminder.time.split(':').map(Number)
   let ruleOrDate
 
   if (reminder.repeat === 'مرة') {
@@ -21,77 +24,251 @@ function scheduleReminder(reminder, conn) {
     if (when <= now) when = when.plus({ days: 1 })
     ruleOrDate = when.toJSDate()
   } else {
-    let rule = new schedule.RecurrenceRule()
+    const rule = new schedule.RecurrenceRule()
     rule.hour = hour
     rule.minute = minute
     rule.tz = TIMEZONE
-
     if (reminder.repeat === 'اسبوعي') {
-      rule.dayOfWeek = DateTime.now().setZone(TIMEZONE).weekday % 7 // 0=Sunday
+      rule.dayOfWeek = DateTime.now().setZone(TIMEZONE).weekday % 7
     } else if (reminder.repeat === 'شهري') {
       rule.date = DateTime.now().setZone(TIMEZONE).day
     }
-
     ruleOrDate = rule
   }
 
   schedule.scheduleJob(reminder.id, ruleOrDate, async () => {
-    await conn.sendMessage(reminder.chat, {
-      text: `🔔 تذكير: ${reminder.message}\n👤 العضوية: ${vipStatus}`
-    })
+    try {
+      await conn.sendMessage(reminder.chat, {
+        text: `🔔 *تذكير*\n\n${reminder.message}`
+      })
+    } catch (e) { console.error('[REMINDER]', e?.message) }
   })
 }
 
-// 🔁 تحميل التذكيرات عند تشغيل البوت
 export function loadAndScheduleReminders(conn) {
-  let data = JSON.parse(fs.readFileSync(remindersFile))
-  for (let reminder of data) {
-    scheduleReminder(reminder, conn)
+  try {
+    const data = JSON.parse(fs.readFileSync(remindersFile))
+    for (const r of data) scheduleReminder(r, conn)
+  } catch (e) { console.error('[REMINDER-LOAD]', e?.message) }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// تطبيع الإدخال (أرقام عربية → إنجليزية)
+// ─────────────────────────────────────────────────────────────────────────────
+function normalize(text = '') {
+  const map = { '٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9','：':':' }
+  return String(text).trim().replace(/[٠-٩：]/g, ch => map[ch] || ch)
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// تخزين جلسات المعالج (مؤقت في الذاكرة)
+// ─────────────────────────────────────────────────────────────────────────────
+global.reminderSessions ??= {}
+
+function clearExpired() {
+  const now = Date.now()
+  for (const k of Object.keys(global.reminderSessions)) {
+    if (now - global.reminderSessions[k].ts > SESSION_TIMEOUT) {
+      delete global.reminderSessions[k]
+    }
   }
 }
 
-// ⚙️ أمر البوت
-let handler = async (m, { args, command, usedPrefix, conn }) => {
-  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
-  const getName = async (jid) => { try { return await conn.getName(jid) } catch { return jid.split('@')[0] } }
-  let example = `${usedPrefix + command} 18:30 اشرب دواء يومي`
-  if (args.length < 3)
-    return m.reply(`❗ الصيغة الصحيحة:\n${usedPrefix + command} [الوقت] [الرسالة] [التكرار]\nمثال:\n${example}\n👤 العضوية: ${vipStatus}`)
+// ─────────────────────────────────────────────────────────────────────────────
+// خطوات المعالج
+// ─────────────────────────────────────────────────────────────────────────────
+async function askTime(conn, m) {
+  const sent = await conn.sendMessage(m.chat, {
+    text:
+`╭────『 🔔 إنشاء تذكير 』────
+│
+│ *الخطوة 1 من 3: الوقت*
+│ ⏰ في أي وقت تريد التذكير؟
+│
+│ الصيغة: HH:MM (24 ساعة)
+│ مثال: 18:30 أو 07:15
+│
+╰──────────────────
+↩️ ردّ على هذه الرسالة بالوقت`
+  }, { quoted: m })
+  return sent?.key?.id || null
+}
 
-  let time = args[0]
-  let repeat = args[args.length - 1]
-  let message = args.slice(1, -1).join(' ')
+async function askMessage(conn, chat, quoted) {
+  const sent = await conn.sendMessage(chat, {
+    text:
+`╭────『 🔔 إنشاء تذكير 』────
+│
+│ *الخطوة 2 من 3: الرسالة*
+│ 💬 ماذا تريدني أن أذكّرك به؟
+│
+╰──────────────────
+↩️ ردّ بالرسالة`
+  }, { quoted })
+  return sent?.key?.id || null
+}
 
-  if (!/^\d{2}:\d{2}$/.test(time))
-    return m.reply('❌ صيغة الوقت غير صحيحة، استخدم مثلا 18:30')
+async function askRepeat(conn, chat, quoted) {
+  const sent = await conn.sendMessage(chat, {
+    text:
+`╭────『 🔔 إنشاء تذكير 』────
+│
+│ *الخطوة 3 من 3: التكرار*
+│ 🔁 كم مرة يتكرر التذكير؟
+│
+│   1. مرة واحدة فقط
+│   2. يومي
+│   3. اسبوعي
+│   4. شهري
+│
+╰──────────────────
+↩️ ردّ برقم الخيار أو بالكلمة`
+  }, { quoted })
+  return sent?.key?.id || null
+}
 
-  if (!['مرة', 'يومي', 'اسبوعي', 'شهري'].includes(repeat))
-    return m.reply('❌ نوع التكرار غير صحيح. اختر من: مرة، يومي، اسبوعي، شهري')
+function parseRepeat(raw) {
+  const n = normalize(raw).toLowerCase()
+  if (['1', 'مرة', 'مره', 'one', 'once'].includes(n)) return 'مرة'
+  if (['2', 'يومي', 'يوم', 'daily'].includes(n)) return 'يومي'
+  if (['3', 'اسبوعي', 'أسبوعي', 'weekly'].includes(n)) return 'اسبوعي'
+  if (['4', 'شهري', 'monthly'].includes(n)) return 'شهري'
+  return null
+}
 
-  // 🧮 حساب الوقت المتبقي
-  let [hour, minute] = time.split(':').map(Number)
-  let now = DateTime.now().setZone(TIMEZONE)
+function diffString(time) {
+  const [hour, minute] = time.split(':').map(Number)
+  const now = DateTime.now().setZone(TIMEZONE)
   let target = now.set({ hour, minute, second: 0, millisecond: 0 })
   if (target <= now) target = target.plus({ days: 1 })
-  let diff = target.diff(now, ['hours', 'minutes', 'seconds']).toObject()
+  const diff = target.diff(now, ['hours', 'minutes']).toObject()
+  return `${Math.floor(diff.hours)}س ${Math.floor(diff.minutes)}د`
+}
 
-  let remainingTime = `${String(Math.floor(diff.hours)).padStart(2, '0')}:${String(Math.floor(diff.minutes)).padStart(2, '0')}:${String(Math.floor(diff.seconds)).padStart(2, '0')}`
-
-  let reminder = {
+async function saveAndConfirm(conn, m, session) {
+  const reminder = {
     id: `${m.chat}-${Date.now()}`,
     chat: m.chat,
-    time,
-    repeat,
-    message,
-    createdAt: Date.now()
+    time: session.time,
+    repeat: session.repeat,
+    message: session.message,
+    createdAt: Date.now(),
   }
-
-  let data = JSON.parse(fs.readFileSync(remindersFile))
+  const data = JSON.parse(fs.readFileSync(remindersFile))
   data.push(reminder)
   fs.writeFileSync(remindersFile, JSON.stringify(data, null, 2))
   scheduleReminder(reminder, conn)
 
-  await m.reply(`✅ تم ضبط التذكير بنجاح\n🕒 الوقت: ${time}\n🔁 التكرار: ${repeat}\n💬 الرسالة: ${message}\n⏳ الوقت المتبقي: ${remainingTime}\n👤 العضوية: ${vipStatus}`)
+  const vipStatus = global.tierBadge ? global.tierBadge(m.sender) : (isVip(m.sender) ? '💎 مميز' : '👤 عادي')
+  await conn.sendMessage(m.chat, {
+    text:
+`╭────『 ✅ تم ضبط التذكير 』────
+│
+│ 🕒 الوقت:        ${session.time}
+│ 🔁 التكرار:      ${session.repeat}
+│ ⏳ المتبقي:      ${diffString(session.time)}
+│ 💬 الرسالة:      ${session.message}
+│
+│ 👤 ${vipStatus}
+│
+╰──────────────────`
+  }, { quoted: m })
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// الأمر الرئيسي → يبدأ المعالج
+// ─────────────────────────────────────────────────────────────────────────────
+const handler = async (m, { conn }) => {
+  clearExpired()
+  const msgId = await askTime(conn, m)
+  global.reminderSessions[m.sender] = {
+    step: 'time',
+    msgId,
+    chat: m.chat,
+    ts: Date.now(),
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// متابعة المعالج عبر Reply
+// ─────────────────────────────────────────────────────────────────────────────
+handler.all = async function (m) {
+  clearExpired()
+  const session = global.reminderSessions[m.sender]
+  if (!session) return
+
+  // يجب أن يكون الردّ على آخر رسالة من البوت
+  const quotedId = m.quoted?.id || m.message?.extendedTextMessage?.contextInfo?.stanzaId
+  if (!quotedId || quotedId !== session.msgId) return
+
+  const raw = (m.text || '').trim()
+  if (!raw) return
+
+  // إلغاء صريح
+  if (/^(الغاء|إلغاء|cancel|توقف)$/i.test(raw)) {
+    delete global.reminderSessions[m.sender]
+    return this.sendMessage(m.chat, { text: '❌ تم إلغاء إنشاء التذكير.' }, { quoted: m })
+  }
+
+  // ── الخطوة 1: الوقت ────────────────────────────────────────
+  if (session.step === 'time') {
+    const t = normalize(raw)
+    if (!/^\d{1,2}:\d{2}$/.test(t)) {
+      const sent = await this.sendMessage(m.chat, {
+        text: '❌ صيغة الوقت غير صحيحة.\nاستخدم: HH:MM (مثل 18:30)\n\n↩️ جرّب الردّ مرة أخرى'
+      }, { quoted: m })
+      session.msgId = sent?.key?.id || session.msgId
+      session.ts = Date.now()
+      return
+    }
+    let [h, mi] = t.split(':').map(Number)
+    if (h > 23 || mi > 59) {
+      const sent = await this.sendMessage(m.chat, {
+        text: '❌ الوقت خارج النطاق.\nالساعة 0-23، الدقيقة 0-59.\n\n↩️ جرّب مرة أخرى'
+      }, { quoted: m })
+      session.msgId = sent?.key?.id || session.msgId
+      session.ts = Date.now()
+      return
+    }
+    session.time = `${String(h).padStart(2,'0')}:${String(mi).padStart(2,'0')}`
+    session.step = 'message'
+    session.ts = Date.now()
+    session.msgId = await askMessage(this, m.chat, m)
+    return
+  }
+
+  // ── الخطوة 2: الرسالة ────────────────────────────────────
+  if (session.step === 'message') {
+    if (raw.length < 2 || raw.length > 300) {
+      const sent = await this.sendMessage(m.chat, {
+        text: '❌ الرسالة قصيرة جداً أو طويلة جداً (2-300 حرف).\n\n↩️ ردّ مرة أخرى'
+      }, { quoted: m })
+      session.msgId = sent?.key?.id || session.msgId
+      session.ts = Date.now()
+      return
+    }
+    session.message = raw
+    session.step = 'repeat'
+    session.ts = Date.now()
+    session.msgId = await askRepeat(this, m.chat, m)
+    return
+  }
+
+  // ── الخطوة 3: التكرار ────────────────────────────────────
+  if (session.step === 'repeat') {
+    const r = parseRepeat(raw)
+    if (!r) {
+      const sent = await this.sendMessage(m.chat, {
+        text: '❌ خيار غير معروف.\nاختر رقماً (1-4) أو كلمة: مرة / يومي / اسبوعي / شهري\n\n↩️ ردّ مرة أخرى'
+      }, { quoted: m })
+      session.msgId = sent?.key?.id || session.msgId
+      session.ts = Date.now()
+      return
+    }
+    session.repeat = r
+    await saveAndConfirm(this, m, session)
+    delete global.reminderSessions[m.sender]
+  }
 }
 
 handler.command = /^ذكرني$/i
