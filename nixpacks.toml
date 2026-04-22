@@ -8,9 +8,7 @@ nixPkgs = ["...", "python3", "ffmpeg", "yt-dlp"]
 
 [phases.install]
 cmds = [
-  "corepack enable",
-  "corepack prepare pnpm@9 --activate",
-  "pnpm install --no-frozen-lockfile"
+  "pnpm install --frozen-lockfile"
 ]
 
 [start]
