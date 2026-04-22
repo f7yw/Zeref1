@@ -651,8 +651,17 @@ async function connectionUpdate(update) {
 conn.ev.on('connection.update', connectionUpdate)
 conn.ev.on('creds.update', saveCreds)
 
-// ====== GROUP EVENTS → OWNER NOTIFICATIONS ======
+// ====== GROUP EVENTS → IN-GROUP NOTIFICATIONS ======
+// نتجاهل أحداث القروبات خلال أول 25 ثانية من الاتصال لأن baileys
+// يبثّ groups.update لكل القروبات أثناء المزامنة الأوّلية (ضوضاء).
 ;(async () => {
+  const STARTUP_QUIET_MS = 25_000
+  let _connectedAt = 0
+  conn.ev.on('connection.update', (u) => {
+    if (u?.connection === 'open') _connectedAt = Date.now()
+  })
+  const isInStartupWindow = () => !_connectedAt || (Date.now() - _connectedAt < STARTUP_QUIET_MS)
+
   try {
     const { notifyGroupEvent, notifyOwners, header } = await import('./lib/notify.js')
 
@@ -674,66 +683,129 @@ conn.ev.on('creds.update', saveCreds)
       } catch { return id }
     }
 
-    // 1) أحداث المشاركين (انضمام/مغادرة/ترقية/خفض) — للجميع لا للبوت فقط
+    // أداة dedupe خفيفة لمنع تكرار رسائل المجموعة
+    const _grpRecent = new Map()
+    const grpDedupe = (key, windowMs = 15_000) => {
+      const now = Date.now()
+      const last = _grpRecent.get(key) || 0
+      if (now - last < windowMs) return true
+      _grpRecent.set(key, now)
+      if (_grpRecent.size > 500) {
+        for (const [k, t] of _grpRecent) if (now - t > 5 * 60_000) _grpRecent.delete(k)
+      }
+      return false
+    }
+    const sendToGroup = async (jid, text, mentions = []) => {
+      try {
+        await conn.sendMessage(jid, { text, mentions: Array.from(new Set(mentions.filter(Boolean))) }).catch(() => {})
+      } catch (_) {}
+    }
+
+    // 1) أحداث المشاركين (انضمام/مغادرة/ترقية/خفض) — تُرسل للقروب نفسه مع منشن
     conn.ev.on('group-participants.update', async (ev) => {
       try {
+        if (isInStartupWindow()) return  // تجاهل ضوضاء المزامنة الأولى
         const me = botJids()
         const involvesBot = (ev.participants || []).some(p => me.has(conn.decodeJid?.(p) || p))
         const action = ev.action
-        const labels = { add: 'انضم', remove: 'غادر/طُرد', promote: 'تمت ترقيته', demote: 'تم خفضه' }
-        const label = labels[action]
-        if (!label) return
+        const labels = {
+          add:     { emoji: '➕', verb: 'انضم'        },
+          remove:  { emoji: '👋', verb: 'غادر/طُرد'  },
+          promote: { emoji: '⬆️', verb: 'تمت ترقيته' },
+          demote:  { emoji: '⬇️', verb: 'تم خفضه'    }
+        }
+        const meta = labels[action]
+        if (!meta) return
 
-        // إن كان البوت طرفاً → استخدم الإشعار الخاص (بقالب الحالة)
+        // إذا تأثّر البوت نفسه → أعلم المطور أيضاً (وليس القروب)
         if (involvesBot) {
           const map = { add: 'joined', remove: 'left', promote: 'promoted', demote: 'demoted' }
           await notifyGroupEvent(conn, ev.id, map[action], { byJid: ev.author })
+          // لا نرسل للقروب لتجنّب الضوضاء عند الانضمام/الإخراج
           return
         }
 
-        // وإلا → إشعار عام عن نشاط القروب
-        const gname = await groupName(ev.id)
-        const who = (ev.participants || []).map(p => '@' + String(p).split('@')[0]).join(' ')
-        const by  = ev.author ? `\n👤 *بواسطة:* @${String(ev.author).split('@')[0]}` : ''
-        const text =
-`${header('👥', `نشاط في القروب — ${label}`, conn)}
+        const dKey = `grp-act:${ev.id}:${action}:${(ev.participants || []).join(',')}`
+        if (grpDedupe(dKey)) return
 
-📛 *المجموعة:* ${gname}
-🆔 \`${ev.id}\`
-🧑‍🤝‍🧑 *المعنيون:* ${who}${by}`
-        await notifyOwners(text, { dedupeKey: `grp-act:${ev.id}:${action}:${(ev.participants || []).join(',')}` })
+        const who = (ev.participants || []).map(p => '@' + String(p).split('@')[0]).join(' ')
+        const by  = ev.author ? `@${String(ev.author).split('@')[0]}` : '—'
+        const text =
+`╭───『 ${meta.emoji} *${meta.verb}* 』
+│
+│ 🧑‍🤝‍🧑 *المعنيّون:* ${who}
+│ 👤 *بواسطة:* ${by}
+│ 🕐 ${new Date().toLocaleString('ar-EG', { hour12: false })}
+╰────────`
+
+        const mentions = [
+          ...(ev.participants || []).map(p => String(p)),
+          ev.author ? String(ev.author) : null
+        ]
+        await sendToGroup(ev.id, text, mentions)
       } catch (e) { console.error('[GRP-EV]', e?.message) }
     })
 
-    // 2) تحديثات بيانات القروب (الاسم/الوصف/الصورة/إعدادات الخصوصية...)
+    // 2) تحديثات بيانات القروب (الاسم/الوصف/الصورة/إعدادات الخصوصية...) — تُرسل للقروب
     conn.ev.on('groups.update', async (updates) => {
       try {
+        if (isInStartupWindow()) return  // تجاهل ضوضاء المزامنة الأولى
         for (const u of (updates || [])) {
           const id = u.id
           if (!id) continue
-          const gname = await groupName(id)
           const fields = []
-          if (u.subject)      fields.push(`📝 *الاسم الجديد:* ${u.subject}`)
-          if (u.desc)         fields.push(`📜 *الوصف:* ${String(u.desc).slice(0, 200)}`)
-          if (u.announce !== undefined) fields.push(`📢 *قفل الإرسال:* ${u.announce ? 'مفعّل (مشرفون فقط)' : 'متوقف'}`)
-          if (u.restrict !== undefined) fields.push(`🛡️ *قفل التعديل:* ${u.restrict ? 'مفعّل (مشرفون فقط)' : 'متوقف'}`)
-          if (u.revoke)       fields.push(`🔗 *تجديد الرابط*`)
+          if (u.subject !== undefined) fields.push(`📝 *الاسم الجديد:* ${u.subject || '—'}`)
+          if (u.desc !== undefined)    fields.push(`📜 *الوصف الجديد:* ${(String(u.desc || '—')).slice(0, 300)}`)
+          if (u.announce !== undefined) fields.push(`📢 *قفل الإرسال:* ${u.announce ? 'مفعّل (المشرفون فقط)' : 'متوقّف (الكل يرسل)'}`)
+          if (u.restrict !== undefined) fields.push(`🛡️ *قفل تعديل المعلومات:* ${u.restrict ? 'مفعّل (المشرفون فقط)' : 'متوقّف'}`)
+          if (u.revoke)                 fields.push(`🔗 *تم تجديد رابط الدعوة* (الرابط القديم لم يعد فعّالاً)`)
+          if (u.pictureChange || u.pictureUpdated || u.picture)
+                                        fields.push(`🖼️ *تم تغيير صورة المجموعة*`)
           if (!fields.length) continue
+
+          const dKey = `grp-up:${id}:${Object.keys(u).filter(k => k !== 'id').sort().join(',')}`
+          if (grpDedupe(dKey)) continue
+
+          const author = u.subjectOwner || u.descOwner || u.author || null
+          const by = author ? `@${String(author).split('@')[0]}` : '—'
           const text =
-`${header('🔧', 'تغيير في إعدادات القروب', conn)}
-
-📛 *المجموعة:* ${gname}
-🆔 \`${id}\`
-
-${fields.join('\n')}`
-          await notifyOwners(text, { dedupeKey: `grp-up:${id}:${Object.keys(u).join(',')}` })
+`╭───『 🔧 *تحديث إعدادات القروب* 』
+│
+│ 👤 *بواسطة:* ${by}
+│
+${fields.map(f => `│ ${f}`).join('\n')}
+│
+│ 🕐 ${new Date().toLocaleString('ar-EG', { hour12: false })}
+╰────────`
+          const mentions = [author].filter(Boolean).map(String)
+          await sendToGroup(id, text, mentions)
         }
       } catch (e) { console.error('[GRP-UP]', e?.message) }
+    })
+
+    // 2.b) تغيّر صورة المجموعة (يأتي من contacts.update عبر الـ chat metadata)
+    conn.ev.on('contacts.update', async (updates) => {
+      try {
+        if (isInStartupWindow()) return  // تجاهل ضوضاء المزامنة الأولى
+        for (const u of (updates || [])) {
+          const jid = u.id
+          if (!jid || !jid.endsWith('@g.us')) continue
+          if (u.imgUrl === undefined && u.imageUrl === undefined) continue
+          const dKey = `grp-pic:${jid}:${u.imgUrl || u.imageUrl || 'changed'}`
+          if (grpDedupe(dKey, 30_000)) continue
+          const text =
+`╭───『 🖼️ *تم تغيير صورة المجموعة* 』
+│ 🕐 ${new Date().toLocaleString('ar-EG', { hour12: false })}
+╰────────`
+          await sendToGroup(jid, text, [])
+        }
+      } catch (e) { console.error('[GRP-PIC]', e?.message) }
     })
 
     // 3) قروب جديد أُضيف إليه البوت
     conn.ev.on('groups.upsert', async (groups) => {
       try {
+        if (isInStartupWindow()) return  // تجاهل ضوضاء المزامنة الأولى
         for (const g of (groups || [])) {
           await notifyGroupEvent(conn, g.id, 'joined', { note: 'مجموعة جديدة أُضيف إليها البوت' })
         }

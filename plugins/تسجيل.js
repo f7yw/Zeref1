@@ -73,5 +73,6 @@ let handler = async (m, { conn, usedPrefix }) => {
 
 handler.help = ['تسجيل', 'register']
 handler.tags = ['main']
-handler.command = /^(تسجيل|تسجل|register|سجل|انضم)$/i
+// أزيل (انضم) لأنه يتعارض مع plugins/owner-join.js (إضافة البوت لقروب عبر رابط)
+handler.command = /^(تسجيل|تسجل|register|سجل|انضمام|اشتراك)$/i
 export default handler

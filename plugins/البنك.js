@@ -138,5 +138,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
 handler.help   = ['بنك', 'ايداع', 'سحب', 'تحويل']
 handler.tags   = ['economy']
-handler.command = /^(البنك|بنك|بنكي|رصيدي|حسابي|ايداع|سحب|تحويل|حول|deposit|withdraw|transfer)$/i
+// أزيل (حسابي) لأنها تخص plugins/profile.js (الملف الشخصي). هنا الرصيد فقط.
+handler.command = /^(البنك|بنك|بنكي|رصيدي|ايداع|إيداع|سحب|تحويل|حول|deposit|withdraw|transfer)$/i
 export default handler

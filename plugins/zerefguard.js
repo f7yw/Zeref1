@@ -76,7 +76,8 @@ const handler = async (m, { command, args }) => {
 
 handler.help = ['guard', 'guard_seal', 'guard_check', 'guard_unseal']
 handler.tags = ['owner']
-handler.command = /^(guard|guard[_\s]?seal|guard[_\s]?check|guard[_\s]?unseal|حماية|ختم[_\s]?الحماية|فحص[_\s]?الحماية|الغاء[_\s]?الحماية)$/i
+// أزيل (حماية) لتجنّب التعارض مع plugins/security.js (حماية الروابط/الإعلانات). هنا حماية الملفات.
+handler.command = /^(guard|guard[_\s]?seal|guard[_\s]?check|guard[_\s]?unseal|حماية[_\s]?الملفات|ختم[_\s]?الحماية|فحص[_\s]?الحماية|الغاء[_\s]?الحماية)$/i
 handler.rowner = true
 
 export default handler

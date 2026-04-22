@@ -982,6 +982,9 @@ handler.all = async function (m) {
 // ════════════════════════════════════════════════════════════════════
 handler.help    = ['مافيا - لعبة المافيا الاجتماعية الكاملة']
 handler.tags    = ['game']
-handler.command = /^(مافيا|mafia|انضم|انضمام|join|بدء_مافيا|start_mafia|وقف_مافيا|stop_mafia|إيقاف_مافيا|الغاء_مافيا|لاعبين|لاعبون|players|قواعد_مافيا|rules_mafia)$/i
+// ملاحظة: تمت إزالة (انضم|join|انضمام) لأنها تتعارض مع أمر إضافة البوت لقروب
+// عبر رابط دعوة (plugins/owner-join.js). للانضمام للعبة المافيا استخدم:
+//   .انضم_مافيا   .join_mafia
+handler.command = /^(مافيا|mafia|انضم_مافيا|انضم[_\s]?لعبه|join_mafia|join[_\s]?mafia|بدء_مافيا|start_mafia|وقف_مافيا|stop_mafia|إيقاف_مافيا|الغاء_مافيا|لاعبين|لاعبون|players|قواعد_مافيا|rules_mafia)$/i
 
 export default handler

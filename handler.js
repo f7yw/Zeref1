@@ -89,6 +89,58 @@ try {
     if (typeof m.text !== 'string')
         m.text = ''
 
+    // ── Parse interactive responses (buttons / list rows / template buttons / native flow) ──
+    // Converts a tap on a button into a normal command so the existing
+    // prefix-based router can dispatch it without per-plugin changes.
+    try {
+        const raw = m?.message || {}
+        let selectedId = null
+        let selectedText = null
+        let kind = null
+
+        const btn = raw.buttonsResponseMessage
+        const lst = raw.listResponseMessage
+        const tpl = raw.templateButtonReplyMessage
+        const itr = raw.interactiveResponseMessage
+
+        if (btn?.selectedButtonId) {
+            selectedId = btn.selectedButtonId
+            selectedText = btn.selectedDisplayText || ''
+            kind = 'button'
+        } else if (lst?.singleSelectReply?.selectedRowId) {
+            selectedId = lst.singleSelectReply.selectedRowId
+            selectedText = lst.title || ''
+            kind = 'list'
+        } else if (tpl?.selectedId) {
+            selectedId = tpl.selectedId
+            selectedText = tpl.selectedDisplayText || ''
+            kind = 'template'
+        } else if (itr?.nativeFlowResponseMessage?.paramsJson) {
+            try {
+                const p = JSON.parse(itr.nativeFlowResponseMessage.paramsJson)
+                selectedId = p.id || p.selectedId || p.button_id || p.row_id || null
+                selectedText = p.title || p.displayText || ''
+                kind = 'interactive'
+            } catch (_) {}
+        }
+
+        if (selectedId) {
+            let id = String(selectedId).trim()
+            // Strip leading "id:" prefix some clients add
+            id = id.replace(/^id[:=]/i, '')
+            // Ensure prefix
+            const prefixRe = global.prefix instanceof RegExp ? global.prefix : /^[./#!]/
+            if (!prefixRe.test(id)) id = '.' + id
+            m.text = id
+            if (m.message?.conversation !== undefined) m.message.conversation = id
+            if (m.message?.extendedTextMessage?.text !== undefined) m.message.extendedTextMessage.text = id
+            m.selectedId = selectedId
+            m.selectedDisplayText = selectedText
+            m.isInteractive = true
+            m.interactiveType = kind
+        }
+    } catch (e) { /* never break message handling on parse errors */ }
+
     const msgId = `${m?.key?.remoteJid || ''}:${m?.key?.id || ''}:${m?.key?.participant || ''}`
     if (global.seenMessages.has(msgId)) return
     global.seenMessages.add(msgId)

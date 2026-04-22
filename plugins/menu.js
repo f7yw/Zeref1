@@ -92,6 +92,9 @@ const sections = {
       'وصله            ← سلسلة الكلمات',
       'لو              ← لو جامعي/مهني/تقني/فلسفي',
       'رهان / slot      ← ماكينة الحظ',
+      'مافيا           ← لعبة المافيا الاجتماعية',
+      'انضم_مافيا      ← انضمام للعبة مافيا قائمة',
+      'تحدي_حجره       ← حجرة ورقة مقص بين لاعبَين',
       '',
       '─── ألعاب ذكاء جامعية ───',
       'منطق            ← لغز منطقي للمفكرين',
@@ -187,6 +190,9 @@ const sections = {
       '',
       '─── الصراحة ───',
       'صراحه           ← نشر صراحة مجهولة',
+      '',
+      '─── أزرار تفاعلية ───',
+      'ازرار           ← قالب أزرار سريع تجريبي',
     ]
   },
 
@@ -288,9 +294,10 @@ const sections = {
       'إيقاف_ترحيب    ← إيقاف الترحيب',
       '',
       '─── الحماية ───',
-      'الحماية [تشغيل/ايقاف] ← حماية المجموعة',
+      'الحماية [تشغيل/ايقاف] ← مكافحة الروابط/الإعلانات',
       'تحذير @        ← تحذير عضو',
       'تنظيف          ← حذف رسائل البوت',
+      'احذف (بالرد)   ← حذف رسالة محدّدة',
       '',
       'مغادرة_البوت   ← يغادر البوت القروب',
     ]
@@ -482,7 +489,7 @@ function buildHeader(m, user, level, role, max, uptime, vipStatus) {
  *  - isOwner / isAdmin (صلاحيات المستخدم)
  *  - isSubBot (يفلتر بالـ featureTag)
  */
-function getAllowedSections(conn, { isOwner = false, isAdmin = false, menuKind = 'main' } = {}) {
+function getAllowedSections(conn, { isOwner = false, isAdmin = false, isGroup = false, menuKind = 'main' } = {}) {
   const isSubBot = !!conn?.__subBotPhone
   let pool = Object.values(sections)
 
@@ -494,10 +501,29 @@ function getAllowedSections(conn, { isOwner = false, isAdmin = false, menuKind =
     pool = pool.filter(s => allowSet.has(String(s.featureTag || '').toLowerCase()))
   }
 
-  // فلترة بنوع القائمة
-  pool = pool.filter(s => String(s.menu || 'main') === menuKind)
+  // فلترة بنوع القائمة:
+  //   • main  → نعرض كل الأقسام التي يستحقها المستخدم (audience)
+  //             أقسام القروب تظهر فقط داخل قروب
+  //             أقسام المطور تظهر فقط للمطور
+  //   • group → فقط أقسام menu='group'
+  //   • dev   → فقط أقسام menu='dev'
+  if (menuKind === 'group') {
+    pool = pool.filter(s => String(s.menu || 'main') === 'group')
+  } else if (menuKind === 'dev') {
+    pool = pool.filter(s => String(s.menu || 'main') === 'dev')
+  } else {
+    // main: لا نقيّد بـ s.menu — نعتمد على audience + isGroup
+    pool = pool.filter(s => {
+      const aud = String(s.audience || 'all').toLowerCase()
+      const m = String(s.menu || 'main')
+      if (m === 'group' && !isGroup) return false  // لا نظهر أقسام القروب في الخاص
+      if (aud === 'owner') return isOwner
+      if (aud === 'admin') return isOwner || isAdmin
+      return true
+    })
+  }
 
-  // فلترة بالصلاحية (audience)
+  // فلترة بالصلاحية للأقسام المتبقية (تطبق أيضاً على group/dev)
   pool = pool.filter(s => {
     const aud = String(s.audience || 'all').toLowerCase()
     if (aud === 'owner') return isOwner
@@ -593,6 +619,7 @@ let handler = async (m, { conn, command, usedPrefix, isOwner, isAdmin, isROwner 
   const sectionsToShow = getAllowedSections(conn, {
     isOwner: ownerFlag,
     isAdmin: adminFlag,
+    isGroup: !!m.isGroup,
     menuKind
   })
 
@@ -627,6 +654,7 @@ let handler = async (m, { conn, command, usedPrefix, isOwner, isAdmin, isROwner 
     subPhone,
     isOwner: ownerFlag,
     isAdmin: adminFlag,
+    isGroup: !!m.isGroup,
     menuKind,
   }
 }
@@ -645,6 +673,7 @@ handler.all = async function (m) {
   const sectionsToShow = getAllowedSections(this, {
     isOwner: !!session.isOwner,
     isAdmin: !!session.isAdmin,
+    isGroup: !!session.isGroup,
     menuKind: session.menuKind || 'main'
   })
   if (!sectionsToShow[choice]) return

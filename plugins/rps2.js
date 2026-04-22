@@ -239,6 +239,7 @@ handler.all = async function (m) {
 
 handler.help    = ['تحدي — حجر ورقة مقص بين لاعبين']
 handler.tags    = ['game']
-handler.command = /^(تحدي|تحدٍ|rps2|حجرورقة|الغاء_تحدي|cancel_rps)$/i
+// أزيل (تحدي) لأنه يتعارض مع plugins/تحدي.js (تحدي الرياضيات). هذا تحدي حجرة-ورقة-مقص.
+handler.command = /^(تحدي_حجره|تحدي_rps|rps2|حجرورقة|الغاء_تحدي|cancel_rps)$/i
 
 export default handler
