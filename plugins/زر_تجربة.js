@@ -1,66 +1,54 @@
 /**
- * .ازرار  / .buttons  / .قائمه_ازرار
+ * .ازرار / .buttons / .قائمه_ازرار
  * ─────────────────────────────────────────────────────────────────────────────
- * يرسل لوحة أزرار تفاعلية عبر InteractiveMessage الحديث (NativeFlow / quick_reply).
- * عند الضغط على أي زر، يأتي الرد كـ interactiveResponseMessage فيه paramsJson
- * يحوي { id: '.أمر' } — يتم تحويله تلقائياً إلى أمر فعلي عبر parser
- * الردود التفاعلية في handler.js → ينفذ الأمر في المسار العادي.
+ * يرسل قائمة منسدلة عبر listMessage (مدعومة على معظم نسخ واتساب الرسمي
+ * وWhatsApp Business). كل عنصر يحمل rowId يبدأ بنقطة (مثل ".البنك") —
+ * عند اختياره يتحوّل عبر parser الردود التفاعلية في handler.js إلى أمر
+ * فعلي يدخل المسار العادي للأوامر.
  *
- * ملاحظة: واتساب الحديث لم يعد يدعم templateButtons/buttons القديم،
- * لذا نستخدم interactiveMessage الذي تدعمه نسخ واتساب الحالية.
+ * إن لم يدعم العميل listMessage يقوم البوت بالعودة إلى رسالة نصية بديلة.
  */
 
 let handler = async (m, { conn }) => {
-  const _bly = await import('@whiskeysockets/baileys')
-  const proto = _bly.proto || _bly.default?.proto
-  const generateWAMessageFromContent = _bly.generateWAMessageFromContent || _bly.default?.generateWAMessageFromContent
-  if (!proto?.Message?.InteractiveMessage || !generateWAMessageFromContent) {
-    return m.reply('⚠️ نسخة baileys الحالية لا تدعم الأزرار التفاعلية على هذا البوت.')
-  }
-
-  const text = `╭───『 🎛️ *لوحة الأزرار التفاعلية* 』
+  const text =
+`╭───『 🎛️ *لوحة الأزرار* 』
 │
-│ اضغط أي زر بالأسفل لتنفيذ الأمر فوراً.
-│ يتم تمرير المعرّف عبر parser الردود
-│ التفاعلية إلى مسار الأوامر الاعتيادي.
+│ اختر من القائمة بالأسفل لتنفيذ
+│ الأمر فوراً عبر parser التفاعل.
 │
 ╰────────`
 
-  const make = (display, id) => ({
-    name: 'quick_reply',
-    buttonParamsJson: JSON.stringify({ display_text: display, id })
-  })
+  const sections = [{
+    title: 'الأوامر السريعة',
+    rows: [
+      { title: '💰 رصيدي',     description: 'عرض رصيدك في البنك',    rowId: '.البنك' },
+      { title: '📖 آية قرآنية', description: 'اقتباس قرآني عشوائي',    rowId: '.قران'  },
+      { title: '📋 القائمة',    description: 'فتح قائمة الأوامر الكاملة', rowId: '.اوامر' },
+    ]
+  }]
 
-  const interactiveMsg = {
-    body:   { text },
-    footer: { text: 'ZEREF • أزرار تفاعلية' },
-    header: { title: '🎛️ ZEREF', hasMediaAttachment: false },
-    nativeFlowMessage: {
-      buttons: [
-        make('💰 رصيدي',     '.البنك'),
-        make('📖 آية قرآنية', '.قران'),
-        make('📋 القائمة',    '.اوامر'),
-      ]
-    }
+  const listMessage = {
+    text,
+    footer:    'ZEREF • قائمة تفاعلية',
+    title:     '🎛️ ZEREF',
+    buttonText: 'اضغط هنا للاختيار',
+    sections
   }
 
-  const wrapped = generateWAMessageFromContent(
-    m.chat,
-    {
-      viewOnceMessage: {
-        message: {
-          messageContextInfo: {
-            deviceListMetadata: {},
-            deviceListMetadataVersion: 2
-          },
-          interactiveMessage: proto.Message.InteractiveMessage.create(interactiveMsg)
-        }
-      }
-    },
-    { userJid: conn.user.id, quoted: m }
-  )
+  try {
+    await conn.sendMessage(m.chat, listMessage, { quoted: m })
+  } catch (e) {
+    // Fallback نصّي
+    await conn.sendMessage(m.chat, {
+      text:
+`${text}
 
-  await conn.relayMessage(m.chat, wrapped.message, { messageId: wrapped.key.id })
+🔢 *اختر بإرسال أحد الأوامر:*
+• .البنك   — رصيدك
+• .قران    — آية قرآن
+• .اوامر   — القائمة الكاملة`
+    }, { quoted: m })
+  }
 }
 
 handler.help    = ['ازرار', 'buttons']

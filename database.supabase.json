@@ -327,7 +327,7 @@
       "lastmonthly": 0,
       "lastnambang": 0,
       "makanannaga": 0,
-      "premiumTime": 3353628128630,
+      "premiumTime": 3353628339518,
       "seedbrokoli": 0,
       "seedkentang": 0,
       "totalEarned": 0,
@@ -408,7 +408,7 @@
       "kerjaempatbelas": 0,
       "kerjatujuhbelas": 0,
       "kucinglastclaim": 0,
-      "lastEnergyRegen": 1776828128630,
+      "lastEnergyRegen": 1776828339518,
       "lastmancingeasy": 0,
       "lastmancinghard": 0,
       "lastpotionclaim": 0,
@@ -808,7 +808,7 @@
       "lastnambang": 0,
       "makanannaga": 0,
       "premiumDate": -1,
-      "premiumTime": 3353628128884,
+      "premiumTime": 3353628362103,
       "seedbrokoli": 0,
       "seedkentang": 0,
       "totalEarned": 0,
@@ -1066,7 +1066,7 @@
       "kerjatujuhbelas": 0,
       "kucinglastclaim": 0,
       "lastCommandTime": 1776761763373,
-      "lastEnergyRegen": 1776828128630,
+      "lastEnergyRegen": 1776828339518,
       "lastmancingeasy": 0,
       "lastmancinghard": 0,
       "lastpotionclaim": 0,
@@ -1144,7 +1144,7 @@
       "premium": true,
       "regTime": 1776796237964,
       "registered": true,
-      "premiumTime": 3353628128884,
+      "premiumTime": 3353628362103,
       "infiniteResources": true
     },
     "158884446605486@s.whatsapp.net": {
@@ -1242,7 +1242,7 @@
       "premium": true,
       "regTime": 1776795449504,
       "registered": true,
-      "premiumTime": 3353628128884,
+      "premiumTime": 3353628362103,
       "infiniteResources": true
     },
     "28648019066900@lid": {
@@ -1337,7 +1337,7 @@
       "emas": 0,
       "emerald": 0,
       "esteh": 0,
-      "exp": 32,
+      "exp": 27,
       "expg": 0,
       "exphero": 0,
       "expired": 0,
@@ -1558,7 +1558,7 @@
       "pointxp": 0,
       "potion": 10,
       "premium": true,
-      "premiumTime": 3353628128884,
+      "premiumTime": 3353628362103,
       "ramuan": 0,
       "ramuancentaurlast": 0,
       "ramuangriffinlast": 0,
@@ -1572,7 +1572,7 @@
       "ramuanserigalalast": 0,
       "registered": true,
       "reglast": 0,
-      "regTime": 1776828128884,
+      "regTime": 1776828362103,
       "rendang": 0,
       "rhinoceros": 0,
       "rhinocerosexp": 0,
@@ -1624,7 +1624,7 @@
       "sworddurability": 0,
       "tigame": 50,
       "tiketcoin": 0,
-      "title": 0,
+      "title": "",
       "tomat": 0,
       "tprem": 0,
       "trash": 0,
@@ -1661,58 +1661,32 @@
       "infiniteResources": true,
       "tempBannedUntil": 0,
       "energy": 100,
-      "lastEnergyRegen": 1776828128884,
+      "lastEnergyRegen": 1776828362103,
       "messages": {
-        "total": 3,
+        "total": 1,
         "groups": {
-          "120363427285079878@g.us": 3
+          "120363427285079878@g.us": 1
         },
-        "last": 1776828177881
+        "last": 1776828362636
       },
-      "lastCommandTime": 1776828130028,
+      "lastCommandTime": 1776828362646,
       "commandCount": 1,
       "transactions": [
         {
           "type": "earn",
           "amount": 0,
           "reason": "🆙 مكافأة المستوى 0",
-          "time": 1776828130029
+          "time": 1776828363255
         }
-      ],
-      "lastDaily": 0,
-      "lastWork": 0,
-      "totalEarned": 0,
-      "totalSpent": 0,
-      "catexp": 0,
-      "enchant": 0,
-      "glimit": 20,
-      "glory": 0,
-      "healthmonster": 0,
-      "kyubiexp": 0,
-      "kyubilastfeed": 0,
-      "lastbansos": 0,
-      "lastcodereg": 0,
-      "lastgift": 0,
-      "lastIstigfar": 0,
-      "lastrampok": 0,
-      "lastsda": 0,
-      "lastwar": 0,
-      "pancing": 0,
-      "pertambangan": 0,
-      "pertanian": 0,
-      "petFood": 0,
-      "psenjata": 0,
-      "psepick": 0,
-      "robo": 0,
-      "roboxp": 0
+      ]
     },
     "137465276969165:25@lid": {
       "registered": true,
-      "regTime": 1776828128884,
+      "regTime": 1776828362103,
       "name": "شادو",
       "bio": "🤖 التاجر الرسمي للبوت — موارد لا نهائية",
       "premium": true,
-      "premiumTime": 3353628128884,
+      "premiumTime": 3353628362103,
       "infiniteResources": true,
       "energy": 100,
       "money": 1000000000,
@@ -1723,11 +1697,11 @@
     },
     "137465276969165@lid": {
       "registered": true,
-      "regTime": 1776828128884,
+      "regTime": 1776828362103,
       "name": "شادو",
       "bio": "🤖 التاجر الرسمي للبوت — موارد لا نهائية",
       "premium": true,
-      "premiumTime": 3353628128884,
+      "premiumTime": 3353628362103,
       "infiniteResources": true,
       "energy": 100,
       "money": 1000000000,
@@ -1852,7 +1826,7 @@
       "autosticker": false,
       "antiviewonce": false,
       "messageStats": {
-        "28648019066900@lid": 314,
+        "28648019066900@lid": 319,
         "137465276969165@lid": 6,
         "204990769553546@lid": 119,
         "967782114485@s.whatsapp.net": 42
@@ -2091,10 +2065,10 @@
       "lastSuccess": 1776762542219
     },
     "مافيا.js": {
-      "last": 1776828130029,
-      "total": 11,
-      "success": 11,
-      "lastSuccess": 1776828130029
+      "last": 1776828254957,
+      "total": 12,
+      "success": 12,
+      "lastSuccess": 1776828254957
     },
     "bot-control.js": {
       "last": 1776786084692,
@@ -2151,10 +2125,10 @@
       "lastSuccess": 1776827276152
     },
     "advanced-stats.js": {
-      "last": 1776736711127,
-      "total": 3,
-      "success": 1,
-      "lastSuccess": 1776736711127
+      "last": 1776828192141,
+      "total": 4,
+      "success": 2,
+      "lastSuccess": 1776828192141
     },
     "owner-listprem.js": {
       "last": 1776785824624,
@@ -2163,10 +2137,10 @@
       "lastSuccess": 1776785824624
     },
     "زر_تجربة.js": {
-      "last": 1776827644518,
-      "total": 7,
-      "success": 6,
-      "lastSuccess": 1776827644518
+      "last": 1776828363255,
+      "total": 9,
+      "success": 8,
+      "lastSuccess": 1776828363255
     },
     "test-interactive.js": {
       "last": 1776784447576,
@@ -3142,7 +3116,7 @@
         "tctoken-137465276969165@lid.json": "eyJ0b2tlbiI6eyJ0eXBlIjoiQnVmZmVyIiwiZGF0YSI6IkJBRW9UUGVaNGV6N2s1MD0ifSwidGltZXN0YW1wIjoiMTc3NjgyNzIzNiJ9",
         "tctoken-158884446605486@lid.json": "eyJ0b2tlbiI6eyJ0eXBlIjoiQnVmZmVyIiwiZGF0YSI6IkJBRW8vc01UcDhOMDZMND0ifSwidGltZXN0YW1wIjoiMTc3Njc5Nzk3NiJ9"
       },
-      "savedAt": 1776828136978
+      "savedAt": 1776828347906
     }
   },
   "groupRequestCooldown": {}
