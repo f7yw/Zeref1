@@ -362,6 +362,62 @@ ${lines}
     )
   }
 
+  // ─── حذف بيانات الأجهزة المرتبطة (البوتات الفرعية) ─────────────────────
+
+  if (/^(حذف_الأجهزة_المرتبطة|مسح_الأجهزة_المرتبطة|حذف_الاجهزة|مسح_الاجهزة|clear_linked_devices|delete_linked_devices|reset_devices)$/i.test(command)) {
+    let destroySubBot, listSubBots
+    try {
+      ({ destroySubBot, listSubBots } = await import('../lib/jadibot.js'))
+    } catch (e) {
+      return m.reply(`⚠️ تعذّر تحميل وحدة البوتات الفرعية: ${e?.message || e}`)
+    }
+
+    const subs = listSubBots()
+    if (!subs.length) {
+      return m.reply('ℹ️ لا توجد أجهزة/بوتات فرعية مسجّلة لحذفها.')
+    }
+
+    const arg = (text || '').trim()
+
+    // حذف رقم محدّد
+    if (arg && !/^(الكل|all|كل|تأكيد|confirm)$/i.test(arg)) {
+      const phone = arg.replace(/\D/g, '')
+      if (!phone) return m.reply('⚠️ أدخل رقم هاتف صالح.')
+      const exists = subs.find(s => s.phone === phone)
+      if (!exists) return m.reply(`⚠️ لا يوجد جهاز مسجّل بالرقم: +${phone}`)
+      try {
+        await destroySubBot(phone)
+        await global.db?.write?.()
+        return m.reply(`✅ تم حذف بيانات الجهاز/البوت الفرعي: +${phone}`)
+      } catch (e) {
+        return m.reply(`❌ فشل الحذف: ${e?.message || e}`)
+      }
+    }
+
+    // حذف الكل (يتطلب تأكيد)
+    if (!/^(الكل|all|كل|تأكيد|confirm)$/i.test(arg)) {
+      const list = subs.map((s, i) => `   ${i + 1}. +${s.phone}  ${s.online ? '🟢' : '🔴'}`).join('\n')
+      return m.reply(
+`⚠️ *تأكيد الحذف*
+
+سيتم حذف *${subs.length}* جهاز/بوت فرعي:
+${list}
+
+للحذف الكامل أرسل:
+*${usedPrefix}${command} الكل*
+
+أو لحذف جهاز محدد:
+*${usedPrefix}${command} <رقم_الهاتف>*`)
+    }
+
+    let ok = 0, fail = 0
+    for (const s of subs) {
+      try { await destroySubBot(s.phone); ok++ } catch { fail++ }
+    }
+    try { await global.db?.write?.() } catch {}
+    return m.reply(`✅ اكتمل الحذف.\n• تم حذف: *${ok}*\n• فشل: *${fail}*`)
+  }
+
   // ─── رفض المكالمات ──────────────────────────────────────────────────────
 
   if (/^(رفض_المكالمات|reject_calls|حجب_مكالمات)$/i.test(command)) {
@@ -531,6 +587,7 @@ ${lines}
 │ .حضور_دائم / .حضور_إيقاف
 │ .رفض_المكالمات / .قبول_المكالمات
 │ .الأجهزة_المرتبطة
+│ .حذف_الأجهزة_المرتبطة [رقم|الكل]
 │ .رد_تلقائي [تشغيل/ايقاف]
 ╰────────────────────────────`.trim())
   }
@@ -545,9 +602,9 @@ handler.help = [
   'خصوصية_المشاهدة', 'خصوصية_الصورة', 'خصوصية_الحالة',
   'خصوصية_المجموعات', 'جميع_الخصوصية',
   'نشر_حالة', 'حضور_دائم', 'رفض_المكالمات',
-  'الأجهزة_المرتبطة', 'رد_تلقائي'
+  'الأجهزة_المرتبطة', 'حذف_الأجهزة_المرتبطة', 'رد_تلقائي'
 ]
 handler.tags  = ['owner']
 handler.rowner = true
-handler.command = /^(تحكم_البوت|bot_panel|لوحة_البوت|لوحة|لوحه|panel|اعدادات|إعدادات|settings|وقت_التشغيل|uptime|وقت_التشغيل_البوت|رام|ram|ذاكرة|memory|تقرير_البوت|bot_report|تقرير_مفصل|تفعيل_الكل|enable_all|ايقاف_الكل|إيقاف_الكل|disable_all|تغيير_البادئة|setprefix|بادئة|مسح_الذاكرة|clearcache|clear_cache|إعادة_تشغيل|restart|اعادة_تشغيل|قائمة_القروبات|list_groups|القروبات|بث_للقروبات|broadcast_groups|بث_قروبات|بث_للكل|broadcast_all|بث_عام|اسم_البوت|setbotname|غير_اسم_البوت|وصف_البوت|setbotbio|نبذة_البوت|غير_الوصف|صورة_البوت|setbotpic|غير_صورة_البوت|حذف_صورة_البوت|removebotpic|صورة_الحساب_الحالية|botpic|صورتي|خصوصية_المشاهدة|last_seen|آخر_ظهور|خصوصية_الصورة|pp_privacy|خصوصية_صورة_البوت|خصوصية_الحالة|status_privacy|خصوصية_المجموعات|group_privacy|من_يضيفني|جميع_الخصوصية|privacy_all|كل_الخصوصية|الاجهزة|الأجهزة_المرتبطة|linked_devices|اجهزتي|رفض_المكالمات|reject_calls|حجب_مكالمات|قبول_المكالمات|allow_calls|تعطيل_رفض_مكالمات|حضور_دائم|always_online|متاح_دائم|حضور_إيقاف|حضور_ايقاف|offline_presence|نشر_حالة|post_status|حالة_واتساب|رد_تلقائي|auto_reply|autoreply)$/i
+handler.command = /^(تحكم_البوت|bot_panel|لوحة_البوت|لوحة|لوحه|panel|اعدادات|إعدادات|settings|وقت_التشغيل|uptime|وقت_التشغيل_البوت|رام|ram|ذاكرة|memory|تقرير_البوت|bot_report|تقرير_مفصل|تفعيل_الكل|enable_all|ايقاف_الكل|إيقاف_الكل|disable_all|تغيير_البادئة|setprefix|بادئة|مسح_الذاكرة|clearcache|clear_cache|إعادة_تشغيل|restart|اعادة_تشغيل|قائمة_القروبات|list_groups|القروبات|بث_للقروبات|broadcast_groups|بث_قروبات|بث_للكل|broadcast_all|بث_عام|اسم_البوت|setbotname|غير_اسم_البوت|وصف_البوت|setbotbio|نبذة_البوت|غير_الوصف|صورة_البوت|setbotpic|غير_صورة_البوت|حذف_صورة_البوت|removebotpic|صورة_الحساب_الحالية|botpic|صورتي|خصوصية_المشاهدة|last_seen|آخر_ظهور|خصوصية_الصورة|pp_privacy|خصوصية_صورة_البوت|خصوصية_الحالة|status_privacy|خصوصية_المجموعات|group_privacy|من_يضيفني|جميع_الخصوصية|privacy_all|كل_الخصوصية|الاجهزة|الأجهزة_المرتبطة|linked_devices|اجهزتي|حذف_الأجهزة_المرتبطة|مسح_الأجهزة_المرتبطة|حذف_الاجهزة|مسح_الاجهزة|clear_linked_devices|delete_linked_devices|reset_devices|رفض_المكالمات|reject_calls|حجب_مكالمات|قبول_المكالمات|allow_calls|تعطيل_رفض_مكالمات|حضور_دائم|always_online|متاح_دائم|حضور_إيقاف|حضور_ايقاف|offline_presence|نشر_حالة|post_status|حالة_واتساب|رد_تلقائي|auto_reply|autoreply)$/i
 export default handler
